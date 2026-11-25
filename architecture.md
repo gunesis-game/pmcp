@@ -1,8 +1,36 @@
 # Architecture
 
-Status: **Proposed.** Nothing is built yet, so every section describes an intended design to approve or change, not verified current state. Requirement IDs refer to [requirements.md](requirements.md). Proposed decisions are listed in [Decisions and trade-offs](#decisions-and-trade-offs). This document and [requirements.md](requirements.md) together are complete: nothing has to be read from another repository.
+Status: **Under review.** Substantial implementation already exists in this repository. This document describes the intended architecture, but it has not yet been reconciled comprehensively against the implementation or confirmed as approved. Requirement IDs refer to [requirements.md](requirements.md). Proposals, approved decisions, implementation facts, verified behavior, and unresolved questions must be kept distinct. Proposed decisions are listed in [Decisions and trade-offs](#decisions-and-trade-offs).
 
 External dependencies, checked on 2026-11-25: `github.com/github/github-mcp-server/v2` at `7edc2dd` (requires Go 1.27.4; uses `github.com/modelcontextprotocol/go-sdk` v1.8.0 and `github.com/google/go-github/v92`).
+
+## Document status and decision authority
+
+This architecture is **under review**, not a declaration that the current design is approved. The repository contains substantial implementation; that fact is not approval of the design.
+
+Use these terms consistently across the requirements, architecture, decision records, and implementation review:
+
+- **Proposed** — a candidate direction that may be changed; it is not binding.
+- **Approved** — an explicitly accepted decision, recorded with its rationale and approval evidence in the decision record; binding until superseded.
+- **Superseded** — a previously approved decision replaced by a later approved decision. Keep the historical record and link the replacement.
+
+Keep these separate kinds of statements explicit:
+
+- **Requirement** — an obligation or outcome the system must satisfy.
+- **Architecture decision** — an approved technical approach for satisfying requirements.
+- **Implementation fact** — what the code currently does, irrespective of approval.
+- **Verified behavior** — behavior demonstrated by specific tests or other evidence; implementation presence alone is not verification.
+
+Neither code nor documentation wording alone implies approval. A proposed design must not override observed implementation facts; implementation must not silently become authoritative design. Record mismatches as drift or unresolved items until reviewed and decided.
+
+Current review status:
+
+- Requirements: Draft; approval has not been established.
+- Architecture: Under review; approval has not been established.
+- Implementation: Substantial code exists.
+- Verification: Not assessed by this review.
+- Design-to-implementation conformance: Not assessed comprehensively.
+- Known drift: Not yet catalogued comprehensively.
 
 ## System overview
 
