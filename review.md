@@ -79,7 +79,24 @@ Completion eligibility checks for recorded evidence where `IsFullPass()` is true
   - Updates architecture/requirements documentation to reflect implementation status and clarify proposed/approved/superseded authority.
   - No implementation remediation in that PR.
 
+### R-004 — Idempotency replay does not validate tool/action against request ID
+**Status:** Confirmed code path; severity depends on request-ID contract (potential misuse/correctness issue)  
+**Area:** Coordinator / replay / request identity
+
+The replay scan matches a commit by `Pmcp-Request` only, then decodes and returns the stored result. It does not verify that the stored `Pmcp-Tool` and `Pmcp-Action` match the incoming request's tool/action. If a client accidentally reuses a UUID for a different action within the replay window, the coordinator can return the previous action's result as if it answered the new request, rather than reject the mismatch.
+
+**Suggested disposition:** On replay match, validate stored tool/action/request identity; reject conflicting reuse with a clear error. Add a test that reuses one request ID across different tool/action pairs. Also test same ID/same action replay as existing idempotency behavior.
+
 ## Session log
+### Session 2 — Coordinator request/replay consistency review
+- Re-verified `review.md` exists on the review branch before continuing.
+- Reviewed coordinator request validation, branch resolution, locking, read-only path, change retries, replay, and publish/read-back.
+- Reviewed harness and safeguards, migration, and standard-cycle end-to-end tests.
+- Confirmed replay matching is based on request ID alone; stored tool/action are not checked against incoming tool/action (R-004).
+- Expected-head publish retries recompute state; the test exercises concurrent external head movement and retryable refusal under continuously moving head.
+- Tests are source-reviewed only; no test execution was performed.
+- No implementation changes made.
+
 ### Session 1 — Initial review and evidence consistency
 - Reconciled repository state and documentation status.
 - Identified P0 documentation status/decision-authority gaps; remediation drafted in PR #1.
