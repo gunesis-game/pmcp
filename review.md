@@ -1,3 +1,27 @@
+## SESSION HANDOFF — START HERE
+
+**Last updated:** 2026-11-25  
+**Active review branch:** `review/session-persistent-tracking`  
+**Baseline branch:** `main`  
+**Persistent tracker:** this file (`review.md`) — read it before continuing.
+
+### Resume instructions
+1. Fetch/read this entire `review.md` from `review/session-persistent-tracking` first.
+2. Verify the branch still exists and inspect its latest commit. Check whether the remediation PR #1 is still open/draft and whether the review branch has drifted from `main`.
+3. Do not assume prior findings or branch snapshots are unchanged; verify relevant source before acting.
+4. Continue the review only. **Do not make implementation changes, create remediation commits, or merge anything without the user's explicit approval.**
+5. Next task: review plan mutations, reconciliation classification, cycle ordering/preemption, and cross-record validator consistency. Then map findings to adversarial/negative tests.
+6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
+
+### Review snapshot
+- Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), previously reported as draft/unmerged; verify current status.
+- Tracker branch: `review/session-persistent-tracking`.
+- Findings: **R-001** policy revision is not bound to selected CI evidence (P1 candidate); **R-002** evidence is keyed by cycle+SHA so tiers overwrite (P1 candidate); **R-003** full-tier pass is required for cycle completion (confirmed behavior); **R-004** idempotency replay does not verify stored tool/action against incoming request (potential correctness issue); **R-005** Recorded decisions' approval metadata invariants are not enforced by validator (P2 candidate).
+- Source/tests have been read, but tests have **not** been run. Findings are review observations, not yet runtime-verified.
+- No implementation changes have been made during this review; no merge performed.
+
+---
+
 # PMCP Repository Review — Persistent Tracking
 
 **Review status:** In progress  
