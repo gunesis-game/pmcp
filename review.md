@@ -23,7 +23,7 @@
 | State snapshot/encoding | Partially reviewed | Typed parsing, clone/re-encode, digest behavior inspected |
 | Cycle lifecycle rules | Partially reviewed | Full-tier pass required for completion confirmed |
 | Decision governance | Pending detailed review | |
-| Repository store / publish consistency | Pending detailed review | Expected-head publishing and retries seen; store implementations not fully reviewed |
+| Repository store / publish consistency | Interface and in-memory test store reviewed; production adapter absent from repository tree | Expected-head semantics specified at interface; adapter cannot be verified |
 | CI integration | Partially reviewed | Gate evaluation and evidence collector inspected; execution not performed |
 | Test coverage | Partially reviewed | Source tests read, but no local test run |
 
@@ -120,3 +120,12 @@ When resuming:
 - Check for changes since the recorded baseline.
 - Update the status summary, findings, and session log.
 - Continue from the highest-priority unfinished task.
+
+
+### Session 3 — Store and integrity/acceptance protocol review
+- Verified the persistent tracker and reviewed the store interface and in-memory implementation.
+- Repository tree contains only `internal/store/repo_store.go` and `internal/store/memory_store.go`; no production GitHub repository-store adapter is present in this repository, so its atomicity/branch-ref behavior cannot be verified here.
+- Confirmed `RepoStore.Publish` contract requires publishing against `expectedHead`, and coordinator handles `ErrHeadMoved` by retrying from a fresh read. The in-memory store enforces expected head under mutex and clones written file bytes; it is test infrastructure, not proof of production semantics.
+- Reviewed setup.accept and `StateDigest`: digest covers sorted `.pmcp/*.json` state files only, intentionally not `project/` documents/policy. accept requires `user_confirmed: true` and reason, and publishes an acceptance digest. Integrity check compares current state digest with recent pmcp commit digest or a later accept.
+- No new finding confirmed in this pass. Production adapter verification remains blocked by absence from this repo. Tests remain source-reviewed, not executed; no code changes.
+
