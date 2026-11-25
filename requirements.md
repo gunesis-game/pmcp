@@ -4,7 +4,7 @@ pmcp (Project Management MCP) is an MCP server that gives AI coding agents every
 
 This document is complete on its own. Every rule, argument, check and piece of guidance pmcp must implement or serve is written here, and nothing has to be read from another repository. The technical design is in [architecture.md](architecture.md), which also holds the state and policy schemas.
 
-Status: **Draft.** Nothing here is approved yet. Items marked *(open)* depend on a question in [Open questions and assumptions](#open-questions-and-assumptions).
+Status: **Draft.** Requirements approval has not been established. Draft statements are candidates for approval, not binding requirements; implemented behavior does not imply approval. The architecture document defines the shared distinction between proposed, approved, and superseded decisions, and between requirements, architecture decisions, implementation facts, and verified behavior. Items marked *(open)* depend on a question in [Open questions and assumptions](#open-questions-and-assumptions).
 
 ## Purpose and scope
 
