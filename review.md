@@ -111,7 +111,22 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 
 **Suggested disposition:** On replay match, validate stored tool/action/request identity; reject conflicting reuse with a clear error. Add a test that reuses one request ID across different tool/action pairs. Also test same ID/same action replay as existing idempotency behavior.
 
+### R-006 — Reconciliation allows an empty reviewed-source list
+**Status:** Confirmed contract-validation gap; severity P2 candidate  
+**Area:** Reconciliation / completeness / validation
+
+`plan.reconcile` requires the `reviewed` argument, but accepts an empty list. REQ-041 defines it as the list of sections and decision IDs read in full, and the served reconcile procedure requires reading the canonical project requirements, architecture, decisions, and current state before classification. An empty list can therefore produce a reconciliation record with no declared source review. The validator also does not enforce non-empty `reviewed`. This is distinct from `items` being empty, which could be legitimate if no candidate items were found.
+
+**Suggested disposition:** Require at least one non-empty reviewed source and validate each entry is non-blank (trim whitespace); add tests for omitted, empty, and whitespace-only entries, while retaining the ability to record zero reconciliation items when a thorough review finds none.
+
+
 ## Session log
+### Session 5 — Reconciliation and cycle-ordering review
+- Verified the tracker branch HEAD (`52066d1`) and baseline `main` HEAD (`c72f139`); PR #1 remains open, draft, and unmerged.
+- Began review of plan mutations/reconciliation, cycle transition gates, completion, preemption, pending reorder, and snapshot validation.
+- Recorded R-006: `plan.reconcile` accepts an empty `reviewed` list despite REQ-041 describing it as the sources read in full; empty `items` may still be valid when no candidate issues are found.
+- No tests executed. No implementation changes. Review is still in progress.
+
 ### Session 2 — Coordinator request/replay consistency review
 - Re-verified `review.md` exists on the review branch before continuing.
 - Reviewed coordinator request validation, branch resolution, locking, read-only path, change retries, replay, and publish/read-back.
@@ -129,11 +144,11 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 - No implementation code changed; no local tests executed.
 
 ## Next review tasks (priority order)
-1. Finish coordinator review: idempotency replay, request identity, concurrency/locking, retry/reset behavior, result state around publishing.
-2. Review store implementations (GitHub repo store and memory store): expected-head semantics, atomicity, commit metadata, ancestry/read-back behavior.
-3. Review integrity/acceptance protocol and digest scope, especially state file inclusion/exclusion.
-4. Review audit/journal recording and whether failed/rejected/no-op actions are accurately represented.
-5. Reconcile cycle lifecycle, decision governance, checkpoint, plan, reconciliation, and policy editing rules against architecture/requirements.
+1. Continue plan/reconciliation review: validate task and criterion mutation edge cases, source-list semantics, and cross-record consistency.
+2. Review cycle ordering/preemption and phase gates against DR-02 through DR-06; identify any adversarial tests missing.
+3. Review store implementations (GitHub repo store and memory store): expected-head semantics, atomicity, commit metadata, ancestry/read-back behavior.
+4. Review integrity/acceptance protocol and digest scope, especially state file inclusion/exclusion.
+5. Review audit/journal recording and whether failed/rejected/no-op actions are accurately represented.
 6. Map tests to findings and identify missing adversarial/race tests.
 7. Revisit R-001 and R-002, confirm severity and propose a coherent evidence model before coding.
 
