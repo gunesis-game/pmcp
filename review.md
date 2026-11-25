@@ -22,7 +22,7 @@
 | Evidence collection and gate evaluation | Reviewed; findings recorded below | Evidence selection happens before lock |
 | State snapshot/encoding | Partially reviewed | Typed parsing, clone/re-encode, digest behavior inspected |
 | Cycle lifecycle rules | Partially reviewed | Full-tier pass required for completion confirmed |
-| Decision governance | Pending detailed review | |
+| Decision governance | Reviewed; validation invariant gap recorded | Approval verification path reviewed; state validator appears to omit some semantic invariants |
 | Repository store / publish consistency | Interface and in-memory test store reviewed; production adapter absent from repository tree | Expected-head semantics specified at interface; adapter cannot be verified |
 | CI integration | Partially reviewed | Gate evaluation and evidence collector inspected; execution not performed |
 | Test coverage | Partially reviewed | Source tests read, but no local test run |
@@ -129,3 +129,24 @@ When resuming:
 - Reviewed setup.accept and `StateDigest`: digest covers sorted `.pmcp/*.json` state files only, intentionally not `project/` documents/policy. accept requires `user_confirmed: true` and reason, and publishes an acceptance digest. Integrity check compares current state digest with recent pmcp commit digest or a later accept.
 - No new finding confirmed in this pass. Production adapter verification remains blocked by absence from this repo. Tests remain source-reviewed, not executed; no code changes.
 
+
+
+### R-005 — Decision ledger validator does not enforce Recorded-state approval invariants
+**Status:** Potential validation gap (confirmed omission in validator; impact depends on intended invariant)
+**Severity:** P2 candidate
+**Area:** Decision governance / state validation
+
+
+Decision recording verifies approval and writes approval metadata, but `SnapshotValidator.checkLedger` checks decision IDs, state labels, and `verified_revision` for Recorded entries only. It does not require a Recorded decision to have an `approval`, `recorded_at`, or `specification`, nor does it constrain those fields for Proposed entries. The normal `decision.record` path populates these fields, but an accepted/out-of-band state or malformed state that passes validation can represent an approval-less Recorded decision. Policy approval pointers can refer to that ledger entry because `checkApprovals` checks existence only.
+
+**Suggested disposition:** Confirm the intended schema invariants for Proposed vs Recorded decisions, then enforce them in snapshot validation and add malformed-state tests. Avoid claiming normal `decision.record` bypasses its approval checks; this finding concerns validator coverage.
+
+
+### Session 4 — Governance consistency review (decision and audit)
+- Reviewed decision propose/record/list, approval verification for attested and issue-comment modes, issue-comment validation, audit check/advance, checkpoint save, and cycle transition/completion paths.
+- Issue-comment approval checks approver membership, prevents the acting account from being an approver, requires comment timestamp after proposal, and checks the approval phrase for the specific decision.
+- Decision record validates specification markers and stores the verified revision; policy approvals are updated only when a recorded decision approves a strategy key.
+- Confirmed validator omission of several Recorded-state metadata invariants; recorded R-005 as a potential validation gap.
+- Audit watermark is tied to a completed execution order; audit.advance requires an active standard cycle and records outcome/boundary. Its user attestation is narrative outcome rather than checklist proof; no finding assigned pending requirement semantics.
+- Cycle transition and completion gates were partially reviewed; completion checks reconciliation, criteria, open tasks, full-pass evidence, and attestations.
+- No implementation changes, no tests executed, no merge.
