@@ -197,7 +197,6 @@ flowchart TD
 - The Product North Star was added to `architecture.md` and `requirements.md`: support agents with limited reasoning, small context windows, interrupted/lost sessions; the governed GitHub repository is the sole durable project memory (implementation plus PMCP governance knowledge), with no separate PMCP project database/store. PMCP interprets and validates repository knowledge and exposes explicit MCP operations/guidance for recovery and continuity. The mechanical-governance/AI-completion principle was added to both documents, including structured AI return/provenance/completion requirements (REQ-113–REQ-115).
 
 ## Approved decisions (preserved in full)
-
 ### A-007 | Parsing, domain interpretation, and semantic validation
 
 **Status: Approved by the user on 2026-11-26.**
@@ -397,8 +396,7 @@ No implementation changes are authorized by this decision.
 **Status: Approved by the user on 2026-11-26.**
 
 - `status.report` is the agent-facing operation for requesting and presenting a consolidated governance status report. It is a consumer of shared governance-history infrastructure, not the owner of that infrastructure.
-- The operation is `status.report`, takes no arguments, rejects unknown arguments, and is strictly read-only. It performs no state mutation, journal append, watermark update, or Git commit.
-- Shared infrastructure, requested by the coordinator, supplies the canonical state snapshot at exact current HEAD; relevant governance commits and provenance; reconstructed transitions in chronological order; commit classifications; metadata validation; state-integrity and transition-validation findings; and explicit history completeness/limitations.
+- The operation is `status.report`, takes no arguments, rejects unknown arguments, and is strictly read-only. It performs no state mutation, journal append, watermark update, or Git commit.- Shared infrastructure, requested by the coordinator, supplies the canonical state snapshot at exact current HEAD; relevant governance commits and provenance; reconstructed transitions in chronological order; commit classifications; metadata validation; state-integrity and transition-validation findings; and explicit history completeness/limitations.
 - Shared infrastructure owns Git traversal, commit classification, snapshot retrieval, transition reconstruction and validation. Consumers must not duplicate those responsibilities. History discovery must not silently truncate relevant ancestry using a fixed recent-commit limit.
 - The report retains current-state information from REQ-020: branch and exact HEAD revision; registry/governance validation; active cycle and checkpoint/handoff details; paused, blocked and pending cycles; status counts; default next cycle; proposed decisions; approved strategies and strategy gaps; and audit watermark/window/due status.
 - The report additionally presents the governance-state revision, verified transitions and their commit/operation provenance, unclassified or externally modified state changes, invalid/contradictory metadata, and history reconstruction completeness.
@@ -597,7 +595,6 @@ Rationale: separating an explicitly dispatched caller from the reusable cleanup 
 - This is a foundational PMCP architectural principle and applies beyond GitHub Actions workflow validation to PMCP's governance and tool-consumer interactions generally.
 
 Rationale: PMCP exists to govern the consumer's work, not merely to provide a collection of checks for the consumer to interpret and orchestrate. Performing every reliable check centrally makes governance more consistent and lowers the context and reasoning burden on consumers. Explicitly surfacing the remaining uncertainty preserves honest boundaries without pretending PMCP can prove what it cannot.
-
 No implementation changes are authorized by this decision.
 
 ### A-030 | Structured governance assessment response contract
@@ -998,34 +995,25 @@ No implementation changes are authorized by this decision.
 - Do not introduce a separate verification ID. The architecture already has sufficient existing identity sources; an additional identifier is redundant absent a demonstrated need.
 - Git commits are already content-addressed. PMCP must use Git's native storage/integrity mechanics rather than introducing a custom content-addressing scheme or hash-named payload files without a requirement.
 - Evidence payload format, layout, fields, size limits, and boundaries remain undecided. This partial approval does not approve the remainder of the A-048 proposal.
-- No implementation changes are authorized.
 
+## A-049 — Evidence content is not required to be universally structured
 
-## Session 75 — Rejected redundant verification ID
+**Status:** Approved  
+**Date:** 2026-11-26
 
-- User agreed: **no verification ID** should be added to the evidence payload contract.
-- A-048 remains open; next resume by examining proposed report fields and identity relationships, avoiding redundant identifiers or mechanics already supplied by Git/GitHub.
+- The evidence content itself does not need a universal, PMCP-defined structure. Test reports, logs, outputs, files, screenshots, and other evidence may retain the format produced by the verification process.
+- PMCP must mechanically govern the process and establish the evidence facts it can reliably determine: publication, retention/retrievability, integrity, provenance, association with the correct subject revision, and the required governance process.
+- PMCP must not introduce a universal test-report schema, normalize all evidence contents, or attempt to mechanically judge evidence substance where that cannot be reliably determined.
+- AI assesses the substantive meaning and sufficiency of evidence when contextual judgment is genuinely required: whether the evidence supports the claim, test coverage/meaning is relevant, gaps or contradictions exist, or a result is suspicious.
+- Canonical governance state and the minimum evidence envelope may remain structured where needed for PMCP's mechanical governance; the evidence payload itself can be opaque and heterogeneous.
+- This boundary does not reduce PMCP's responsibilities: it should mechanize all reliable governance work and provide AI only the remaining evidence and context needed to assess unresolved substance.
 
+**Principle:** PMCP governs the process and integrity of the evidence. AI evaluates the substance of the evidence.
 
-## Session 76 — Execution outcome field approved
+No implementation changes are authorized by this decision.
 
-- User approved explicitly retaining the verification workflow's reported execution outcome in the evidence payload.
-- This is an execution fact, distinct from PMCP's governance assessment/gate conclusion. PMCP must independently validate it against execution details and provenance; a reported outcome alone does not establish governance success.
-- **Resume at:** Field 2, workflow identity—determine whether identity needs explicit repetition in the payload or can be derived from existing Git/GitHub provenance.
+## Session 79 — Universal evidence structure rejected; evidence substance delegated
 
-
-## Session 77 — Workflow identity is derived from Git publication
-
-- User rejected duplicating workflow identity in the evidence payload: the canonical North Star and durable Git publication commit already identify the publishing tool in the commit message. Git workflow history cleanup does not remove repository commit history.
-- Do not add a separate workflow identity or tier field to the evidence payload if they are deterministically established from the canonical publisher identity/commit message and governed tool mapping. The Git commit is the durable identity source, not a surviving Actions run record.
-- This corrects the prior proposal to store workflow identity and tier redundantly in the evidence payload. GitHub Actions provenance references must not be the only durable source for publisher identity.
-- **Resume at:** Continue field review with minimal fields, first checking existing North Star and canonical Git publication metadata before proposing any payload field.
-
-
-## Session 78 — Inspected existing test workflows and report outputs
-
-- Static inspection of the repository tree found only one current GitHub Actions workflow, `.github/workflows/ci.yml`; no separate `verify-fast`, `verify-integration`, or `verify-acceptance` workflows currently exist in the tree.
-- The current CI workflow runs `gofmt` check, `go vet ./...`, and `go test -race ./...`. It does not currently request structured test output, create report files, or upload test-report artifacts.
-- The project is Go 1.24. Go's test runner can emit a machine-readable event stream with its `-json` option, but the current workflow does not use it. Existing test output is therefore console/log output only (including `go vet` diagnostics and ordinary test output); no retained report format is currently configured.
-- No test execution was performed as part of this inspection; this is static workflow inspection only.
-- **Resume at:** Discuss what actual reports/evidence are appropriate to collect from Go test and go vet, and whether their native outputs are sufficient before designing PMCP payload fields. No report-schema decision or implementation is approved by this finding.
+- User agreed that the evidence itself need not be universally structured; this corrects the earlier tendency to over-design a shared report format.
+- Evidence content may remain in native, varied formats. PMCP's role is mechanical governance, integrity, retention, provenance, and revision binding; AI evaluates substantive meaning/sufficiency when judgment is required.
+- **Resume at:** Reassess the remaining evidence envelope/lifecycle requirements under A-049 against existing architecture and requirements before proposing any new fields or storage mechanics. Avoid repeating information already supplied by the canonical North Star or Git metadata.
