@@ -447,3 +447,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Suggested direct validator tests: malformed/null/invalid timestamps; missing branch/revision; event log entries with missing/invalid fields; event action with stale/missing checkpoint_at; and valid minimal/empty initial checkpoint. Confirm which invariants must apply to untouched new cycles and non-event changes before enforcing.
 - No code changes and no tests executed.
 - **Next:** continue validator cross-record checks (audit record chronology/boundaries and checkpoint-to-cycle references), avoiding duplication of R-005–R-011.
+
+
+### Session 27 — Audit history integrity and watermark semantics
+
+- Confirmed current `main` HEAD is `bc09d5948a8089b25804fb36278f9d6de29b699a` (Session 26 tracker commit); no source changes observed.
+- Reviewed `internal/state/audit.go`, `internal/governance/audit_rules.go`, `audit_window.go`, validator `checkAudit`, and REQ-080/081 plus REQ-101.
+- Validator enforces the explicitly stated REQ-101 audit invariant: watermark non-negative and, when nonzero, corresponds to a completed cycle's execution order. It does not semantically validate historical audit entries' timestamp/from/through/outcome/cycle or cross-link them to cycles/checkpoints. REQ-081 describes how entries are appended but REQ-101 does not currently specify history-validation rules. **No new candidate elevated**; adding constraints without requirements clarification would be speculative.
+- `audit.advance` checks increasing watermark, completed boundary, and in-progress standard cycle; writes watermark, history entry, handoff audit boundary and log event together through the snapshot mutation. Static review sees no confirmed inconsistency in this path. Test files for these components were not found in the tree listing; no tests run.
+- No code changes. **Next:** investigate cycle/record reference integrity and whether reconciliation/decision references are required to point to existing records under explicit requirements.
