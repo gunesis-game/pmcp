@@ -918,3 +918,28 @@ This approves the direct-publication architectural direction, not a detailed sch
 - Tool ownership is limited to its own result; PMCP owns derived governance conclusions.
 - The result must be bound to the exact subject state/commit it verified.
 - **Resume at:** design publication concurrency/write-safety and exact contract boundaries, then reassess A-039–A-041.
+
+
+## A-045 — Verification publication write-safety
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+- Each verification tool may publish only to its designated namespace in canonical `.pmcp/state.json`: Fast to `verification.fast`, Integration to `verification.integration`, and Acceptance to `verification.acceptance`.
+- Publication must preserve all other state and governance data; partial or whole-document replacement from a tool-owned subset is prohibited.
+- Publication is atomic at the Git commit level.
+- Publication must be based on the exact repository HEAD from which the state was read. The commit must have that observed HEAD as its parent; stale publication is rejected.
+- No automatic retries, rebasing, merging, locks, or retry subsystem is introduced. A stale publisher must be explicitly re-requested.
+- The subject commit SHA actually verified and the commit SHA that publishes the result are distinct and must remain separately identified.
+- Failed or uncertain publication must not be represented as successful. Any uncertain outcome must be checked for whether the publication commit exists before a new attempt.
+- Verification tools publish evidence; PMCP interprets it and derives freshness, conflicts, missing evidence, gate outcomes, and next actions.
+
+Rationale: namespace ownership and exact-parent publication prevent tools from silently overwriting unrelated state or publishing against a state they did not read, without introducing locking or retry machinery.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 72 — Verification publication write-safety approved
+
+- A-045 approved the namespace ownership, preservation, atomic commit, exact observed-parent, stale rejection, no retry/lock, SHA separation, and uncertain-publication rules.
+- **Resume at:** design the evidence representation and lifecycle in the canonical PMCP Git repository, including how accepted evidence remains retained/retrievable and protected from workflow-history cleanup; then reassess A-039–A-041.
