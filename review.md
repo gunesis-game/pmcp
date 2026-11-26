@@ -7,17 +7,9 @@
 
 ## Review scope — assess the delta against the project baseline
 
-**This document is a review and change-assessment record, not a second requirements or architecture document.** The product purpose and North Star belong at the opening of `requirements.md` and `architecture.md`, where they define what PMCP must achieve and guide its design.
+**Mandatory reading:** Anyone using this review MUST first read `requirements.md` and `architecture.md` in full. Those documents define the product and its intended architecture; this review deliberately does not repeat their content. The current code must also be examined as the implementation under review.
 
-The review works from three current-state inputs:
-
-- `requirements.md` — the stated product obligations and intended outcomes.
-- `architecture.md` — the proposed/approved technical structure and design decisions.
-- The current code — what is actually implemented, independently of what the documents say.
-
-Against that baseline, this document records the assessment and the **proposed delta**: what should change in the requirements, architecture, or implementation; why it should change; what has been agreed; and what remains unresolved. It must distinguish current facts, proposed changes, approved decisions, and implementation work. It must not silently turn a review proposal into a product requirement or architecture decision.
-
-The product North Star—including the limited-session/limited-context agent problem and the single-repository persistence boundary—should be stated in the opening of both `requirements.md` and `architecture.md`, not duplicated as a product-definition section here.
+This document records the evidence-based assessment and the **proposed delta** against those inputs: what should change in requirements, architecture, or implementation; why; what has been agreed; and what remains unresolved. It distinguishes current facts, proposed changes, approved decisions, and implementation work. A review proposal does not become a product requirement or architecture decision unless explicitly approved and recorded in the relevant baseline document.
 
 ## North Star — Review tracking and continuity
 
@@ -33,7 +25,7 @@ The product North Star—including the limited-session/limited-context agent pro
 
 This document is the persistent cross-session record of the assessment and proposed changes to PMCP. It evaluates the current `requirements.md`, `architecture.md`, and code, then records the proposed and agreed delta from that baseline.
 
-The requirements and architecture documents own the product definition and design. This review does not replace them or restate their product North Star. It records evidence, critical assessment, proposed changes, decisions, unresolved questions, and the resulting change scope.
+The reader is required to consult `requirements.md` and `architecture.md` for the product definition and intended design. This review records evidence, critical assessment, proposed changes, decisions, unresolved questions, and the resulting change scope.
 
 **The existing requirements, architecture, and implementation are all reviewable; none is presumed correct merely because it exists.** The purpose is to establish what should be retained, changed, or removed, and to make the rationale and agreed delta recoverable across sessions.
 
