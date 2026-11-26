@@ -1085,3 +1085,25 @@ No implementation changes are authorized by this decision.
 
 - A-052 approved: Git commit/object identity and integrity mechanisms are sufficient for evidence stored in the PMCP repository; the additional SHA-256 payload checksum requirement is retired as redundant.
 - **Resume at:** Continue examining evidence storage/retrieval lifecycle mechanics (including repository growth) without proposing a second evidence identity, checksum, or storage mechanism.
+
+
+## A-053 — Evidence-based storage growth assessment
+
+**Status:** Approved architectural clarification  
+**Date:** 2026-11-26
+
+- Do not introduce evidence-storage growth controls, optimizations, limits, or additional storage infrastructure based on speculation.
+- Any future concern about repository growth must be grounded in evidence from governed development cycles and actual observed impact (e.g., evidence volume, repository growth, clone/fetch/checkout/CI or agent-workflow impact), not assumptions about binary files.
+- The evidence must be assessed within the governed implementation cycle; the AI determines the contextual assessment and next step, and PMCP enforces the permitted progression.
+- Until cycle evidence establishes an operational constraint, permanent evidence retention remains and no automatic pruning, expiry, deletion, arbitrary size limit, separate evidence service/database, or speculative Git LFS adoption is introduced.
+- If a demonstrated constraint warrants addressing, the response is a separately governed decision informed by the collected evidence, preserving evidence retention and governance integrity.
+
+**Boundary:** Optimize only in response to demonstrated, cycle-derived operational evidence—not hypothetical growth.
+No implementation changes are authorized by this decision.
+
+
+## Session 83 — Repository growth assessment grounded in cycle evidence
+
+- User corrected the proposal's basis: repository growth decisions must be supported by clear evidence from governed cycles, not speculative concerns.
+- A-053 approved: defer storage-growth interventions until actual cycle evidence establishes a meaningful operational constraint; assess and decide within the governed implementation cycle.
+- **Resume at:** Continue the evidence lifecycle/storage review, identifying any remaining unresolved mechanics without inventing controls or duplicating Git's capabilities.
