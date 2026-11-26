@@ -68,15 +68,12 @@ Evidence is still evaluated against the selected commit SHA; this is not evidenc
 Do not implement until the semantics and expected UX are agreed.
 
 ### R-002 — Evidence records are keyed by cycle and SHA, not by tier
-**Status:** Confirmed data-model behavior; consequence is a design concern  
-**Severity:** P1 candidate  
+**Status:** No defect confirmed; explicitly aligned with requirements/model
 **Area:** State / evidence / cycle completion
 
-Evidence is stored as `Evidence[cycleID][SHA]`. A subsequent collection for the same SHA replaces the prior entry, even if the tier differs. The record contains a tier, but tier is not part of the storage key.
+Evidence is stored as `Evidence[cycleID][SHA]`; collecting another tier for the same SHA replaces the entry. REQ-073 and architecture's one-entry-per-SHA layout describe this model. Completion scans evidence entries for any full-tier pass. This is a design trade-off, not a requirements violation absent a multi-tier retention requirement.
 
-Cycle completion requires at least one evidence record with tier `full` and gate `pass`. Therefore, a later `fast` collection for the same SHA can overwrite a prior full-tier pass and remove completion eligibility. Different tier records are not retained simultaneously.
-
-**Suggested disposition:** Consider keying records by SHA+tier, or retaining immutable evidence records and selecting the appropriate one for completion. Review audit, reconciliation, serialization, and public API impact before deciding.
+**Disposition:** No remediation recommendation under current requirements.
 
 ### R-003 — Full-tier passing evidence is required for cycle completion
 **Status:** Confirmed implementation behavior  
@@ -102,13 +99,13 @@ Completion eligibility checks for recorded evidence where `IsFullPass()` is true
   - Updates architecture/requirements documentation to reflect implementation status and clarify proposed/approved/superseded authority.
   - No implementation remediation in that PR.
 
-### R-004 — Idempotency replay does not validate tool/action against request ID
-**Status:** Confirmed code path; severity depends on request-ID contract (potential misuse/correctness issue)  
+### R-004 — Idempotency replay is keyed only by request ID
+**Status:** Robustness question; no defect confirmed under REQ-015
 **Area:** Coordinator / replay / request identity
 
-The replay scan matches a commit by `Pmcp-Request` only, then decodes and returns the stored result. It does not verify that the stored `Pmcp-Tool` and `Pmcp-Action` match the incoming request's tool/action. If a client accidentally reuses a UUID for a different action within the replay window, the coordinator can return the previous action's result as if it answered the new request, rather than reject the mismatch.
+Replay matches request ID and returns the stored result, without comparing incoming tool/action/arguments. REQ-015 defines repeating an applied ID as returning the earlier result and changing nothing. Reusing a UUID with a different payload is caller misuse under the current contract; mismatch rejection could improve diagnostics but is not a confirmed defect.
 
-**Suggested disposition:** On replay match, validate stored tool/action/request identity; reject conflicting reuse with a clear error. Add a test that reuses one request ID across different tool/action pairs. Also test same ID/same action replay as existing idempotency behavior.
+**Disposition:** No remediation recommendation absent a clarified request-ID payload-binding requirement.
 
 ### R-006 — Reconciliation allows an empty reviewed-source list
 **Status:** Confirmed contract-validation gap; severity P2 candidate  
@@ -316,3 +313,14 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Corrected stale R-002 and R-004 descriptions in Findings to match the later Sessions 10–11 dispositions. Tracker still needs a broader consolidation to remove duplicate/out-of-order session history and reconcile top-level finding inventory.
 - No tests executed; no implementation changes.
 - Next: review request result envelopes, validation/refusal semantics, and CI policy/workflow mapping; then consolidate findings and missing test matrix.
+
+
+### Session 16 — Result envelope, failure advice, next-request derivation, and CI gate semantics
+- Verified latest tracker blob SHA `62e04bca7bdc3b589d32ce694a5234cb5af3505f` and main HEAD `ca5fc8357b1d3143635cfc36ce0dba14a6a40995` before review; no intervening changes.
+- Reviewed `coordinator/result.go`, failure advice, next-request structs/deriver, CI gate evaluator, evidence collector, policy model, and REQ-012–REQ-015/REQ-072.
+- Result envelope `finish()` matches summary rules: first message on non-ok, last on ok; empty messages normalized. Coordinator `succeed` and `fail` preserve status/verdict/data and next-request derivation appropriately; failure results null data and changed files and no published revision.
+- REQ-014 failure advice mapping matches implementation, including gate-not-met, pending, fail, and no-required-checks outcomes. REQ-013 placeholders and approval attestations are generated as placeholders, and next-request is explicitly a suggestion rather than overriding the user's chosen work.
+- CI evaluator's treatment of optional workflows in polling was checked against REQ-072, which explicitly says poll while any workflow is in progress or a required workflow is not triggered; implementation matches. Latest run/attempt selection, required-workflow blocking, skipped/cancelled/other conclusions classification, and failure-detail bounds align with the stated contract. No new defect confirmed.
+- Tracker hygiene issue: the persistent Findings section had stale R-002 and R-004 descriptions despite the summary/session notes having downgraded them. Corrected those descriptions and refreshed the handoff priority.
+- No tests run; no code changes.
+- Next: inspect policy parsing and workflow/component selection edge cases, then review error paths where external CI reads fail, canceled polling, and idempotency/result publication boundaries. Consolidate findings and missing test coverage.
