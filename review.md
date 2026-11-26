@@ -984,3 +984,33 @@ No implementation changes are authorized by this decision.
 - Safe use of values and binding to the PMCP verification request remain separate assessment responsibilities.
 - No implementation changes or tests.
 - **Resume at:** define precise normalization and validation semantics for defaults and supplied dispatch values (including number representation, boolean representation, missing/empty values, choice matching, and GitHub's input/context coercions), then assess how the validated values are bound to the intended verification request.
+
+### A-035 | Workflow-dispatch input value normalization and validation
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Supplied input names must match declared schema keys exactly. Undeclared inputs and duplicate keys in the incoming representation are violations. PMCP must not silently discard supplied values.
+- Every required input must be supplied. Every optional input must declare an explicit default. A required input must not also declare a default. An omitted optional input resolves to its declared default.
+- `string` values must be supplied as strings and preserved exactly; PMCP must not implicitly trim or otherwise rewrite them. Numbers and booleans supplied for string inputs are rejected.
+- `boolean` values must be actual Boolean values (`true` or `false`), not strings such as `"yes"`, `"1"`, or `"false"`.
+- `number` values must be finite JSON numbers. Numeric strings, NaN, and infinity are rejected.
+- `choice` values must be exact strings matching one of the declared options. Unknown or differently cased values are rejected.
+- PMCP creates one canonical typed representation of the complete resolved input set and serializes it according to the GitHub dispatch API contract. PMCP must not rely on GitHub implicit coercion to make invalid values acceptable.
+- PMCP retains both the original supplied values and the resolved canonical values for provenance.
+- Before dispatch, PMCP records the workflow path and revision, intended target SHA, and canonical input set. After dispatch, it retrieves the resulting run and verifies the run's inputs and target revision against the recorded intent. A mismatch means the run cannot be accepted as governance evidence.
+- The typed `inputs` context is the semantic reference for workflow input values. PMCP must not assume `github.event.inputs` preserves Boolean types, because that context exposes values as strings.
+- Input normalization and validation do not prove that workflow code consumes values safely; safe-consumption analysis remains a separate assessment. Nor do they alone authorize the request or establish execution provenance.
+
+Rationale: strict typed acceptance prevents implicit coercion and ambiguity from creating false confidence. A single canonical representation makes request intent auditable, while post-dispatch comparison binds the resulting run to the exact workflow revision, target revision, and inputs PMCP intended. GitHub's differently typed input contexts must be treated explicitly rather than conflated.
+
+No implementation changes are authorized by this decision.
+
+### Session 62 — Workflow-dispatch input normalization approved
+
+- User approved A-035: exact input-name matching; reject undeclared or duplicate inputs; required inputs must be supplied; optional inputs require explicit defaults; required inputs cannot also have defaults.
+- Enforce strict typed values: strings remain unchanged; booleans must be Boolean; numbers must be finite JSON numbers; choice values must exactly match declared options.
+- PMCP maintains a canonical typed resolved input set and provenance for supplied and resolved values, then serializes according to the GitHub dispatch API contract.
+- Record workflow path/revision, intended target SHA, and canonical inputs before dispatch; verify the resulting run against that intent before accepting it as governance evidence.
+- Use the typed `inputs` context as semantic reference; do not assume `github.event.inputs` preserves Boolean types.
+- No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define how PMCP mechanically verifies that workflow inputs are consumed safely throughout expressions, shell commands, actions, and reusable workflows; distinguish statically provable safe patterns from unresolved or confirmed unsafe use.
