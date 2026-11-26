@@ -1012,3 +1012,11 @@ No implementation changes are authorized by this decision.
 - User approved explicitly retaining the verification workflow's reported execution outcome in the evidence payload.
 - This is an execution fact, distinct from PMCP's governance assessment/gate conclusion. PMCP must independently validate it against execution details and provenance; a reported outcome alone does not establish governance success.
 - **Resume at:** Field 2, workflow identity—determine whether identity needs explicit repetition in the payload or can be derived from existing Git/GitHub provenance.
+
+
+## Session 77 — Workflow identity is derived from Git publication
+
+- User rejected duplicating workflow identity in the evidence payload: the canonical North Star and durable Git publication commit already identify the publishing tool in the commit message. Git workflow history cleanup does not remove repository commit history.
+- Do not add a separate workflow identity or tier field to the evidence payload if they are deterministically established from the canonical publisher identity/commit message and governed tool mapping. The Git commit is the durable identity source, not a surviving Actions run record.
+- This corrects the prior proposal to store workflow identity and tier redundantly in the evidence payload. GitHub Actions provenance references must not be the only durable source for publisher identity.
+- **Resume at:** Continue field review with minimal fields, first checking existing North Star and canonical Git publication metadata before proposing any payload field.
