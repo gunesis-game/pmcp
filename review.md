@@ -955,3 +955,32 @@ No implementation changes are authorized by this decision.
 - No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the exact `workflow_dispatch` input schema and validation rules, including supported input types, required/default semantics, choice options, boolean/number handling, input count and size limits, and how dispatch inputs are bound to the governed verification request. Then continue with effective permission semantics.
 
+### A-034 | Governed workflow-dispatch input contract
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP supports a deliberately restricted workflow_dispatch.inputs schema rather than accepting every GitHub Actions input capability.
+- Supported input types are string, boolean, number, and choice.
+- The environment input type is excluded because it introduces deployment-environment semantics, protection rules, and environment-scoped secrets outside the intended parameter contract.
+- Every input must declare an explicit type and a non-empty description.
+- required must be a boolean when present; its default is false.
+- A declared default must conform to the declared input type.
+- A choice input must declare a non-empty set of unique string options; its default, if present, must be one of those options.
+- Unknown input properties are a violation; they must not be silently ignored.
+- Enforce GitHub's maximum of 25 top-level inputs and maximum dispatch payload size of 65,535 characters.
+- Input schema validation does not establish that input values are safely consumed by workflow expressions, shell commands, actions, or reusable workflows. Those uses require separate semantic and security assessment.
+- Input schema validation also does not establish that supplied values correspond to an authorized PMCP verification request. Binding dispatch values to the governed request is a separate execution/provenance responsibility.
+- A syntactically valid but unsupported or ambiguous construct remains unresolved where PMCP cannot reliably interpret it; demonstrably invalid or contract-violating declarations are violations.
+
+Rationale: PMCP should accept only a small, explicit parameter language it can validate mechanically. Excluding environment inputs avoids expanding the governed workflow's credential and deployment boundary. Schema validation, safe consumption, and request binding remain distinct responsibilities.
+
+No implementation changes are authorized by this decision.
+
+### Session 61 — Workflow-dispatch input contract approved
+
+- User approved A-034: restricted input types (string, boolean, number, choice); environment excluded.
+- Explicit type and non-empty description required; required defaults false; defaults must match type; choice options must be non-empty unique strings and contain any declared default.
+- Unknown properties are violations; enforce maximum 25 inputs and 65,535-character dispatch payload.
+- Safe use of values and binding to the PMCP verification request remain separate assessment responsibilities.
+- No implementation changes or tests.
+- **Resume at:** define precise normalization and validation semantics for defaults and supplied dispatch values (including number representation, boolean representation, missing/empty values, choice matching, and GitHub's input/context coercions), then assess how the validated values are bound to the intended verification request.
