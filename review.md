@@ -1064,3 +1064,24 @@ No implementation changes are authorized by this decision.
 - User corrected the proposed lifecycle: evidence assessment is not a direct PMCP-to-AI feedback loop independent of implementation cycles.
 - A-051 approved: PMCP prepares and presents evidence/context within the implementation cycle; AI makes the final assessment and determines what happens next; PMCP validates the decision against governance rules, records it, and enforces permitted progression.
 - **Resume at:** Continue reviewing evidence lifecycle and implementation-cycle integration, then identify any remaining unresolved evidence envelope/storage mechanics without reintroducing standalone feedback loops, universal evidence structure, or redundant canonical metadata.
+
+
+## A-052 — Git-native identity and integrity; no separate evidence checksum
+
+**Status:** Approved architectural clarification  
+**Date:** 2026-11-26
+
+- Git's native object and commit mechanisms already provide evidence content integrity and identity within the committed repository history. The commit SHA identifies a specific committed revision; Git object hashes bind the committed tree and file content.
+- Retire the separate SHA-256 evidence-payload checksum requirement. PMCP must not add a redundant payload checksum or invent another evidence identity mechanism.
+- Evidence identity and association rely on ordinary Git paths, objects, commits, and history, together with the canonical governance-state references. PMCP still verifies required evidence exists, is retrievable, and is associated with the governed workflow/run and target revision.
+- Git integrity does not independently establish producer authenticity or the truth/substantive sufficiency of evidence; provenance and contextual assessment remain distinct governance concerns.
+
+**Boundary:** Rely on Git's native integrity and identity. Do not duplicate these mechanisms with a separate payload checksum or evidence-ID system.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 82 — Git-native evidence identity/integrity approved
+
+- A-052 approved: Git commit/object identity and integrity mechanisms are sufficient for evidence stored in the PMCP repository; the additional SHA-256 payload checksum requirement is retired as redundant.
+- **Resume at:** Continue examining evidence storage/retrieval lifecycle mechanics (including repository growth) without proposing a second evidence identity, checksum, or storage mechanism.
