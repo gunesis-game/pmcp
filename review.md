@@ -1,23 +1,22 @@
 ## SESSION HANDOFF — START HERE
 
 **Last updated:** 2026-11-26  
-**Branch:** `main` only. All review work happens on `main`; do not create or use any other branch (see [README.md](README.md)).  
-**Persistent tracker:** this file (`review.md`) — read it before continuing.
+**Branch:** `main` only. All review work happens on `main`; do not create/use other branches.  
+**Persistent tracker:** `review.md`; read it before continuing.
 
 ### Resume instructions
-1. Fetch/read this entire `review.md` from `main` first, using the GitHub MCP server.
-2. Inspect the latest commit on `main`.
-3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
-4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
-5. Next task: consolidate the implementation-completeness observations from Session 22, reconcile the architecture's target-server claims against actual scope, then build a prioritized adversarial test plan.
-6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
+1. Fetch this tracker from `main` and inspect latest `main` HEAD before reviewing.
+2. Review only. Do not implement fixes or remediation commits without explicit user approval.
+3. Findings are confirmed only when code and requirements establish a defect. Draft/under-review scope mismatches are tracked as completeness risks.
+4. No tests have been executed during this review so far; code conclusions are static-review observations.
+5. **Next task:** if the user continues, review remaining validator/requirements test coverage or investigate a specific candidate finding. Avoid repeating the broad completeness reconciliation unless project scope is formally clarified.
 
-### Review snapshot
-- Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), its changes are merged into `main`.
-- Tracker location: `review.md` on `main`.
-- Findings: R-001 (policy changes during CI wait) is an unconfirmed semantics question; R-002 tier overwrite for same cycle+SHA is consistent with REQ-073/architecture's one-entry-per-SHA model, no defect confirmed; R-003 full-tier pass requirement is intentional; R-004 mismatched-payload replay remains a robustness question under REQ-015; R-005 decision metadata validator omission remains a P2 candidate; R-006–R-008 reconciliation validation gaps remain candidates; R-009 scalar-reference whitespace validation inconsistency is a low-severity candidate.
-- Source/tests have been read, but tests have **not** been run. Findings are review observations, not yet runtime-verified.
-- No implementation changes have been made during this review.
+### Current review snapshot
+- **Confirmed implementation defects:** none established in the current static review.
+- **Potential validator candidates R-005–R-009:** decision/reconciliation semantic invariants and normalization inconsistencies; requirements are draft and precise invariants need confirmation.
+- **Completeness/delivery risk:** governance core and coordinator exist, but the actual runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, and production GitHub adapters are absent from the source tree. This is not elevated to a confirmed defect because requirements/architecture are Draft/Under review and scope is unconfirmed.
+- **Prior P0 documentation status/authority issue:** remediation PR #1 is merged; architecture now accurately states Under review, requirements Draft, implementation substantial, verification not assessed.
+- No implementation changes; no tests executed.
 
 ---
 
@@ -400,3 +399,24 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Existing in-repository tests validate coordinator behavior through test harness and fake GitHub facts/store, not the actual MCP tool inventory, configuration propagation, server startup, transport, or exposed GitHub tool parity. Once adapters/bootstrap exist, highest-value contract tests: tool inventory parity and filtering/config options; tool schemas/annotations; read-only/lockdown behavior on PMCP tools; malformed MCP arguments/envelope mapping; startup/config failures; tool/resource/prompt registration; integration with real GitHub clients and atomic repository-store semantics.
 - No tests executed; no implementation changes.
 - **Next:** reconcile target architecture claims and project scope/milestone status; then consolidate confirmed findings vs completeness risks and produce a prioritized test plan. Continue review only.
+
+
+### Session 23 — Architecture/scope reconciliation and review consolidation
+
+- Freshly fetched `review.md`, `architecture.md`, `requirements.md`, `README.md`, repository tree, issue list and pull-request list. `main` HEAD before this tracker update: `8fa1fd9e380838f2a96a257799b1128120ddffb2` (Session 22 tracker commit).
+- Confirmed scope authority remains unresolved: README says follow GitHub MCP operations and main-only workflow; architecture status is **Under review** and says requirements are **Draft**, architecture approval not established, verification not assessed, and drift not catalogued. The repository has one closed issue/merged PR for P0 documentation-status/decision-authority remediation; no milestone or release-scope signal was found in the retrieved issue/PR set.
+- Consolidated current assessment:
+  - **Confirmed defects:** none established by this static review.
+  - **Potential candidates:** R-005 decision cross-field invariants, R-006 reconciliation reviewed-source requirements, R-007 reconciliation item/evidence validator asymmetry, R-008 recorded/pristine reconciliation atomicity, R-009 scalar/list reference whitespace normalization. R-007/R-008 are the strongest validation candidates, but formal requirement/schema authority remains Draft; they are not promoted to confirmed findings.
+  - **Delivery/completeness risk:** governance rules/coordinator/test fakes exist, but the source tree lacks the runnable MCP server, GitHub tool/resource/prompt passthrough, configuration/bootstrap, MCP adapters/transport, and production GitHub store/facts adapters. These would be critical to REQ-001/002 and architecture if in current scope; until scope is approved, label this an implementation completeness risk rather than a defect.
+- Prioritized adversarial test plan (static review proposes; tests not run):
+  1. **P0 scope/acceptance decision first:** approve, defer, or remove the target-server/production-adapter obligations; define a milestone/acceptance boundary. This is governance, not a code test.
+  2. **P1 validator direct tests:** malformed snapshots with inconsistent decision and reconciliation metadata; blank item/evidence; empty reviewed list; scalar/list whitespace references; validate pristine and recorded cases. Establish exact schema invariants first.
+  3. **P1 publication fault injection:** expected-head movement; ref update failure after commit object creation; publish-success then read-back failure; same-request-ID replay; multi-file commit atomicity; deletion vs empty content; non-force ref semantics. Production adapter tests are impossible until it exists.
+  4. **P1 end-to-end acceptance:** once server exists, tool inventory/config parity, schema/annotations, toolset enablement, read-only/lockdown propagation, MCP resources/prompts, malformed input and startup errors, plus AC-02 complete standard cycle against dedicated GitHub test repository.
+  5. **P2 CI evidence tests:** run selection by latest run/attempt; required and optional workflows; transitive components; pending/cancelled/timeouts; API read failures; annotations bounds; same-SHA repeat collection; wait/cancel semantics.
+  6. **P2 governance lifecycle matrix:** preemption, promotion, default order, block/unblock, cancellation attestations, transition gates, decision marker verification, reconciliation contradictions, audit watermark. Assert rejected calls leave head unchanged.
+  7. **P2 migration/setup round-trip:** legacy migration preserves identifiers/orders/timestamps/evidence/decision/audit records; setup/accept validates and publishes in one commit; failure injection verifies no partial state.
+  8. **P3 robustness/contract tests:** malformed UUID, unsupported tool/action, unknown args, null/scalar args, whitespace-only strings/list values, replay with altered payload under same request ID (resolve contract question first), bounded result messages/annotations, clock/ID failures.
+- **Disposition:** this consolidation does not change findings' confirmation level. No implementation edits and no tests executed.
+- **Next:** review remaining validator edge cases or, preferably, establish scope/requirement approval before converting completeness risks into findings. Continue review only.
