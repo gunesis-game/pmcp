@@ -485,3 +485,29 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - **No new finding/candidate elevated.** The contract does not specify a criterion reset/removal feature, nor a reset semantics for task completion, so absence is not treated as a defect. Existing R-013 remains a validation candidate subject to requirement approval.
 - Test-gap observation: repository tree has no dedicated `plan_rules_test.go` or plan/validator-specific test file. This does not prove there are no indirect tests, but direct unit coverage for plan update/reconcile behaviors is not visible in the named-file test inventory. No tests were executed.
 - **Next:** consolidate the review's test gaps and candidates into a prioritized final review summary, separating implementation completeness/scope risks from contract-dependent candidates and verified facts.
+
+
+### Session 31 — Review consolidation (static, prioritized)
+
+- Verified latest `main` HEAD before this checkpoint: `97aadd2cf76cf28698442cf4f8beb37cb4a81899`; no intervening changes observed beyond Session 30.
+- Consolidated the tracker’s recorded findings/candidates and test gaps. This is a static-review consolidation, **not a runtime/test verification or declaration that the review is exhaustive**.
+
+**Confirmed implementation defects:** none established to date.
+
+**Prioritized validation/contract candidates (requirements are Draft; confirm invariants before fixes):**
+1. **R-008 — reconciliation metadata atomicity** (P2 candidate): validator permits partial recorded metadata; define pristine-vs-recorded invariant.
+2. **R-005 — Recorded decision semantic fields** (P2 candidate): validator does not require approval/recorded_at/specification consistency for Recorded entries.
+3. **R-007 — reconciliation item completeness** (P2 candidate): persisted blank item/evidence can pass validator although action path rejects.
+4. **R-006 — reviewed-source completeness** (P2 candidate): reconciliation accepts empty reviewed list; served procedure expects source review.
+5. **R-010 — cycle timestamp presence**: creation timestamp is not required by validator despite lifecycle requirement.
+6. **R-012 — checkpoint/handoff semantic integrity**: required handoff fields and journal-entry consistency are not validated.
+7. **R-011 — micro-cycle text nonblankness**: validator checks presence but not trim-aware nonblank values.
+8. **R-013 — acceptance criterion evidence/done consistency**: validator does not enforce evidence when done; requirement currently ambiguous.
+
+**Lower-priority design/robustness questions (not defects under current draft):** R-001 policy revision binding during evidence wait; R-004 request-ID payload binding; R-002 tier overwrite/storage semantics; R-003 full-tier completion behavior (documented implementation behavior, not finding). Cross-record decision/handoff references remain a possible integrity enhancement but no explicit invariant found.
+
+**Coverage priorities:** add direct validator unit tests for malformed persisted states above; plan update/reconcile action tests; request-ID payload mismatch; policy mutation during evidence preparation; same-SHA cross-tier overwrite; explicit tier gate matrix. Test inventory/source review did not reveal dedicated plan-rule/validator test files. No tests executed.
+
+**Delivery/completeness risk:** runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, and production GitHub adapters remain absent from the reviewed source tree; scope/requirements are Draft or Under review, so this remains an unconfirmed scope risk.
+
+- No source code changed. **Next:** pause broad static review and ask for a scope/requirements decision: confirm whether this repository is intended to be a complete runnable PMCP product now or only the governance core; if the former, prioritize delivery-scope gap review, otherwise turn the invariant candidates into a test-first backlog after requirements approval.
