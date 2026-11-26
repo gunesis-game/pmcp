@@ -9,7 +9,7 @@
 2. Inspect the latest commit on `main`.
 3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
 4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
-5. Next task: inspect policy validation for workflow/component names and evidence wait bounds, then review CI read/error/cancellation and publication/idempotency boundaries.
+5. Next task: consolidate R-005–R-009 against precise invariants and map them to validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage.
 6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
 
 ### Review snapshot
@@ -342,4 +342,15 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Rechecked coordinator lifecycle: external CI preparation happens before branch locking; cancellation/errors from store/CI calls propagate to failure results. During publish, expected-head movement triggers retry with a fresh read/reapply; other publish errors fail without claiming a revision.
 - **Operational ambiguity (not a confirmed defect):** if publish succeeds but the subsequent branch read-back/ancestry confirmation fails, the caller receives an error and the failure envelope clears `PublishedRevision`/changed-files even though the commit may exist. The commit's request-ID trailer allows a retry with the same request ID to recover the stored result via replay. This behavior should be explicitly covered/documented with a fault-injection test (publish-success/read-back-failure/retry-same-ID); no code changes proposed.
 - No new confirmed defect. Existing candidates R-005–R-009 remain pending consolidation and requirement-level confirmation. No tests run and no implementation changes.
-- **Next:** consolidate the candidate validator findings with severity and exact missing adversarial tests; then review remaining external-store and integrity failure boundaries. Continue with review only.
+- **Next:** consolidate R-005–R-009 against precise state invariants and map them to direct validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage. Continue with review only.
+
+
+### Session 19 — CI failure/cancellation and idempotent publication read-back follow-through
+- Verified `main` HEAD at `fdcd5d05fe911d1b4fa72b1bbf7d098e59dc9b95` (tracker-only commit from Session 18); reviewed current sources before continuing.
+- Followed `EvidenceCollector.Collect` through `RunsForSHA`, polling, `Sleep(ctx,...)`, and failed-run detail reads. Reader failures (runs/jobs/annotations) return errors; cancellation from the sleep path propagates. Failure details are attached only to failed checks with a run ID; annotation counts and message lengths are bounded. No defect confirmed.
+- Followed the publish path: state is validated before commit; `Publish` uses expected-head and returns `ErrHeadMoved` for retry/reapply; after commit, `confirmPublished` checks the ref or ancestry. Other publish/read-back/ancestry failures return an error and clear the reported published revision. A retry using the same request ID can replay the committed result if its state commit remains in the configured recent-commit window. This is an **uncertain-outcome operational behavior**, not a confirmed correctness defect; add fault-injection coverage for publish-success/read-back-failure/retry-same-ID.
+- Replay stores the result trailer with `PublishedRevision` and `NextRequest` stripped, then reconstructs those on replay from the commit and current snapshot. Replay is request-ID-only, matching the previously recorded R-004 contract interpretation.
+- Rechecked policy validation: tiers require exactly fast/integration/full and non-null lists; component tests must be present as a list; dependants must name known components. Blank workflow/component test names and duplicate policy values are not explicitly prohibited by the currently inspected requirements, so these remain clarification/test candidates, **not findings**. Policy evidence-wait values are checked when used as the request default and fail closed if outside request bounds; snapshot-level bounds are not explicitly required.
+- Production `RepoStore` adapter remains absent from the repository tree, so real GitHub atomicity/branch-ref behavior cannot be verified. This is a scope/verification limitation, not a defect assigned to the in-repository interface or MemoryStore.
+- No implementation changes. No tests executed.
+- **Next:** consolidate R-005–R-009 against precise state invariants and map them to direct validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage. Continue with review only.
