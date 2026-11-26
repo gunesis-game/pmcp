@@ -216,3 +216,25 @@ Rationale: syntactically malformed data and semantically invalid governance stat
 - User approved A-007. Recorded the decision above and updated the unresolved parsing question and resume point.
 - No implementation changes authorized or made.
 - **Resume at:** inspect the current governance operations and their actual input dependencies/validation behavior. Use concrete call sites to assess whether the operation-specific boundary is respected; propose one next design decision at a time and record approval here before continuing.
+
+### A-008 | Canonical governance state file and Git-backed history
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Replace the multiple `.pmcp/*.json` governance state files with one canonical `.pmcp/state.json` file.
+- The canonical file represents the complete current PMCP governance state at a given Git commit.
+- Git commits and history are the sole source of version history. PMCP must not introduce a separate state-versioning or history store.
+- Governance operations may retrieve the state file from `HEAD` and relevant ancestor commits, then compare snapshots to understand state transitions.
+- The amount of history inspected is determined by the needs of the operation; do not impose a universal fixed history depth.
+- Distinguish structural state comparison from governance interpretation: a diff identifies what changed, while PMCP governance rules determine the meaning and validity of that transition.
+- A repository commit does not necessarily represent a governance transition; commits that do not change `.pmcp/state.json` need not be interpreted as state transitions.
+
+Rationale: Git already provides immutable commit snapshots and historical retrieval. A single canonical state file simplifies the persistence and parsing boundary while preserving Git as the only durable source of state history. It does not eliminate semantic validation of relationships and governance rules within or across snapshots.
+
+No implementation changes are authorized by this decision.
+
+### Session 34 — Canonical state representation decision
+
+- User approved A-008: one canonical `.pmcp/state.json`, with Git commits as the sole state history and operation-dependent historical comparison.
+- Recorded A-008 in this review tracker on `main`; no implementation files changed.
+- **Resume at:** continue inspecting actual governance operation call sites and their input dependencies/validation behavior. Then assess operation-specific validation as a separate decision. The previously discussed validation proposal is not yet approved.
