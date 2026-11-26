@@ -53,11 +53,11 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. The user has now approved CI-owned configuration as the source of verification workflow selection instead of a replacement PMCP policy file.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 narrows initial provider support to GitHub Actions and clarifies that testing/verification workflows are mandatory governance, with mandatory execution and validation gates when cycles reach implementation.
 
-Continue classifying the former policy fields and reconcile A-014 carefully: verification evidence must retain the required policy snapshot/fingerprint semantics, but the source of workflow selection is the repository's CI-owned configuration. Define how PMCP discovers/interprets that configuration, maps workflows to evidence tiers, and fingerprints the exact relevant configuration. Do not assume that arbitrary CI configuration is automatically a sufficient or stable policy interface.
+Continue by defining deterministic GitHub Actions configuration discovery and tier-to-workflow mapping, including how PMCP identifies applicable workflows, validates that required workflows are present and usable, and binds evidence to the exact configuration/revision. The model must distinguish establishing the project's mandatory testing strategy during governance/design from enforcing its execution as an implementation-cycle gate. An agent must be able to determine what validation to run, invoke or inspect the relevant workflow results, and use those results to validate implementation; a missing or unconfigured mandatory workflow must not be treated as optional success.
 
-Other former fields remain individually subject to disposition: approvals are derived from the decision ledger; Git workflow policy is superseded by fixed-`main`; decision approval modes/approver lists, performance settings, component mappings, commands, and wait overrides require explicit justification or removal. Reconcile the existing strategy gate and approved decision contracts before proposing changes. No implementation changes without explicit approval.
+Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-022. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -590,3 +590,29 @@ No implementation changes are authorized by this decision.
 - CI discovery, provider support, tier mapping and fingerprinting remain unresolved design questions.
 - The review tracker is the only file changed. No implementation or baseline requirements/architecture files were changed; no tests were run.
 - **Resume at:** define deterministic CI configuration discovery and tier-to-workflow mapping, then reconcile A-014 and the strategy gate. Continue individual disposition of all former policy fields before rewriting requirements or architecture.
+
+
+### A-022 | Mandatory testing workflows with GitHub Actions as the initial provider
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP initially supports GitHub Actions as its CI provider for governed testing and verification workflows. Support for other CI providers is deferred to future explicit extensions; it is not part of the initial provider contract.
+- Testing and verification workflows are a mandatory part of project governance. They are not an optional capability, optional policy choice, or merely a convenience for evidence collection.
+- Governance/design must establish the project's testing and verification strategy and the applicable workflows. The strategy and workflow configuration must be deterministically discoverable from CI-owned repository configuration, consistent with A-021.
+- When a cycle reaches implementation, the applicable testing/verification workflows become mandatory validation gates. Implementation is not considered validated merely because code changes have been made or an agent claims they are complete.
+- PMCP must provide an agent-facing way to determine which workflows apply to the implementation, run or request their execution through the supported GitHub Actions integration, inspect their results, and use the resulting evidence to validate the implementation.
+- Evidence must remain bound to the implementation revision and the exact relevant CI configuration/fingerprint used to select the workflows, preserving A-014 and A-021. It must identify the selected workflows, their provenance, and their outcomes.
+- A missing, ambiguous, invalid, or non-executable required workflow configuration must be surfaced as a governance/validation failure or blocker; it must not silently degrade into optional testing or passing evidence.
+- This decision establishes mandatory status and initial provider scope. It does not yet define the exact GitHub Actions discovery convention, workflow-to-tier mapping syntax, required workflow inventory, invocation permissions/mechanism, result interpretation, or fingerprint algorithm. Those remain explicit design questions.
+
+Rationale: testing is part of the governed path from design to implementation, and PMCP is intended to guide agents through that path. GitHub Actions provides a concrete initial execution and evidence source; deferring other providers keeps the first contract deterministic without making testing itself optional.
+
+No implementation changes are authorized by this decision.
+
+### Session 49 — Mandatory testing workflow direction approved
+
+- User approved GitHub Actions as the initial and only CI provider in scope, with other providers deferred to explicit future extensions.
+- User clarified that testing/verification workflows are mandatory governance, not optional configuration. The project must establish its strategy during governance/design; applicable workflows become mandatory validation gates when cycles reach implementation.
+- The handoff now focuses on deterministic GitHub Actions discovery/mapping and the agent-facing workflow execution/result/evidence path, while reconciling A-014's revision-bound evidence contract and the strategy gate.
+- No implementation files or baseline requirements/architecture files changed; this session updates the review tracker only. No tests were run.
+- **Resume at:** inspect existing CI/evidence and strategy-gate contracts against A-021/A-022, then propose the exact GitHub Actions discovery and workflow mapping contract. Update and verify this tracker after every approval. No implementation without explicit approval.
