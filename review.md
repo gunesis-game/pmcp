@@ -55,10 +55,11 @@ The assessment should establish and continually update:
 
 **Review remains ongoing.** No confirmed defect has been established, no tests were executed in this review, and no implementation changes are authorized. Requirements, architecture, and implementation remain open to critical reassessment. The assessment matrix is partial, not exhaustive.
 
-**Current architectural anchor:** Session 34 / A-008 — `.pmcp/state.json` is the canonical current governance state, versioned solely by Git commits; governance compares snapshots as needed to interpret transitions. The North Star in `architecture.md` and `requirements.md` now also establishes the canonical results model: GitHub Actions is only the execution runner (run status/provenance may be presented to governance, but workflow runs/artifacts are not the results store); each verification tool owns publishing its results back through that tool, and the results flow into the canonical state. PMCP mechanically governs what it can and hands genuinely unresolved assessment to the AI in a structured, evidence-backed form; the AI returns structured assessments for PMCP to validate and incorporate.
+**North Star:** Git is the sole durable source of truth; `.pmcp/state.json` is the canonical current governance state. GitHub Actions is only the runner. Fast, integration, and acceptance verification tools publish their results directly into their own namespaces in the canonical state; run status and provenance are supplementary. PMCP owns governance conclusions and mechanically evaluates tool-owned results, handing only genuinely judgment-dependent work to AI.
 
-**Next:** Define the verification-results publication boundary: what each verification tool owns and commits, how PMCP consumes those commits into `.pmcp/state.json`, and what execution metadata remains merely supplementary. Then reassess A-039–A-041 against this North Star; do not assume a separate evidence archive or GitHub workflow artifacts are needed. Keep GitHub Actions run-history cleanup separate from Git commit history. Do not implement anything without explicit approval.
+**Latest approved direction (A-044):** Option A—direct, namespace-scoped publication into `.pmcp/state.json`. Each verification tool writes only its own section. PMCP reads and derives governance state; it does not overwrite the underlying tool result. The decision is recorded below. Concurrency/write-safety and the precise publication contract are not yet settled.
 
+**Resume next:** Define publication write-safety and contract boundaries: exact permitted namespace updates, stale-write rejection, protection against cross-tool overwrites, and binding each result to the exact subject commit tested. Then reconcile A-039–A-041 against the North Star. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -892,3 +893,28 @@ The cleanup workflow must determine and validate its complete deletion scope bef
 These safeguards define a two-phase process: inventory/classify/plan first, then revalidate/execute. The deletion plan is mechanical; the approved retention policy is its authority, not an AI per-run decision.
 
 These safeguards do not yet specify additional exclusions or protection for runs carrying governance evidence, operational authorization, deletion execution mechanics, or post-deletion verification. No implementation changes are authorized by this decision.
+
+## A-044 — Direct verification publication into canonical state
+
+**Status:** Approved architectural direction  
+**Date:** 2026-11-26  
+**Choice:** Option A
+
+Fast, Integration, and Acceptance verification tools publish their results directly into their own namespaces in the canonical `.pmcp/state.json`; no separate results store or later PMCP incorporation layer is introduced.
+
+- Tool-owned namespaces: `verification.fast`, `verification.integration`, and `verification.acceptance`.
+- Each tool may update only its own verification result namespace; it does not author or overwrite another tool's result.
+- PMCP reads the published tool results and owns derived governance conclusions, including gate satisfaction, result freshness, conflicts, missing results, and next actions.
+- The AI is involved only for genuinely unresolved judgment-dependent work surfaced by PMCP.
+- Git commits provide durable state history. GitHub Actions is only the execution runner; its run status and provenance are supplementary, not the canonical result store.
+- Results must identify the subject commit/state they actually verified, so results for an earlier state are not mistaken for verification of a later one.
+
+This approves the direct-publication architectural direction, not a detailed schema or write mechanism. Concurrency, stale-write rejection, publication validation, and exact contract fields remain unresolved and must be designed before implementation. Option A does not authorize implementation.
+
+## Session 71 — Canonical publication ownership decided
+
+- User selected Option A: each verification tool writes directly to its own namespace in `.pmcp/state.json`.
+- Separate tool-result files/store and a PMCP incorporation stage are rejected as unnecessary extra state.
+- Tool ownership is limited to its own result; PMCP owns derived governance conclusions.
+- The result must be bound to the exact subject state/commit it verified.
+- **Resume at:** design publication concurrency/write-safety and exact contract boundaries, then reassess A-039–A-041.
