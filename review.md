@@ -59,7 +59,7 @@ The assessment should establish and continually update:
 
 **Latest approved direction (A-044):** Option A—direct, namespace-scoped publication into `.pmcp/state.json`. Each verification tool writes only its own section. PMCP reads and derives governance state; it does not overwrite the underlying tool result. The decision is recorded below. Concurrency/write-safety and the precise publication contract are not yet settled.
 
-**Resume next:** Define publication write-safety and contract boundaries: exact permitted namespace updates, stale-write rejection, protection against cross-tool overwrites, and binding each result to the exact subject commit tested. Then reconcile A-039–A-041 against the North Star. No implementation changes without explicit approval.
+**Resume next:** Continue reviewing evidence lifecycle and governance boundaries: how evidence is surfaced to AI for substantive assessment, and how PMCP mechanizes the remaining evidence-envelope checks without duplicating canonical state or Git metadata. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -1017,3 +1017,26 @@ No implementation changes are authorized by this decision.
 - User agreed that the evidence itself need not be universally structured; this corrects the earlier tendency to over-design a shared report format.
 - Evidence content may remain in native, varied formats. PMCP's role is mechanical governance, integrity, retention, provenance, and revision binding; AI evaluates substantive meaning/sufficiency when judgment is required.
 - **Resume at:** Reassess the remaining evidence envelope/lifecycle requirements under A-049 against existing architecture and requirements before proposing any new fields or storage mechanics. Avoid repeating information already supplied by the canonical North Star or Git metadata.
+
+
+## A-050 — Reconcile the evidence envelope and lifecycle (A-039–A-041)
+
+**Status:** Approved architectural clarification  
+**Date:** 2026-11-26
+
+- Retain A-039–A-041, narrowed to govern the evidence envelope and lifecycle, not impose universal structure on evidence contents or overstate PMCP's ability to judge substantive adequacy.
+- A-039's shared contract governs only the minimum envelope PMCP needs to mechanically associate evidence with its workflow, run, target revision, scope, outcome, and references. Reports, logs, outputs, screenshots, and other payloads may remain native, opaque, and heterogeneous.
+- A-040 remains sound: PMCP mechanically establishes provenance, association, integrity, retention, and retrievability to the extent reliably determinable. Mechanical integrity does not prove evidence is substantively adequate.
+- A-041 remains sound: retained evidence payloads belong in the PMCP repository. GitHub Actions artifacts are staging/transport only, not durable governance evidence.
+- PMCP mechanically verifies the envelope and governance requirements it can reliably establish. AI assesses contextual sufficiency—whether evidence supports its claim/scope, whether coverage is meaningful, and whether gaps, contradictions, or suspicious results remain—and PMCP preserves and incorporates that assessment through its governed process.
+
+**Boundary:** PMCP establishes evidence process, association, provenance, and integrity; AI evaluates evidence substance where contextual judgment is required. Layer success is scoped and does not imply overall governance completion.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 80 — Evidence-envelope reconciliation approved
+
+- A-050 approved the clarification of A-039–A-041 against A-049: shared governance applies to the evidence envelope/lifecycle, not a universal evidence-content schema.
+- PMCP remains responsible for reliable mechanical checks; AI receives unresolved contextual assessment with the relevant evidence and context.
+- **Resume at:** continue the evidence lifecycle assessment—specifically how evidence and contextual assessment are handed to AI and returned to PMCP—without reintroducing universal evidence structure or duplicating existing canonical metadata.
