@@ -559,7 +559,7 @@ No implementation changes are authorized by this decision.
 - Effective repository permissions must be explicit and least-privilege. Unspecified permissions default to none; governed verification jobs must not receive write permissions.
 - Governed verification jobs must not be given repository, organization, environment, or other secrets/credentials that could enable repository writes or otherwise bypass the read-only execution boundary. The exact static inspection rules and treatment of platform-provided credentials remain to be specified.
 - Reusable workflows and external actions are permitted only when referenced immutably by full commit SHA, rather than mutable tags or branches.
-- **Explicit exception — Git workflow-history cleanup:** the Git workflow-history cleanup capability is to be implemented as a reusable workflow. This is a narrowly scoped operational exception to the general restriction on reusable workflows; it is not a PMCP verification workflow, must not be selected as verification evidence, and must not be callable from governed verification workflows. Its invocation model and narrowly scoped permissions must be designed separately. The exception does not authorize mutable references; reusable-workflow/action references remain pinned to immutable commit SHAs.
+- **Explicit exception — Git Git Git workflow history cleanup:** the Git Git Git workflow history cleanup capability is to be implemented as a reusable workflow. This is a narrowly scoped operational exception to the general restriction on reusable workflows; it is not a PMCP verification workflow, must not be selected as verification evidence, and must not be callable from governed verification workflows. Its invocation model and narrowly scoped permissions must be designed separately. The exception does not authorize mutable references; reusable-workflow/action references remain pinned to immutable commit SHAs.
 - PMCP rejects dynamic, ambiguous, or unsupported workflow constructs when it cannot determine the effective configuration and enforce the applicable contract. It must fail closed rather than assume a safe interpretation.
 - Static workflow inspection cannot prove arbitrary shell scripts, action internals, or external side effects harmless. PMCP must state this limitation and must not represent configuration validation as a complete sandbox or security proof.
 - This decision establishes the validation direction and the explicit reusable-workflow exception. The precise supported YAML subset, expression handling, secret/credential detection, and cleanup-workflow invocation/permission contract remain to be defined.
@@ -567,11 +567,11 @@ No implementation changes are authorized by this decision.
 
 Rationale: validating only YAML syntax would accept workflows whose effective triggers, permissions, dependencies, or expressions undermine the governed verification boundary. A deliberately small, inspectable configuration surface makes enforcement more deterministic. The separately scoped history-cleanup reusable workflow serves an operational purpose and must not be conflated with workflows that produce verification evidence.
 
-### A-028 | Git workflow-history cleanup invocation structure
+### A-028 | Git Git Git workflow history cleanup invocation structure
 
 **Status: Approved by the user on 2026-11-26.**
 
-- Git workflow-history cleanup is initiated through a dedicated, explicitly dispatched caller workflow.
+- Git Git Git workflow history cleanup is initiated through a dedicated, explicitly dispatched caller workflow.
 - The caller invokes a dedicated reusable cleanup workflow through `workflow_call`.
 - The cleanup workflow receives only the narrowly defined inputs required for the cleanup operation; its interface must not accept arbitrary commands, arbitrary workflow references, or unrestricted repository targets.
 - The reusable cleanup workflow is an operational maintenance capability, not a governed verification workflow and not a source of verification evidence. Governed verification workflows must not call it.
@@ -861,12 +861,12 @@ Evidence must still satisfy A-039 and A-040. GitHub Actions artifacts may serve 
 
 No implementation changes are authorized by this decision.
 
-## A-042 — Git workflow history cleanup retention policy
+## A-042 — Git Git workflow history cleanup retention policy
 
 **Status:** Approved
 **Date:** 2026-11-26
 
-GitHub Actions workflow-history cleanup is governed by the following retention policy. This is cleanup of GitHub Actions workflow run records, not Git commit history; it does not authorize rewriting, truncating, rebasing, squashing, or force-pushing repository commits.
+GitHub Actions Git Git workflow history cleanup is governed by the following retention policy. This is cleanup of GitHub Actions workflow run records, not Git commit history; it does not authorize rewriting, truncating, rebasing, squashing, or force-pushing repository commits.
 
 - **Per-workflow retention:** For each workflow, retain only the latest four runs with outcomes of **success** or **failure**. Remove older success/failure runs beyond that limit.
 - **Global cleanup:** Remove runs with other outcomes, including **cancelled** and **skipped**, regardless of workflow.
@@ -942,7 +942,7 @@ No implementation changes are authorized by this decision.
 ## Session 72 — Verification publication write-safety approved
 
 - A-045 approved the namespace ownership, preservation, atomic commit, exact observed-parent, stale rejection, no retry/lock, SHA separation, and uncertain-publication rules.
-- **Resume at:** design the evidence representation and lifecycle in the canonical PMCP Git repository, including how accepted evidence remains retained/retrievable and protected from workflow-history cleanup; then reassess A-039–A-041.
+- **Resume at:** design the evidence representation and lifecycle in the canonical PMCP Git repository, including how accepted evidence remains retained/retrievable and protected from Git Git workflow history cleanup; then reassess A-039–A-041.
 
 
 ## A-046 — Structured verification results and supporting evidence payloads
@@ -956,7 +956,7 @@ No implementation changes are authorized by this decision.
 - GitHub Actions artifacts may be used as temporary staging/transport, but are not the retained governance record.
 - Accepted evidence is retained permanently in repository history; no automatic evidence deletion is introduced.
 
-This distinguishes canonical structured governance state from its supporting evidence content without introducing a separate results store. The mechanics of evidence format, layout, size constraints, integrity verification, and protection from workflow-history cleanup remain open.
+This distinguishes canonical structured governance state from its supporting evidence content without introducing a separate results store. The mechanics of evidence format, layout, size constraints, integrity verification, and protection from Git Git workflow history cleanup remain open.
 
 No implementation changes are authorized by this decision.
 
@@ -965,3 +965,26 @@ No implementation changes are authorized by this decision.
 - A-046 approved structured results and evidence references in canonical `.pmcp/state.json`, with detailed payload files retained in the PMCP Git repository and published together atomically.
 - Accepted evidence has permanent retention; Actions artifacts are staging only.
 - **Resume at:** determine the concrete evidence payload format, repository layout, size/boundary constraints, integrity verification, and protections against cleanup. Then reconcile A-039–A-041 and update the architecture/requirements North Star as needed.
+
+
+## A-047 — Git workflow history cleanup is independent of PMCP governance
+
+**Status:** Approved architectural principle  
+**Date:** 2026-11-26
+
+Git workflow history cleanup is a separate, mechanical maintenance operation over GitHub Actions workflow-run records. It must have no direct effect or implication for PMCP governance, canonical state, evidence lifecycle, reconciliation, gates, or project lifecycle.
+
+- Cleanup operates only on GitHub Actions run records—not Git commits, branches, repository files, or Git history.
+- It follows the already approved deterministic retention policy and safeguards (A-042/A-043); no AI interpretation or PMCP governance participation is required.
+- Cleanup must not modify PMCP state or evidence payloads, nor trigger PMCP governance transitions.
+- PMCP's accepted verification evidence and provenance must not depend on the continued existence of GitHub Actions run records after evidence has been accepted and durably published. Any required provenance must be retained within the governance record itself.
+
+Rationale: maintenance of GitHub Actions run records is distinct from PMCP's durable Git-based governance record. Treating it as independent avoids accidental coupling between operational cleanup and project governance.
+
+No implementation changes are authorized by this decision.
+
+## Session 74 — Cleanup terminology and independence clarified
+
+- Correct terminology is **Git workflow history cleanup** to distinguish GitHub Actions run-record cleanup from Git commit history.
+- A-047 approved the cleanup operation as independent and mechanical, with no direct PMCP state or governance implications.
+- **Resume at:** design the evidence payload format/layout and the self-contained provenance needed so accepted evidence remains auditable even after workflow run records are removed; then reconcile A-039–A-041 and update architecture/requirements as appropriate.
