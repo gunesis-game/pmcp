@@ -55,7 +55,7 @@ The assessment should establish and continually update:
 
 A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment. A-032 makes the mechanical-governance/AI-completion model a foundational North Star across the entire MCP: PMCP performs as much governance as it reliably can, then hands the remaining contextual or judgement-based assessment to the AI in a structured, evidence-backed form; the AI returns a structured assessment that PMCP incorporates into the governed process.
 
-The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. A-042 defines GitHub Actions workflow-history cleanup policy: per workflow, retain only the latest four runs whose outcomes are success or failure; globally remove runs with other terminal outcomes such as cancelled or skipped. This concerns GitHub Actions run history, not Git commit history. Resume by specifying cleanup selection boundaries and safeguards, including evidence protection, then reconcile A-027/A-028 workflow design details as needed. No implementation changes without explicit approval.
+The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. A-042 defines GitHub Actions workflow-history cleanup policy: per workflow, retain only the latest four runs whose outcomes are success or failure; globally remove runs with other terminal outcomes such as cancelled or skipped. A-043 establishes cleanup safeguards: completed-run-only eligibility, workflow-identity grouping, complete paginated inventory, deterministic outcome classification, a deletion plan, candidate revalidation, fail-safe behavior on uncertainty, and no per-run AI approval. This concerns GitHub Actions run history, not Git commit history. Resume by defining remaining exclusions/protections and operational authorization/verification, including evidence preservation. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -397,8 +397,7 @@ No implementation changes are authorized by this decision.
 - The operation does not require an in-progress cycle, does not mutate governance state, does not append a journal entry, does not publish a Git commit, and does not advance the watermark.
 - Its semantic validation is operation-specific: only the cycle registry and audit data necessary to calculate and represent the audit window must be valid. Unrelated semantic defects must not block the read.
 - Invalid or insufficient prerequisite data must produce a clear rejection/error, never a panic or misleading audit result.
-- The response is an index of material to review; it does not assert that documentation has been reviewed or reconciled. Review occurs separately, followed by `audit.advance`.
-Rationale: audit discovery and audit completion are separate actions. A read-only query must reliably identify the exact outstanding window without modifying it or being blocked by unrelated governance defects.
+- The response is an index of material to review; it does not assert that documentation has been reviewed or reconciled. Review occurs separately, followed by `audit.advance`.Rationale: audit discovery and audit completion are separate actions. A read-only query must reliably identify the exact outstanding window without modifying it or being blocked by unrelated governance defects.
 
 No implementation changes are authorized by this decision.
 
@@ -798,7 +797,6 @@ No implementation changes are authorized by this decision.
 - The handoff was refreshed to point to the remaining precise GitHub Actions validator contract. This corrects the stale top-level handoff, which had not kept pace with the decisions recorded later in the log.
 - This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.- **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
 
-
 ### A-030 | Structured governance assessment response contract
 
 **Status: Approved by the user on 2026-11-26.**
@@ -1191,3 +1189,31 @@ No implementation changes are authorized by this decision.
 - Workflow selection mechanics, safety exclusions for evidence-related runs, and authorization/verification safeguards remain open.
 - No implementation changes or tests.
 - **Resume at:** specify cleanup selection boundaries and safeguards, particularly how cleanup must preserve governance evidence and what validation is required before deletion.
+
+
+## A-043 — Workflow-history cleanup safeguards
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+The cleanup workflow must determine and validate its complete deletion scope before executing destructive actions. Cleanup eligibility is mechanically governed by A-042 and must not rely on AI judgment or per-run AI approval.
+
+- **Completed runs only:** queued, in-progress, or otherwise active runs are never eligible for deletion.
+- **Workflow identity:** calculate success/failure retention independently per workflow using actual workflow identity, not display names or a repository-wide aggregate.
+- **Complete inventory:** enumerate all relevant runs, including pagination, and establish that the inventory is complete before calculating deletion candidates. An incomplete inventory cannot be treated as complete.
+- **Deterministic classification:** classify runs by their final outcome and apply A-042 mechanically.
+- **Deletion plan:** calculate the exact candidate run IDs and record the reason each candidate is eligible before deleting anything.
+- **Revalidation:** before deletion, confirm each candidate still exists, is completed, and remains eligible under the policy.
+- **Fail-safe:** if enumeration, classification, or revalidation is incomplete or uncertain, stop rather than delete outside the established scope.
+
+These safeguards define a two-phase process: inventory/classify/plan first, then revalidate/execute. The deletion plan is mechanical; the approved retention policy is its authority, not an AI per-run decision.
+
+These safeguards do not yet specify additional exclusions or protection for runs carrying governance evidence, operational authorization, deletion execution mechanics, or post-deletion verification. No implementation changes are authorized by this decision.
+
+## Session 70 — Cleanup safeguards approved
+
+- User approved A-043: only completed runs eligible; group retention by actual workflow identity; complete paginated inventory required; outcome classification deterministic; prepare exact deletion plan; revalidate each candidate; fail safely on uncertainty; no per-run AI approval.
+- Cleanup follows two phases: scope/plan, then revalidation/execution.
+- Additional exclusions/evidence protection, authorization, execution mechanics, and post-delete verification remain open.
+- No implementation changes or tests.
+- **Resume at:** define what runs or evidence must be excluded/protected from deletion, including interaction with PMCP governance evidence.
