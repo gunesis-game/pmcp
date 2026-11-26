@@ -247,8 +247,7 @@ No implementation changes are authorized by this decision.
 - Historical comparisons are required only when the operation's governance rules depend on the transition; they are not an automatic prerequisite for every operation.
 - Semantically invalid unrelated governance data must not block an operation whose required inputs and invariants are valid.
 - Comprehensive repository/governance validation remains available as a diagnostic capability, but is not a prerequisite gate for every operation.
-- Do not introduce a global `IsUsable()` gate or an equivalent all-state usability gate.
-- Use an operation-dependency matrix as the design specification before changing the coordinator.
+- Do not introduce a global `IsUsable()` gate or an equivalent all-state usability gate.- Use an operation-dependency matrix as the design specification before changing the coordinator.
 
 Clarification: the canonical `.pmcp/state.json` must still parse as a complete document before it can be interpreted. Operation-specific validation narrows semantic preconditions and invariants; it does not imply partial parsing of malformed JSON.
 
@@ -497,8 +496,7 @@ No implementation changes are authorized by this decision.
 - Shared infrastructure owns Git traversal, commit classification, snapshot retrieval, transition reconstruction and validation. Consumers must not duplicate those responsibilities. History discovery must not silently truncate relevant ancestry using a fixed recent-commit limit.
 - The report retains current-state information from REQ-020: branch and exact HEAD revision; registry/governance validation; active cycle and checkpoint/handoff details; paused, blocked and pending cycles; status counts; default next cycle; proposed decisions; approved strategies and strategy gaps; and audit watermark/window/due status.
 - The report additionally presents the governance-state revision, verified transitions and their commit/operation provenance, unclassified or externally modified state changes, invalid/contradictory metadata, and history reconstruction completeness.
-- Current-state validity and historical reconstruction validity are distinct dimensions and must not be collapsed into one boolean. A structurally valid current state does not prove its history is valid; a verifiable history does not imply the current state is semantically valid.
-- Partial information must be labelled. If state parsing or history reconstruction is incomplete, the report distinguishes verified facts from unknowns and explains the limitation. Invalid metadata is reported as invalid and cannot establish a successful operation. Unverifiable transitions identify the relevant commit and reason. A partial reconstruction must never be represented as complete.
+- Current-state validity and historical reconstruction validity are distinct dimensions and must not be collapsed into one boolean. A structurally valid current state does not prove its history is valid; a verifiable history does not imply the current state is semantically valid.- Partial information must be labelled. If state parsing or history reconstruction is incomplete, the report distinguishes verified facts from unknowns and explains the limitation. Invalid metadata is reported as invalid and cannot establish a successful operation. Unverifiable transitions identify the relevant commit and reason. A partial reconstruction must never be represented as complete.
 - `audit.check` remains the dedicated audit-window discovery operation. `status.report` may display whether an audit is due but does not perform an audit or advance its watermark. Evidence collection and lifecycle operations remain responsible for their own actions and may consume shared history services independently.
 - This contract defines consumer behavior and information requirements, not the internal implementation/API shape of the shared history service.
 
@@ -747,8 +745,7 @@ Rationale: validating only YAML syntax would accept workflows whose effective tr
 
 - User approved effective-configuration validation, including explicit least-privilege permissions, restrictions on secrets/credentials, immutable references for reusable workflows/actions, and rejection of constructs PMCP cannot safely inspect.
 - User added one explicit exception: Git workflow-history cleanup must be implemented as a reusable workflow. The exception is limited to that operational capability; it is not a verification workflow and cannot be used to produce or participate in verification evidence.
-- The cleanup workflow's invocation and permission model remain open and must be designed separately; the exception does not grant it broad permissions by implication.
-- This tracker update records the approved direction before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- The cleanup workflow's invocation and permission model remain open and must be designed separately; the exception does not grant it broad permissions by implication.- This tracker update records the approved direction before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the precise supported GitHub Actions YAML subset and effective-configuration inspection rules, including expression handling, secret/credential detection, the platform-provided token boundary, and the separately scoped invocation/permission contract for the history-cleanup reusable workflow.
 
 
@@ -997,8 +994,7 @@ No implementation changes are authorized by this decision.
 - `choice` values must be exact strings matching one of the declared options. Unknown or differently cased values are rejected.
 - PMCP creates one canonical typed representation of the complete resolved input set and serializes it according to the GitHub dispatch API contract. PMCP must not rely on GitHub implicit coercion to make invalid values acceptable.
 - PMCP retains both the original supplied values and the resolved canonical values for provenance.
-- Before dispatch, PMCP records the workflow path and revision, intended target SHA, and canonical input set. After dispatch, it retrieves the resulting run and verifies the run's inputs and target revision against the recorded intent. A mismatch means the run cannot be accepted as governance evidence.
-- The typed `inputs` context is the semantic reference for workflow input values. PMCP must not assume `github.event.inputs` preserves Boolean types, because that context exposes values as strings.
+- Before dispatch, PMCP records the workflow path and revision, intended target SHA, and canonical input set. After dispatch, it retrieves the resulting run and verifies the run's inputs and target revision against the recorded intent. A mismatch means the run cannot be accepted as governance evidence.- The typed `inputs` context is the semantic reference for workflow input values. PMCP must not assume `github.event.inputs` preserves Boolean types, because that context exposes values as strings.
 - Input normalization and validation do not prove that workflow code consumes values safely; safe-consumption analysis remains a separate assessment. Nor do they alone authorize the request or establish execution provenance.
 
 Rationale: strict typed acceptance prevents implicit coercion and ambiguity from creating false confidence. A single canonical representation makes request intent auditable, while post-dispatch comparison binds the resulting run to the exact workflow revision, target revision, and inputs PMCP intended. GitHub's differently typed input contexts must be treated explicitly rather than conflated.
@@ -1125,3 +1121,29 @@ This shared contract does not make workflow-specific test content identical and 
 - Missing, malformed, untraceable, incomplete, or inconsistent evidence cannot support a successful gate; unestablished claims remain unresolved.
 - No implementation changes or tests.
 - **Resume at:** determine the governance-level rules for evidence integrity, retention, and retrievability (what PMCP must be able to establish, without prescribing storage mechanics prematurely).
+
+## A-040 — Evidence integrity, retention, and retrievability
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+PMCP must be able to establish that verification evidence is authentic, retained, and retrievable for the governance record that relies on it. A workflow's own assertion of evidence authenticity is not sufficient.
+
+- **Integrity and provenance:** PMCP must mechanically establish that evidence belongs to the identified governed workflow and run, corresponds to the execution PMCP initiated, was produced by the recorded workflow revision, concerns the exact intended target commit SHA, and has not been altered since production. Retrieved evidence must be bound to the run and attempt from which it came.
+- **Retention:** Evidence must remain available for the lifetime of the governance record that relies on it. Its durability cannot be assumed merely because a GitHub run or artifact is currently available. Time-limited artifact retention must not silently invalidate accepted governance evidence. Historical evidence must remain available for subsequent reconciliation, audit, and governance decisions.
+- **Retrievability:** PMCP must be able to retrieve and inspect evidence, not merely retain a URL or identifier. Evidence retrieved with integrity established is mechanically established. Demonstrably altered evidence, or evidence missing/expired in breach of its retention obligation, is a violation. Temporary access failure is unresolved. Unestablished provenance is unresolved. Demonstrably incomplete or inconsistent evidence is a violation; if PMCP cannot establish whether it is incomplete or inconsistent, it remains unresolved.
+- **Assurance boundary:** Establishing integrity and provenance does not establish the substantive truth or sufficiency of every evidence claim. PMCP mechanically validates what it can and hands remaining contextual assessment to AI using the structured assessment contract, with evidence and provenance; the AI returns a structured assessment for PMCP to validate and incorporate.
+- Storage mechanics, artifact formats, and retention implementation are deliberately not prescribed by this decision.
+
+Rationale: Governance decisions must remain auditable and reproducible over time. Evidence cannot be trusted merely because it is presently accessible or produced by the workflow under assessment. Integrity, provenance, availability, and substantive adequacy are distinct obligations and outcomes.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 67 — Evidence integrity and retention approved
+
+- User approved A-040: evidence must have mechanically established integrity and provenance, remain available for the governance record's lifetime, and be retrievable and inspectable.
+- Evidence alteration or retention failure is a violation; temporary inaccessibility or unestablished provenance is unresolved; demonstrated incompleteness/inconsistency is a violation, otherwise uncertainty remains unresolved.
+- Integrity/provenance does not itself prove substantive truth or sufficiency; unresolved contextual judgment is handed to AI with structured evidence and provenance.
+- Storage mechanism, artifact format, and retention implementation remain undecided. No implementation changes or tests.
+- **Resume at:** compare candidate evidence-storage and retention approaches against A-039/A-040 guarantees, including failure modes and how PMCP can independently verify integrity and recover evidence; do not choose a mechanism until the options have been assessed.
