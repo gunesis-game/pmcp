@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return the genuinely unresolved assessment to the consumer as structured, evidence-backed findings.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return the genuinely unresolved assessment to the consumer as structured, evidence-backed findings. A-030 establishes a common structured governance assessment contract that distinguishes passed checks, confirmed violations, and unresolved findings, while separating validation execution status from governance authorization.
 
-Continue by defining the precise supported GitHub Actions configuration subset and validator response contract under A-027/A-029: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, expression handling, and explicit treatment of properties PMCP cannot determine. The validator must maximize deterministic governance, minimize consumer reasoning burden, and never imply that validation alone constitutes governance approval. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
+Continue by defining the precise supported GitHub Actions configuration subset and validator rules under A-027/A-029/A-030: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, expression handling, and explicit treatment of properties PMCP cannot determine. Apply the common response contract, including machine-readable findings, evidence, actionable explanations, stable identifiers, and a distinct top-level validation execution status for infrastructure/tool failures. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -802,3 +802,54 @@ No implementation changes are authorized by this decision.
 - The handoff was refreshed to point to the remaining precise GitHub Actions validator contract. This corrects the stale top-level handoff, which had not kept pace with the decisions recorded later in the log.
 - This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
+
+
+### A-030 | Structured governance assessment response contract
+
+**Status: Approved by the user on 2026-11-26.**
+
+PMCP governance assessments use a common, machine-readable response contract that makes the outcome of each check explicit and minimizes the consumer's need to reconstruct or reinterpret work PMCP has already performed.
+
+Each finding has one of three result values:
+
+- `passed`: PMCP reliably established that the applicable requirement is satisfied.
+- `violation`: PMCP reliably established that the applicable requirement is not satisfied.
+- `unresolved`: PMCP cannot reliably establish whether the requirement is satisfied.
+
+A check must never be marked `passed` merely because PMCP could not inspect or determine it. An unresolved result is not itself a confirmed violation; it identifies the residual assessment and must explain the limitation and provide relevant evidence/context.
+
+The common response envelope must provide:
+
+- A schema version.
+- The assessed subject and, where applicable, its exact revision.
+- A summary of passed, violation, and unresolved findings.
+- A collection of findings with stable identifiers, result, affected subject/location, concise explanation, and supporting evidence.
+- Expected behavior or required remediation for confirmed violations where applicable.
+- A clear explanation of what PMCP could not establish and what remains to be assessed for unresolved findings.
+
+The response must be structured and machine-readable; consumers must not need to parse prose to distinguish outcomes. It must be concise, actionable, evidence-backed, and context-efficient. Consumers should be able to rely on PMCP's completed checks without repeating them.
+
+Validation execution status is distinct from finding results. For example, a GitHub/API/tool failure that prevents PMCP from retrieving or validating a workflow is an execution failure, not an unresolved property for an AI consumer to reason about. A successful inspection that cannot establish the safety of an action's internal behavior may instead produce an `unresolved` finding. A confirmed prohibited trigger in inspected configuration is a `violation`. The final contract must represent inability to execute validation separately from the assessment findings and must not report a successful validation when the validation operation itself failed.
+
+The common response contract is intended to apply across PMCP governance operations, including state validation, decision validation, reconciliation, workflow validation, and future tools. Domain-specific evidence may vary, but consumers should not need a fundamentally different result model for each operation.
+
+Validation evidence is not authorization. The response must not imply a top-level `approved` or `safe` outcome merely because checks passed. The governing operation remains responsible for evaluating the evidence under applicable governance rules and deciding whether an operation may proceed. Keep these questions distinct:
+
+1. Did PMCP successfully execute the validation?
+2. What did the validation establish?
+3. Is the requested operation authorized?
+
+The illustrative JSON envelope discussed during review is not a finalized schema. Exact field names, schema evolution rules, finding taxonomy, and operation-specific extensions remain to be designed.
+
+Rationale: a common response model allows PMCP to perform the deterministic work centrally and return only genuine uncertainty to the consumer. It makes governance outcomes consistent and reduces context and reasoning requirements, especially for AI consumers with limited context or less capable reasoning. Separating execution failure, assessment findings, and authorization prevents infrastructure failures or incomplete inspection from being misrepresented as consumer reasoning tasks or approval.
+
+No implementation changes are authorized by this decision.
+
+### Session 57 — Structured assessment response contract approved
+
+- User approved A-030: governance findings distinguish `passed`, `violation`, and `unresolved`; inability to determine a check must never be represented as a pass.
+- The common response includes a versioned, machine-readable envelope, subject/revision, outcome summary, and stable, evidence-backed, actionable findings.
+- Validation execution failure is represented separately from assessment findings; infrastructure/tool failures are not delegated as consumer reasoning tasks.
+- Validation evidence is not governance authorization. Validation execution, assessment outcome, and authorization remain separate questions.
+- The exact schema and operation-specific extensions remain open. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the precise supported GitHub Actions configuration subset and effective-configuration inspection rules, applying A-027, A-029, and A-030. Begin with YAML/schema validity, trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials. No implementation changes without explicit approval.
