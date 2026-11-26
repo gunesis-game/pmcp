@@ -53,7 +53,7 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations for GitHub Actions workflows.
 
 Continue by defining the deterministic GitHub Actions discovery and tier-to-workflow mapping contract. Determine how workflow files are discovered and identified, how each workflow declares or is assigned to a tier, and how PMCP rejects missing, ambiguous, invalid, or non-executable required workflows. Keep the distinction between strategy establishment during governance/design and execution as a mandatory implementation-cycle gate.
 
@@ -639,3 +639,37 @@ No implementation changes are authorized by this decision.
 - Tier membership is cumulative and deterministic; duplicate workflow identities are evaluated once.
 - The handoff now proceeds to the concrete GitHub Actions discovery, workflow identity, and tier-mapping contract.
 - This tracker update records the approval before moving to the next design topic. No requirements, architecture, or implementation files were changed and no tests were run.
+
+
+### A-024 | Filename-based verification tier declaration
+
+**Status: Approved by the user on 2026-11-26.**
+
+GitHub Actions workflow files under `.github/workflows/` declare their PMCP verification tier through their filename:
+
+- `verify-fast-*.yml` and `verify-fast-*.yaml`: rapid-feedback workflows.
+- `verify-integration-*.yml` and `verify-integration-*.yaml`: integration workflows.
+- `verify-acceptance-*.yml` and `verify-acceptance-*.yaml`: full-acceptance workflows.
+
+Tier expansion follows A-023:
+- `fast`: fast workflows.
+- `integration`: fast and integration workflows.
+- `full`: fast, integration, and acceptance workflows.
+
+The workflow path is its stable identity; the Actions display name is descriptive metadata and is not used as the identity. Workflows that do not match one of these patterns are not implicitly assigned to a verification tier.
+
+A tier with no matching workflows is a configuration failure, not an empty successful gate. Missing or invalid required workflow configuration must block validation.
+
+This decision establishes the declaration convention. The precise validation rules for workflow validity and executability remain open for review. Existing workflow files, including `ci.yml`, require explicit disposition during subsequent configuration reconciliation; this decision does not itself rename or modify them.
+
+Rationale: workflow filenames provide a small, discoverable, version-controlled declaration without introducing a replacement policy/configuration registry.
+
+No implementation changes are authorized by this decision.
+
+### Session 51 — Workflow tier declaration approved
+
+- User approved A-024: workflow filename patterns declare fast, integration, and acceptance tiers.
+- Workflow paths are stable identities; display names are not.
+- Unmatched workflows are not implicitly assigned; empty tiers and invalid/missing required workflow configuration block validation.
+- Next topic: define the validity and executability contract for discovered workflows.
+- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
