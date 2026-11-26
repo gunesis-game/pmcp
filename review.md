@@ -12,6 +12,7 @@
 - No tests have been executed during this review.
 - Confirmed implementation defects: **none established**.
 - Candidate gaps are contract-dependent because requirements remain Draft and architecture Under review.
+- Work directly on `main`: review, approved remediation, and commits all happen on the main branch. No branches or pull requests.
 - Next logical task: resolve intended delivery scope (complete runnable PMCP product vs governance core). If full product is in scope, review delivery gaps first; otherwise confirm invariants and create a test-first backlog.
 
 ## Review discipline
@@ -25,19 +26,19 @@
 
 ### Review areas and disposition
 
-| Review area | Sessions consolidated | Coverage | Result / disposition |
+| Review area | Coverage | Result / disposition |
 |---|---:|---|---|
-| Documentation authority & project status | 1, 4, 23 | README, architecture/requirements status, decision authority, remediation PR | Initial P0 documentation/status issue remediated in merged PR #1. Requirements remain Draft; architecture Under review. |
-| Coordinator/request lifecycle & replay | 2, 8, 11, 16, 19, 22 | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 is a robustness question under REQ-015. |
-| CI/evidence selection, polling & gates | 1, 8, 10, 11, 17–19 | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure, policy timing | R-001 is a policy-snapshot semantics question. R-002 tier overwrite aligns with per-SHA model. R-003 is observed behavior, not a finding. |
-| State/snapshot encoding & integrity | 3, 7, 9, 14, 21 | Typed state, clone/re-encode, canonical encoding, digest scope, integrity acceptance | No confirmed defect. Digest covers sorted `.pmcp/*.json` state files; project docs/policy excluded by design. |
-| Decision ledger & approvals | 4, 7, 14, 20, 28 | Propose/record/list, approval modes, decision fields, policy approval refs, cross-record refs | R-005 remains an invariant candidate; cross-record handoff links are not explicitly required by the Draft contract. |
-| Plan updates & reconciliation | 5–8, 12, 14, 20, 29–30 | Task/criterion mutations, matching, evidence, no-op, reviewed sources, item/reference normalization, persisted reconciliation metadata | R-006–R-009 and R-013 remain candidates; no criterion reset/removal requirement identified. |
-| Cycle lifecycle, order, preemption & completion | 5–6, 13–14, 24–25, 29 | Start/pause/block/unblock/cancel/reorder, micro-cycle promotion, default order, phase gates, timestamps, micro metadata | No confirmed lifecycle defect. R-010 timestamp presence and R-011 micro-field nonblankness are validator candidates. |
-| Checkpoint, handoff, journal & audit | 4, 9, 15, 26–28 | Handoff/checkpoint fields, event log, journal, audit window/watermark, audit advancement | R-012 is a checkpoint/handoff semantic-validation candidate. Audit watermark checks meet explicit REQ-101; historical audit validation is not specified. |
-| Repository-store/publication boundary | 3, 8–9, 18–21 | Store interface/fake, expected-head checks, concurrency retry, commit/read-back/ancestry, atomic publication and failure paths | MemoryStore paths reviewed; production adapter absent, so real GitHub atomicity/no-force behavior unverified. No defect confirmed. |
-| MCP product/bootstrap & delivery scope | 16, 21–23 | Architecture-to-tree reconciliation, tool/resource/prompt exposure, configuration, transport, GitHub MCP passthrough/adapters | Material completeness risk if in current scope; not a confirmed defect while scope is unapproved. |
-| Test coverage & adversarial cases | 7–8, 9, 14–21, 24–30 | Test inventory and gaps across validators, plan/reconcile, evidence, replay, store, bootstrap | Tests were source-inspected only. Dedicated validator and plan/reconciliation test files were not observed in the inventory. |
+| Documentation authority & project status | README, architecture/requirements status, decision authority | Initial P0 documentation/status issue remediated. Requirements remain Draft; architecture Under review. |
+| Coordinator/request lifecycle & replay | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 is a robustness question under REQ-015. |
+| CI/evidence selection, polling & gates | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure, policy timing | R-001 is a policy-snapshot semantics question. R-002 tier overwrite aligns with per-SHA model. R-003 is observed behavior, not a finding. |
+| State/snapshot encoding & integrity | Typed state, clone/re-encode, canonical encoding, digest scope, integrity acceptance | No confirmed defect. Digest covers sorted `.pmcp/*.json` state files; project docs/policy excluded by design. |
+| Decision ledger & approvals | Propose/record/list, approval modes, decision fields, policy approval refs, cross-record refs | R-005 remains an invariant candidate; cross-record handoff links are not explicitly required by the Draft contract. |
+| Plan updates & reconciliation | Task/criterion mutations, matching, evidence, no-op, reviewed sources, item/reference normalization, persisted reconciliation metadata | R-006–R-009 and R-013 remain candidates; no criterion reset/removal requirement identified. |
+| Cycle lifecycle, order, preemption & completion | Start/pause/block/unblock/cancel/reorder, micro-cycle promotion, default order, phase gates, timestamps, micro metadata | No confirmed lifecycle defect. R-010 timestamp presence and R-011 micro-field nonblankness are validator candidates. |
+| Checkpoint, handoff, journal & audit | Handoff/checkpoint fields, event log, journal, audit window/watermark, audit advancement | R-012 is a checkpoint/handoff semantic-validation candidate. Audit watermark checks meet explicit REQ-101; historical audit validation is not specified. |
+| Repository-store/publication boundary | Store interface/fake, expected-head checks, concurrency retry, commit/read-back/ancestry, atomic publication and failure paths | MemoryStore paths reviewed; production adapter absent, so real GitHub atomicity/no-force behavior unverified. No defect confirmed. |
+| MCP product/bootstrap & delivery scope | Architecture-to-tree reconciliation, tool/resource/prompt exposure, configuration, transport, GitHub MCP passthrough/adapters | Material completeness risk if in current scope; not a confirmed defect while scope is unapproved. |
+| Test coverage & adversarial cases | Test inventory and gaps across validators, plan/reconcile, evidence, replay, store, bootstrap | Tests were source-inspected only. Dedicated validator and plan/reconciliation test files were not observed in the inventory. |
 
 ### Unified candidate register
 
@@ -87,9 +88,10 @@
 
 The source tree reviewed contains governance rules, coordinator abstractions and test fakes, but lacks the runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, MCP adapters/transport, and production GitHub store/facts adapters described by architecture. If those are in-scope delivery requirements, this is a material completeness gap. Because requirements are Draft and architecture Under review, it remains a scope risk—not a confirmed defect.
 
-## Remediation / PR tracking
+## Direct-to-main remediation tracking
 
-- **PR #1:** [Remediate P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1) — merged. Updates documentation status and clarifies proposed/approved/superseded authority; no implementation remediation.
+- Repository work is performed directly on `main`; no PRs or branch workflow.
+- Track approved remediation here by commit and concise change summary. No implementation remediation currently recorded.
 
 ## Overall status
 
