@@ -5,32 +5,19 @@
 **Working branch:** `main` only  
 **Assessment mode:** Ongoing, evidence-based assessment; static inspection unless execution is explicitly recorded.
 
-## North Star — Design for agents with limited context and memory
+## Review scope — assess the delta against the project baseline
 
-### Persistence boundary — the governed repository is the only durable store
+**This document is a review and change-assessment record, not a second requirements or architecture document.** The product purpose and North Star belong at the opening of `requirements.md` and `architecture.md`, where they define what PMCP must achieve and guide its design.
 
-**PMCP does not own or operate a separate persistence system for project governance state. All durable PMCP state and project knowledge live in the same GitHub repository as the actual project being built.**
+The review works from three current-state inputs:
 
-- The governed repository contains both the project's implementation and its PMCP governance records, requirements, architecture, decisions, plans, progress, and other durable context needed to continue work.
-- Git is the persistence mechanism and source of truth: commits, trees, blobs, and history provide durable state and provenance.
-- PMCP reads, interprets, validates, and updates the governance material in that repository; it does not maintain a parallel database or separately managed project-state store.
-- An agent or PMCP installation must be replaceable without losing project knowledge. The repository carries the knowledge with the project.
-- Any proposed external or separate persistence mechanism is outside this architecture unless explicitly reconsidered and approved.
+- `requirements.md` — the stated product obligations and intended outcomes.
+- `architecture.md` — the proposed/approved technical structure and design decisions.
+- The current code — what is actually implemented, independently of what the documents say.
 
+Against that baseline, this document records the assessment and the **proposed delta**: what should change in the requirements, architecture, or implementation; why it should change; what has been agreed; and what remains unresolved. It must distinguish current facts, proposed changes, approved decisions, and implementation work. It must not silently turn a review proposal into a product requirement or architecture decision.
 
-**PMCP exists to let AI agents govern and execute project work reliably without depending on the agent's ability to retain the project's history in its own context window or conversation memory.**
-
-The system must assume that an agent may be less capable, have a small context window, lose its session, or be unable to reliably remember prior decisions and instructions. PMCP must therefore make the project's authoritative context, current state, constraints, decisions, and next actions recoverable from durable project records and explicit interfaces—not from the agent's recollection.
-
-Evaluate every requirement and design choice against this purpose:
-- An agent should be able to re-establish the relevant project context after losing its conversation history.
-- Important decisions, rationale, requirements, architecture, progress, and outstanding work must be persisted in an authoritative, discoverable form.
-- The system should provide the right context at the point of use, without requiring the agent to load or retain the entire project history.
-- Operations and guidance should be understandable and usable by agents with limited reasoning and context capacity.
-- Do not assume the agent will remember prior tool calls, infer undocumented conventions, or reconstruct missing context correctly.
-- Prefer explicit state, clear contracts, deterministic workflows, and actionable guidance over implicit conversational continuity.
-
-This is a product-design North Star, not merely a documentation or review-process rule. The review-tracking North Star below applies the same principle to this assessment itself.
+The product North Star—including the limited-session/limited-context agent problem and the single-repository persistence boundary—should be stated in the opening of both `requirements.md` and `architecture.md`, not duplicated as a product-definition section here.
 
 ## North Star — Review tracking and continuity
 
@@ -44,11 +31,11 @@ This is a product-design North Star, not merely a documentation or review-proces
 
 ## Purpose
 
-This document is the persistent cross-session tracker for assessing PMCP as it currently exists and for informing decisions about what PMCP should become.
+This document is the persistent cross-session record of the assessment and proposed changes to PMCP. It evaluates the current `requirements.md`, `architecture.md`, and code, then records the proposed and agreed delta from that baseline.
 
-The product purpose being evaluated is to support AI agents—particularly less capable agents and agents with small context windows—whose conversation history and working context may be lost. PMCP should externalize and preserve the project context and governance state those agents need, so reliable work does not depend on long-lived agent memory.
+The requirements and architecture documents own the product definition and design. This review does not replace them or restate their product North Star. It records evidence, critical assessment, proposed changes, decisions, unresolved questions, and the resulting change scope.
 
-**Requirements, architecture, and implementation are all open to criticism and change. None is presumed correct or authoritative simply because it exists today.** The goal is not to preserve the current design or merely find code defects against the current specification.
+**The existing requirements, architecture, and implementation are all reviewable; none is presumed correct merely because it exists.** The purpose is to establish what should be retained, changed, or removed, and to make the rationale and agreed delta recoverable across sessions.
 
 The assessment should establish and continually update:
 
