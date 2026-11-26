@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-The assessment remains ongoing and is not yet exhaustive. The active track is the revised `status.report` consumer contract, followed by explicit reconciliation of `requirements.md`, `architecture.md`, and every approved operation contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model.
+The assessment remains ongoing and is not yet exhaustive. The active track is the revised `status.report` consumer contract (A-018), followed by explicit reconciliation of `requirements.md`, `architecture.md`, and every approved operation contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model.
 
-The shared governance-history infrastructure is a reusable capability, not owned by `status.report`. A-016 now establishes its commit-classification and metadata principles. Next, define the revised `status.report` contract as A-017: an agent-facing consumer that requests and presents a report using shared history/state reconstruction. Then reconcile all requirements, architecture and operation contracts with one canonical state document per Git commit; Git history remains the only durable version history. No implementation without explicit approval.
+A-016 establishes shared history classification and metadata principles; A-017 establishes the canonical metadata convention and legacy handling. Shared history/state reconstruction is reusable infrastructure, not owned by `status.report`. Next, define A-018 as the thin agent-facing consumer that requests and presents reports using that shared infrastructure. Then reconcile all requirements, architecture and operation contracts with one canonical state document per Git commit; Git history remains the only durable version history. No implementation without explicit approval.
 
 ## Current assessment matrix
 
@@ -425,7 +425,7 @@ No implementation changes are authorized by this decision.
 - `status.report` remains the final non-cycle operation contract under review (A-017 is **not approved or recorded**). Its revised responsibility is to request an appropriate history reconstruction and render an agent-readable consolidated report; it does not own Git traversal or reconstruction.
 - The earlier A-016 draft that treated status as a direct current-snapshot diagnostic is superseded by this clarification and must not be treated as approved.
 - User explicitly raised the review North Star/continuity failure. This session entry and the revised handoff are being committed now before any further discussion. No implementation changes or tests were performed.
-- **Exact resume point:** continue the shared governance-history infrastructure design from the commit-filtering and canonical commit-metadata requirement. Decide the metadata convention and which commits require it; then finish the revised A-017 `status.report` consumer contract. After all operation contracts, reconcile requirements, architecture and every approved contract against the single `.pmcp/state.json` per Git commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
+- **Exact resume point:** continue the shared governance-history infrastructure design from the commit-filtering and canonical commit-metadata requirement. Decide the metadata convention and which commits require it; then finish the revised A-018 `status.report` consumer contract. After all operation contracts, reconcile requirements, architecture and every approved contract against the single `.pmcp/state.json` per Git commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
 
 
 ### A-016 | Shared governance-history commit classification and metadata
@@ -442,7 +442,7 @@ No implementation changes are authorized by this decision.
 - Commit filtering must not rely exclusively on trailers. The shared infrastructure discovers relevant history, retrieves the canonical state snapshot at relevant commits, compares snapshots, reconstructs actual transitions, validates them under the applicable governance rules, preserves provenance, and exposes reusable query/scope APIs.
 - History discovery must be able to inspect the relevant ancestry as required; a fixed recent-N commit window must not silently truncate the history needed to establish a state transition or provenance.
 - Shared history/state reconstruction is reusable by multiple components and operations. It is not owned by `status.report`; consumers must not duplicate Git traversal, classification, reconstruction, or transition validation.
-- The previous direct-current-snapshot `status.report` draft is superseded and was never approved. To avoid reusing its abandoned identifier, the revised `status.report` consumer contract is now tracked as A-017. This is a tracker renumbering only; no contract for A-017 is approved yet.
+- The previous direct-current-snapshot `status.report` draft is superseded and was never approved. To avoid reusing its abandoned identifier, the revised `status.report` consumer contract is now tracked as A-018. This is a tracker renumbering only; no contract for A-017 is approved yet.
 
 Rationale: governance needs a reliable way to distinguish state transitions from ordinary repository work while retaining Git as the sole historical authority. Machine-readable metadata makes filtering practical, but verifying the committed state and actual transition prevents metadata from becoming a parallel or self-authenticating record.
 
@@ -455,3 +455,35 @@ No implementation changes are authorized by this decision.
 - The exact trailer spelling/format, mandatory schema/version compatibility rules, legacy migration behavior, and whether a separate transition identifier is needed remain to be specified against the existing implementation before any implementation proposal.
 - No implementation files changed and no tests were executed. This commit updates the review tracker only.
 - **Resume at:** inspect the existing commit metadata implementation against A-016, settle the precise canonical metadata convention and legacy handling, then define A-017 `status.report` as a thin consumer of shared history reconstruction. After approval, update and verify this file before proceeding to architecture/requirements reconciliation. No implementation without explicit approval.
+
+
+### A-017 | Canonical PMCP commit metadata convention and legacy handling
+
+**Status: Approved by the user on 2026-11-26.**
+
+- New state-changing PMCP governance commits use exactly one of each required trailer:
+  - `Pmcp-Metadata-Version: 1`
+  - `Pmcp-Tool: <tool>`
+  - `Pmcp-Action: <action>`
+  - `Pmcp-Request: <request-id>`
+  - `Pmcp-State-Digest: <digest>`
+  - `Pmcp-Result: <compact result envelope>`
+- `Pmcp-Metadata-Version` versions the commit-metadata convention. It is distinct from the schema version of the canonical `.pmcp/state.json`.
+- `Pmcp-State-Digest` identifies the digest of the canonical committed `.pmcp/state.json`.
+- `Pmcp-Result` retains the compact stored operation-result envelope.
+- New-format metadata must be parsed and validated strictly. Duplicate, missing, malformed, or contradictory required trailers make the metadata invalid; invalid metadata must not be accepted as proof of a PMCP governance transition.
+- Existing unversioned PMCP commits are legacy history. Preserve them without rewriting. Reconstruct their state transitions from Git snapshots and validate what can be established from their actual contents; do not treat old trailers as if they satisfy the new versioned convention.
+- Commits without valid PMCP metadata remain unclassified until their actual tree changes and state snapshots have been examined. The absence of metadata does not exclude a commit from relevant history.
+- This convention applies to new PMCP governance commits that change canonical governance state. Ordinary implementation commits do not require these trailers.
+
+Rationale: a versioned, strict metadata envelope gives shared history infrastructure a stable classification aid while preserving historical commits and keeping the committed state document authoritative.
+
+No implementation changes are authorized by this decision.
+
+### Session 44 — Canonical metadata convention approved
+
+- User approved A-017: versioned metadata for new PMCP governance commits, strict validation of the six required trailers, digest binding to canonical `.pmcp/state.json`, and non-destructive treatment of legacy unversioned commits.
+- The metadata-version trailer is distinct from the state-document schema version.
+- The revised `status.report` consumer contract is now A-018. The earlier A-016 status draft was superseded and never approved; A-017 is the metadata convention.
+- Existing implementation has not been changed. Static inspection identified the current five-trailer format, permissive parser, and lack of explicit metadata versioning. No tests were executed.
+- **Resume at:** define A-018 `status.report` as a thin agent-facing consumer of shared history/state reconstruction. Then reconcile requirements, architecture and all approved contracts against the single canonical `.pmcp/state.json` per commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
