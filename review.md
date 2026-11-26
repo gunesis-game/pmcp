@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-The assessment remains ongoing and is not yet exhaustive. The active track is the revised `status.report` consumer contract (A-018), followed by explicit reconciliation of `requirements.md`, `architecture.md`, and every approved operation contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model.
+The assessment remains ongoing and is not yet exhaustive. A-018, the revised `status.report` consumer contract, is approved and recorded. The next active track is mandatory reconciliation of `requirements.md`, `architecture.md`, and every approved operation contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model.
 
-A-016 establishes shared history classification and metadata principles; A-017 establishes the canonical metadata convention and legacy handling. Shared history/state reconstruction is reusable infrastructure, not owned by `status.report`. Next, define A-018 as the thin agent-facing consumer that requests and presents reports using that shared infrastructure. Then reconcile all requirements, architecture and operation contracts with one canonical state document per Git commit; Git history remains the only durable version history. No implementation without explicit approval.
+A-016 establishes shared history classification and metadata principles; A-017 establishes the canonical metadata convention and legacy handling; A-018 establishes `status.report` as a thin agent-facing consumer of reusable history/state reconstruction. The next step is to read the full requirements and architecture documents and reconcile their current multi-file state assumptions and operation semantics against one canonical state document per Git commit. Git history remains the only durable version history. No implementation without explicit approval.
 
 ## Current assessment matrix
 
@@ -484,6 +484,34 @@ No implementation changes are authorized by this decision.
 
 - User approved A-017: versioned metadata for new PMCP governance commits, strict validation of the six required trailers, digest binding to canonical `.pmcp/state.json`, and non-destructive treatment of legacy unversioned commits.
 - The metadata-version trailer is distinct from the state-document schema version.
-- The revised `status.report` consumer contract is now A-018. The earlier A-016 status draft was superseded and never approved; A-017 is the metadata convention.
+- The revised `status.report` consumer contract is A-018. The earlier A-016 status draft was superseded and never approved; A-017 is the metadata convention.
 - Existing implementation has not been changed. Static inspection identified the current five-trailer format, permissive parser, and lack of explicit metadata versioning. No tests were executed.
 - **Resume at:** define A-018 `status.report` as a thin agent-facing consumer of shared history/state reconstruction. Then reconcile requirements, architecture and all approved contracts against the single canonical `.pmcp/state.json` per commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
+
+### A-018 | Revised `status.report` consumer contract
+
+**Status: Approved by the user on 2026-11-26.**
+
+- `status.report` is the agent-facing operation for requesting and presenting a consolidated governance status report. It is a consumer of shared governance-history infrastructure, not the owner of that infrastructure.
+- The operation is `status.report`, takes no arguments, rejects unknown arguments, and is strictly read-only. It performs no state mutation, journal append, watermark update, or Git commit.
+- Shared infrastructure, requested by the coordinator, supplies the canonical state snapshot at exact current HEAD; relevant governance commits and provenance; reconstructed transitions in chronological order; commit classifications; metadata validation; state-integrity and transition-validation findings; and explicit history completeness/limitations.
+- Shared infrastructure owns Git traversal, commit classification, snapshot retrieval, transition reconstruction and validation. Consumers must not duplicate those responsibilities. History discovery must not silently truncate relevant ancestry using a fixed recent-commit limit.
+- The report retains current-state information from REQ-020: branch and exact HEAD revision; registry/governance validation; active cycle and checkpoint/handoff details; paused, blocked and pending cycles; status counts; default next cycle; proposed decisions; approved strategies and strategy gaps; and audit watermark/window/due status.
+- The report additionally presents the governance-state revision, verified transitions and their commit/operation provenance, unclassified or externally modified state changes, invalid/contradictory metadata, and history reconstruction completeness.
+- Current-state validity and historical reconstruction validity are distinct dimensions and must not be collapsed into one boolean. A structurally valid current state does not prove its history is valid; a verifiable history does not imply the current state is semantically valid.
+- Partial information must be labelled. If state parsing or history reconstruction is incomplete, the report distinguishes verified facts from unknowns and explains the limitation. Invalid metadata is reported as invalid and cannot establish a successful operation. Unverifiable transitions identify the relevant commit and reason. A partial reconstruction must never be represented as complete.
+- `audit.check` remains the dedicated audit-window discovery operation. `status.report` may display whether an audit is due but does not perform an audit or advance its watermark. Evidence collection and lifecycle operations remain responsible for their own actions and may consume shared history services independently.
+- This contract defines consumer behavior and information requirements, not the internal implementation/API shape of the shared history service.
+
+Rationale: status is an agent-facing view over authoritative state and verified history. Separating it from reusable history infrastructure prevents duplicated Git/reconstruction logic and keeps current-state validity distinct from historical provenance and transition validity.
+
+No implementation changes are authorized by this decision.
+
+### Session 45 — A-018 status consumer contract approved
+
+- User approved A-018, defining `status.report` as a read-only, no-argument consumer of shared governance-history reconstruction.
+- The contract retains the current REQ-020 status fields and adds history-derived transitions, provenance, classification/metadata findings, and explicit completeness/limitations.
+- Current-state validity and historical reconstruction validity are separate report dimensions. Partial or invalid history must be disclosed rather than presented as complete.
+- Static inspection confirmed the current implementation is still snapshot-centric: `StatusReport.Apply` consumes prepared validation/integrity facts and the current typed snapshot; the coordinator's read-only path reads a bounded recent commit set. Shared history reconstruction does not yet exist. This is an observation, not an implementation change.
+- No implementation files changed and no tests were executed. The full tracker was preserved and updated in place.
+- **Resume at:** read `requirements.md` and `architecture.md` in full, then reconcile their multi-file state layout, commit/history assumptions, and all approved operation contracts (A-007 onward) against the canonical `.pmcp/state.json` per commit and Git-history-only versioning. Do not redesign or implement until the contradictions and contract impacts have been assessed and presented for approval.
