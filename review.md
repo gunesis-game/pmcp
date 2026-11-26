@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment. A-032 makes the mechanical-governance/AI-completion model a foundational North Star across the entire MCP: PMCP performs as much governance as it reliably can, then hands the remaining contextual or judgement-based assessment to the AI in a structured, evidence-backed form; the AI returns a structured assessment that PMCP incorporates into the governed process.
 
-Continue by defining the remaining semantic and security validation layers for GitHub Actions: trigger semantics, effective permissions, expressions and conditional execution, secrets and credentials (including `GITHUB_TOKEN`), actions and reusable workflow resolution, and behavior PMCP cannot statically establish. The final validation must aggregate all applicable layers under A-030; structural parsing alone must never be presented as complete workflow validation or sufficient authorization. Then reconcile evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
+The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. Continue by defining how this cooperative assessment model applies to the remaining GitHub Actions workflow-validation layers, beginning with trigger semantics. Each layer should mechanically establish what it can, and hand only genuinely unresolved matters to the AI. The overall process must not be treated as complete while required AI assessments remain outstanding. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -897,3 +897,34 @@ No implementation changes are authorized by this decision.
 - The handoff now points to trigger semantics, effective permissions, expressions, credentials, action/reusable-workflow resolution, and remaining static-analysis limits.
 - No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the trigger semantics and allowlist for governed verification workflows, including how GitHub Actions event forms and event filters are interpreted. No implementation changes without explicit approval.
+
+
+### A-032 | Mechanical governance with AI completion — foundational North Star
+
+**Status: Approved by the user on 2026-11-26.**
+
+PMCP is a governance system whose governing processes are deliberately shared between PMCP and its AI consumer. This is a foundational principle of the entire MCP, not a validation-specific design detail.
+
+- PMCP must perform mechanically every part of a governing process that it can reliably determine and enforce.
+- PMCP must not offload deterministic or machine-checkable work to the AI merely because the AI could perform it.
+- Where PMCP reaches the limit of what it can reliably establish—because the remaining matter requires contextual interpretation, judgement, or reasoning—it must identify exactly what remains and present the AI with the relevant subject/revision, evidence, context, constraints, and a precise assessment task.
+- The AI is a participant in completing the governed process, not an external reviewer and not a replacement for PMCP's mechanical responsibilities.
+- The AI returns its assessment in a structured form. PMCP validates and associates that response with the original finding and exact subject/revision, preserves its provenance as an AI-provided assessment, incorporates it into the overall assessment, and determines the next governed step.
+- An unresolved finding means PMCP cannot reliably establish the answer and is handing it off; it is neither a pass nor automatically a violation. Confirmed violations remain violations.
+- A governance process is not complete while required unresolved assessments remain outstanding. Assessment completion, successful validation execution, and authorization remain distinct.
+
+This principle must be part of the Product North Star in both `architecture.md` and `requirements.md`, and must guide the design of every PMCP governance capability—not only workflow validation.
+
+Rationale: PMCP exists to govern work, not merely to provide tools or report machine-check results. It must take as much responsibility as it reliably can, reduce the reasoning and context burden on the AI, and deliberately structure the remainder so the AI can complete the process without guessing or reconstructing missing context.
+
+No implementation changes are authorized by this decision.
+
+
+### Session 59 — Foundational mechanical-governance/AI-completion model approved
+
+- User clarified that PMCP's purpose is broader than automated validation: every governance process must be performed mechanically by PMCP to the fullest extent it can reliably manage, with the remaining contextual/judgement-based work deliberately presented to the AI so the process can be completed.
+- User confirmed that the AI's assessment must return to PMCP in structured form for incorporation into the governed process.
+- A-032 records this as a foundational North Star applying across the entire MCP.
+- The same principle was added to the Product North Star in `architecture.md` and `requirements.md`; REQ-113–REQ-115 define mechanical responsibility, structured AI assessment return/provenance, and completion semantics.
+- No implementation code or tests were changed/run.
+- **Resume at:** continue the GitHub Actions workflow-validation design, starting with trigger semantics, applying A-032 as the governing principle: mechanically determine what PMCP can and explicitly hand off only what it cannot reliably assess.
