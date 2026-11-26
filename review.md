@@ -750,3 +750,29 @@ Rationale: validating only YAML syntax would accept workflows whose effective tr
 - The cleanup workflow's invocation and permission model remain open and must be designed separately; the exception does not grant it broad permissions by implication.
 - This tracker update records the approved direction before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the precise supported GitHub Actions YAML subset and effective-configuration inspection rules, including expression handling, secret/credential detection, the platform-provided token boundary, and the separately scoped invocation/permission contract for the history-cleanup reusable workflow.
+
+
+### A-028 | Git workflow-history cleanup invocation structure
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Git workflow-history cleanup is initiated through a dedicated, explicitly dispatched caller workflow.
+- The caller invokes a dedicated reusable cleanup workflow through `workflow_call`.
+- The cleanup workflow receives only the narrowly defined inputs required for the cleanup operation; its interface must not accept arbitrary commands, arbitrary workflow references, or unrestricted repository targets.
+- The reusable cleanup workflow is an operational maintenance capability, not a governed verification workflow and not a source of verification evidence. Governed verification workflows must not call it.
+- Any write permission required for history cleanup is confined to this explicitly dispatched cleanup execution path. It must not be granted to governed verification workflows.
+- The reusable workflow does not independently acquire or elevate permissions: the caller's effective permissions and credential boundary govern the called workflow. The caller must grant only the minimum write capability required for the approved cleanup operation; the reusable workflow must not expose or forward that capability beyond the cleanup steps that require it.
+- The caller and reusable workflow must be revision-bound and inspectable. A local reusable workflow reference is bound to the caller's commit; any external reusable workflow or action must be pinned to a full immutable commit SHA.
+- The cleanup operation's exact authorization, target/ref constraints, permissions, post-operation integrity checks, and audit evidence remain to be specified before implementation.
+- No implementation changes are authorized by this decision.
+
+Rationale: separating an explicitly dispatched caller from the reusable cleanup implementation gives the maintenance operation a clear invocation boundary while allowing the cleanup logic to be reused. Restricting the caller's authority and the reusable workflow's inputs prevents this operational exception from weakening the read-only verification boundary.
+
+### Session 55 — History-cleanup reusable workflow structure approved
+
+- User approved a dedicated `workflow_dispatch` caller workflow invoking a dedicated `workflow_call` reusable cleanup workflow.
+- The reusable workflow receives only narrowly defined inputs. It is operational maintenance, cannot be used by governed verification workflows, and cannot produce verification evidence.
+- Any write authority is confined to the cleanup invocation path; the called workflow cannot elevate the caller's permissions. The exact minimum permissions and cleanup authorization remain open.
+- Local reusable workflow references are bound to the caller's commit; external references/actions must be pinned to full immutable commit SHAs.
+- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the exact workflow configuration subset PMCP supports and validates, beginning with trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials.
