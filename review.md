@@ -263,3 +263,27 @@ No implementation changes are authorized by this decision.
 - Record that full-state validation remains diagnostic rather than a universal operation gate.
 - No implementation files changed.
 - **Resume at:** construct and verify the operation-dependency matrix from all registered operations, including exact state fields, repository inputs, historical reads, and mutation effects. Reconcile the matrix with requirements and architecture docs before proposing implementation changes.
+### A-010 | Normative operation contract
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Every registered governance action must have an explicit operation contract.
+- Each contract specifies required parsed state inputs; state records/fields read; semantic preconditions and invariants; conditional dependencies and their activation conditions; external inputs (repository documents, Git history, GitHub data); exact state records/fields it may mutate; and post-mutation invariants.
+- Dependencies must be minimal and explicit. Unrelated governance records must not be required to be semantically valid.
+- Conditional behavior must be represented explicitly; do not make every possible dependency mandatory for every invocation.
+- External inputs remain distinct from canonical governance state. Git/GitHub and repository mechanics are not responsibilities of the governance domain model.
+- All mutation effects must be declared, including journals, checkpoint metadata, timestamps, revisions, and other secondary effects.
+- Historical comparisons are specified only where a governance rule requires historical context. No automatic history scan or universal history depth.
+- The coordinator must enforce each operation's contract: ensure required inputs are available and parsed, invoke operation-specific preconditions, and verify declared postconditions. It must not reinstate a global full-state validation or usability gate.
+- The operation-dependency matrix is to be formalized and verified as the design specification before coordinator redesign or implementation.
+
+Rationale: a normative contract makes operation dependencies, governance obligations, external facts, mutation effects, and historical requirements explicit and testable. It replaces implicit global assumptions with reviewable per-operation behavior.
+
+No implementation changes are authorized by this decision.
+
+### Session 36 — Normative operation contract decision
+
+- User approved A-010 as written.
+- The first-pass operation-dependency matrix is accepted as the basis for detailed contracts, subject to refinement against actual registered actions and call paths.
+- No implementation files changed.
+- **Resume at:** formalize and verify the detailed operation contracts for every registered action, including conditional branches, exact fields, external inputs, mutation side effects, preconditions, postconditions, and historical requirements. Then reconcile `requirements.md` and `architecture.md` with A-007 through A-010 before proposing coordinator redesign.
