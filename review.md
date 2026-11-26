@@ -1020,3 +1020,12 @@ No implementation changes are authorized by this decision.
 - Do not add a separate workflow identity or tier field to the evidence payload if they are deterministically established from the canonical publisher identity/commit message and governed tool mapping. The Git commit is the durable identity source, not a surviving Actions run record.
 - This corrects the prior proposal to store workflow identity and tier redundantly in the evidence payload. GitHub Actions provenance references must not be the only durable source for publisher identity.
 - **Resume at:** Continue field review with minimal fields, first checking existing North Star and canonical Git publication metadata before proposing any payload field.
+
+
+## Session 78 — Inspected existing test workflows and report outputs
+
+- Static inspection of the repository tree found only one current GitHub Actions workflow, `.github/workflows/ci.yml`; no separate `verify-fast`, `verify-integration`, or `verify-acceptance` workflows currently exist in the tree.
+- The current CI workflow runs `gofmt` check, `go vet ./...`, and `go test -race ./...`. It does not currently request structured test output, create report files, or upload test-report artifacts.
+- The project is Go 1.24. Go's test runner can emit a machine-readable event stream with its `-json` option, but the current workflow does not use it. Existing test output is therefore console/log output only (including `go vet` diagnostics and ordinary test output); no retained report format is currently configured.
+- No test execution was performed as part of this inspection; this is static workflow inspection only.
+- **Resume at:** Discuss what actual reports/evidence are appropriate to collect from Go test and go vet, and whether their native outputs are sufficient before designing PMCP payload fields. No report-schema decision or implementation is approved by this finding.
