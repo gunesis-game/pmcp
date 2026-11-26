@@ -988,3 +988,20 @@ No implementation changes are authorized by this decision.
 - Correct terminology is **Git workflow history cleanup** to distinguish GitHub Actions run-record cleanup from Git commit history.
 - A-047 approved the cleanup operation as independent and mechanical, with no direct PMCP state or governance implications.
 - **Resume at:** design the evidence payload format/layout and the self-contained provenance needed so accepted evidence remains auditable even after workflow run records are removed; then reconcile A-039–A-041 and update architecture/requirements as appropriate.
+
+
+## A-048 — Evidence payload identity (partial decision)
+
+**Status:** Partially approved; remaining payload contract open  
+**Date:** 2026-11-26
+
+- Do not introduce a separate verification ID. The architecture already has sufficient existing identity sources; an additional identifier is redundant absent a demonstrated need.
+- Git commits are already content-addressed. PMCP must use Git's native storage/integrity mechanics rather than introducing a custom content-addressing scheme or hash-named payload files without a requirement.
+- Evidence payload format, layout, fields, size limits, and boundaries remain undecided. This partial approval does not approve the remainder of the A-048 proposal.
+- No implementation changes are authorized.
+
+
+## Session 75 — Rejected redundant verification ID
+
+- User agreed: **no verification ID** should be added to the evidence payload contract.
+- A-048 remains open; next resume by examining proposed report fields and identity relationships, avoiding redundant identifiers or mechanics already supplied by Git/GitHub.
