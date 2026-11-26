@@ -15,7 +15,7 @@
 ### Review snapshot
 - Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), its changes are merged into `main`.
 - Tracker location: `review.md` on `main`.
-- Findings: R-001 (policy changes during CI wait) downgraded to unresolved semantics; R-002 (tier overwrite for same cycle+SHA) behavior is explicitly consistent with REQ-073's SHA-keyed evidence entry and architecture's one-entry-per-SHA layout, so no defect confirmed; R-003 full-tier pass requirement is intentional; R-004 replay on reused request ID is explicitly idempotent per REQ-015, but mismatched-payload handling remains a robustness question; R-005 approval metadata validator gap (P2 candidate), R-006–R-008 reconciliation validation gaps remain potential findings.
+- Findings: R-001 (policy changes during CI wait) is an unconfirmed semantics question; R-002 tier overwrite for same cycle+SHA is consistent with REQ-073/architecture's one-entry-per-SHA model, no defect confirmed; R-003 full-tier pass requirement is intentional; R-004 mismatched-payload replay remains a robustness question under REQ-015; R-005 decision metadata validator omission remains a P2 candidate; R-006–R-008 reconciliation validation gaps remain candidates; R-009 scalar-reference whitespace validation inconsistency is a low-severity candidate.
 - Source/tests have been read, but tests have **not** been run. Findings are review observations, not yet runtime-verified.
 - No implementation changes have been made during this review.
 
@@ -293,3 +293,15 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Plan mutation paths are transactional at the rule/snapshot level (rejected calls do not publish); exact/unique-prefix matching prevents ambiguous item mutation. A few negative cases remain in the test matrix; this source review does not establish runtime behavior because tests were not run.
 - No code changes; tests not run.
 - Next: reconcile the findings list/status summary with updated dispositions, then map the remaining R-005–R-009 validator and plan edge cases to adversarial tests and identify the highest-value next review target.
+
+
+### Session 14 — Validator and plan-mutation edge cases
+- Verified main HEAD is still `1e82727a42475995ff780d8342c43ccc08558460`; tracker blob SHA is current before this update. No intervening source changes found.
+- Re-read `snapshot_validator.go`, `decision.go`, `plan_record.go`, `plan_rules.go`, and the relevant requirements.
+- Confirmed validator's `checkRecords` only checks plan task/criterion text nonblank and reconciliation classification; reconciliation metadata, item/evidence completeness, reviewed list, and references remain unchecked as described in R-006–R-009.
+- Decision state schema has fields `specification`, `verified_revision`, `recorded_at`, `approval`, and `proposed_at`; validator requires only `verified_revision` for Recorded. The normal `decision.record` path fills the missing metadata, but Proposed/Recorded cross-field constraints still are not enforced by validator. R-005 remains a validation-gap candidate pending a precise state-invariant specification.
+- Plan mutation source inspection: global argument parsing enforces non-empty trimmed scalar/list strings for ordinary string arguments; `meet_criteria` trims criterion/evidence and rejects blanks; removals require reason; ambiguous matching rejects; duplicate additions are rejected. Empty list replacement is allowed and intentional. No new plan mutation defect confirmed.
+- R-009 remains a low-severity candidate: scalar `references: "   "` bypasses trim validation, unlike list form `references: ["   "]`; validator also does not inspect references. The argument is nested in the reconciliation item object, so its treatment under REQ-017 requires interpretation; no runtime tests performed.
+- R-001/R-002/R-004 dispositions reconciled in the Findings section and status summary to reflect Sessions 10–11 conclusions.
+- No code changes; no tests executed.
+- Next: consolidate R-005–R-009 into an invariant/test matrix; inspect decision/reconciliation validation requirements and surrounding state lifecycle to decide which candidates can be confirmed against explicit contract language. Continue review of audit/journal integrity and store failure paths.
