@@ -55,7 +55,7 @@ The assessment should establish and continually update:
 
 The assessment remains ongoing and is not yet exhaustive. The current active track is the detailed operation-contract review, following the approved operation-dependency matrix and the actual registered actions/call paths.
 
-**Next:** review the remaining non-cycle operation contracts in registered order, beginning with `audit.check` after approval of A-014 (`evidence.collect`). Verify each contract against implementation and record each approval here before proceeding. After the operation contracts are complete, reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before proposing coordinator redesign. Do not implement without explicit approval.
+**Next:** review the final remaining non-cycle operation contract, `status.report`, in registered order. After all operation contracts are complete, perform an explicit architecture reconciliation of `requirements.md`, `architecture.md`, and every approved contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model in A-008. This reconciliation is mandatory before coordinator redesign: no operation contract, state dependency, mutation, journal effect, evidence identity, audit watermark, or validation rule may silently retain the superseded multi-file `.pmcp/*.json` persistence model. Treat each Git commit's `state.json` at `HEAD` as the canonical current state; use relevant ancestor commits to understand state transitions where required. Only after that reconciliation may coordinator redesign be proposed. Do not implement without explicit approval.
 
 ## Current assessment matrix
 
@@ -384,3 +384,33 @@ No implementation changes are authorized by this decision.
 - Static inspection confirmed current gaps: the evidence model has no policy revision/fingerprint; evidence is keyed by SHA alone; cycle resolution occurs after CI collection; optional in-progress workflows can prolong polling; and coordinator replay occurs after evidence preparation.
 - No implementation files changed and no tests were executed. This update records the approved contract only.
 - **Resume at:** continue with the next remaining non-cycle operation contract, `audit.check`, and verify it against registered actions and implementation call paths. After each approval, update and verify this file on `main` before proceeding. Reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before coordinator redesign.
+
+
+### A-015 | Complete contract for `audit.check`
+
+**Status: Approved by the user on 2026-11-26.**
+
+- `audit.check` is a read-only query with no arguments; supplied arguments are rejected.
+- It reads the cycle registry and audit watermark and selects every completed cycle whose execution order is strictly greater than the watermark.
+- The audit window is ordered by execution order, ascending.
+- It returns the watermark, number of cycles in the window, whether an audit is due, sequence numbers, and one review entry per cycle.
+- Standard-cycle review entries identify the plan, checkpoint, and evidence record locations. Micro-cycle entries include their outcome and verification evidence.
+- The audit is due when at least three completed cycles are beyond the watermark. The threshold is retained provisionally from REQ-080 and remains subject to requirements reconciliation.
+- The operation does not require an in-progress cycle, does not mutate governance state, does not append a journal entry, does not publish a Git commit, and does not advance the watermark.
+- Its semantic validation is operation-specific: only the cycle registry and audit data necessary to calculate and represent the audit window must be valid. Unrelated semantic defects must not block the read.
+- Invalid or insufficient prerequisite data must produce a clear rejection/error, never a panic or misleading audit result.
+- The response is an index of material to review; it does not assert that documentation has been reviewed or reconciled. Review occurs separately, followed by `audit.advance`.
+
+Rationale: audit discovery and audit completion are separate actions. A read-only query must reliably identify the exact outstanding window without modifying it or being blocked by unrelated governance defects.
+
+No implementation changes are authorized by this decision.
+
+### Session 41 — Audit check contract approval and canonical-state alignment reminder
+
+- User approved A-015, the complete `audit.check` contract.
+- User reiterated that all work reviewed and approved so far must align with the Git-commit history and canonical `.pmcp/state.json` architecture established by A-008.
+- This is a mandatory cross-cutting reconciliation constraint, not a new persistence exception: the approved operation contracts must be reconciled so their state inputs, records, mutation effects, audit/evidence identities, journal/checkpoint effects, and historical comparisons are represented through one canonical state document at each Git commit. Git history is the only durable state-version history; no parallel PMCP history/version store and no retained multi-file `.pmcp/*.json` state model.
+- The architecture reconciliation must explicitly revisit every approved contract (A-007 onward), including A-011 cycle side effects, A-012 revision-bound reconciliation, A-013/A-014 policy-bound evidence, and A-015 audit-window calculation. Where a contract describes logical records or atomic effects, map them into the single state document and a single Git commit rather than interpreting them as separate persisted files.
+- The current `requirements.md` and `architecture.md` still describe the multi-file state layout and therefore require deliberate reconciliation; do not treat the current documentation as already aligned.
+- No implementation files changed and no tests were executed. This commit records A-015 and the architecture-alignment constraint only.
+- **Resume at:** review the final remaining non-cycle operation contract, `status.report`, against registered actions and call paths. Then reconcile requirements, architecture, and all approved operation contracts with A-008's canonical `.pmcp/state.json` and Git-history model before proposing coordinator redesign. Update and verify `review.md` after every subsequent approval. No implementation without explicit approval.
