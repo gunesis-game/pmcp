@@ -9,7 +9,7 @@
 2. Inspect the latest commit on `main`.
 3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
 4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
-5. Next task: consolidate R-005–R-009 against precise invariants and map them to validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage.
+5. Next task: continue with store-integrity and production-adapter boundaries, then build a prioritized adversarial test plan across validator, evidence, and publication paths.
 6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
 
 ### Review snapshot
@@ -354,3 +354,22 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Production `RepoStore` adapter remains absent from the repository tree, so real GitHub atomicity/branch-ref behavior cannot be verified. This is a scope/verification limitation, not a defect assigned to the in-repository interface or MemoryStore.
 - No implementation changes. No tests executed.
 - **Next:** consolidate R-005–R-009 against precise state invariants and map them to direct validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage. Continue with review only.
+
+
+### Session 20 — R-005–R-009 invariant consolidation
+
+- Re-verified latest `main` commit `64e54a6212e79a7aba1b783d02d9950aed7da1c2` (tracker-only from Session 19); source files reviewed are current.
+- Consolidated validator observations against the stated requirements and normal action paths. **No candidate was upgraded to a confirmed correctness defect**, because the requirements are Draft and several invariants are not explicit:
+  - **R-005 (decision ledger):** normal `decision.record` writes approval, recorded_at, specification, and verified_revision. Validator only requires a valid verified_revision for Recorded. The Proposed/Recorded cross-field rules need a schema invariant before strict validation is justified.
+  - **R-006 (reviewed sources):** empty reviewed list accepted; REQ-041 and operating guidance describe reviewed sources, but explicit minimum/blank normalization is not stated strongly enough to settle every edge. Keep as P2 candidate pending requirement confirmation.
+  - **R-007 (item/evidence):** action rejects blank item/evidence, but validator only checks classification. This is a concrete validation asymmetry; malformed/out-of-band state can pass. P2 candidate.
+  - **R-008 (reconciliation atomicity):** normal action writes revision, reviewed, items and timestamp together; validator does not enforce pristine-vs-recorded combinations and `IsRecorded` uses timestamp only. Strong candidate for explicit cross-field validation, P2.
+  - **R-009 (references):** scalar whitespace reference accepted while list whitespace entries are rejected. Low-impact input normalization inconsistency; P3 candidate.
+- Direct validator test coverage remains absent (`internal/validate/*_test.go` was not found in the prior tree review). Action-path happy tests do not substitute for constructing malformed snapshots and testing `Validate`.
+- Proposed invariant/test matrix (tests only; no code changes):
+  1. Decision: Proposed state must be pristine for recorded-only metadata; Recorded state requires approval, timestamp, specification, and valid verified revision—confirm exact schema first.
+  2. Reconciliation: either pristine/unrecorded (no metadata/items) or recorded (revision/time, nonblank reviewed sources, valid items); zero items remain valid when recorded.
+  3. Item: nonblank item/evidence and valid classification; references normalized/validated consistently for scalar/list.
+  4. Test each invariant directly at validator boundary, plus normal action-path tests and state round-trip tests.
+- No new finding beyond the candidates already tracked. No tests run and no implementation changes.
+- **Next:** continue reviewing store-integrity and production-adapter boundaries; then prioritize a focused adversarial/fault-injection test plan. Continue review only.
