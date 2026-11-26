@@ -437,3 +437,13 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - **R-011 candidate — micro metadata can be whitespace-only:** `checkMicro` checks that `eligibility_reason` and `acceptance_criteria` pointers are non-nil, but does not trim or reject empty/whitespace values. DR-05 requires these fields to be set, and REQ-017 says string arguments must be non-empty after trimming. An externally malformed registry can therefore satisfy the pointer check with blank strings. Since requirements are Draft and REQ-017's direct applicability to persisted-state validation may need interpretation, this is a candidate, not a confirmed defect.
 - Suggested tests: both fields nil; each field empty and whitespace-only; valid trimmed content; completed micro cycle with empty verification evidence/outcome (those are only presence-checked too); ensure whitespace in these fields fails if the requirement is adopted as a state invariant.
 - No tests executed; no code changed. Tracker committed at this session boundary.
+
+
+### Session 26 — Checkpoint/handoff cross-record validation
+
+- Verified `main` HEAD at `e63a8b8c0417d00dd412be7f8f029e32e1296c0f` (Session 25 tracker commit); no source changes since then.
+- Re-read policy validation against REQ-017, REQ-062, REQ-071/DR-08. No new confirmed defect: validation matches the stated key/count/list requirements, while additional normalization constraints (blank workflow/component names, duplicates) are not explicit enough to elevate.
+- Reviewed checkpoint/handoff state schema and requirements REQ-018 and REQ-050. **R-012 candidate — checkpoint/handoff records are parsed but not semantically validated:** validator does not check that handoff `updated_at`, `branch`, and `revision` are populated/valid, that event changes update `checkpoint_at`, or that log entries conform to required event/status/phase/time fields. Normal action paths stamp these fields, but malformed/out-of-band checkpoint state may pass snapshot validation. This is a validator gap candidate under Draft requirements; no defect confirmed.
+- Suggested direct validator tests: malformed/null/invalid timestamps; missing branch/revision; event log entries with missing/invalid fields; event action with stale/missing checkpoint_at; and valid minimal/empty initial checkpoint. Confirm which invariants must apply to untouched new cycles and non-event changes before enforcing.
+- No code changes and no tests executed.
+- **Next:** continue validator cross-record checks (audit record chronology/boundaries and checkpoint-to-cycle references), avoiding duplication of R-005–R-011.
