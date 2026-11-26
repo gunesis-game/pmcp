@@ -1071,3 +1071,27 @@ Implementation scope: this decision establishes the assessment boundary; it does
 - Approved A-037 defining bounded assurance scope for GitHub Actions governance.
 - The review remains active; GitHub Actions assessment continues within the agreed boundary rather than expanding into a complete interpreter or arbitrary implementation analyser.
 - Next: return to the remaining governance-level questions for the three verification workflows and the separate Git history cleanup workflow, applying this boundary.
+
+## A-038 — Verification evidence and gate authority
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+- A workflow result is evidence, not a governance decision. A successful GitHub Actions conclusion establishes only that the particular workflow reported successful execution on the assessed revision; it does not establish repository correctness, compliance, or authorisation to proceed.
+- A tier gate is an aggregate governance assessment. PMCP determines whether all workflows required by the tier produced valid evidence, whether that evidence is bound to the intended commit, and whether applicable governance assessments have completed.
+- A tier cannot pass with incomplete or invalid required evidence. Missing, failed, cancelled, inaccessible, mismatched-revision, or otherwise invalid evidence prevents a successful gate. Where PMCP cannot establish the significance of a result, the outcome remains unresolved rather than passing.
+- Higher tiers inherit lower-tier requirements: integration includes fast; full includes fast and integration.
+- Gate completion is not authorisation. A successful verification gate does not itself approve a decision, authorise a change, or advance a governed process unless the governing process separately permits that transition.
+
+These are distinct concepts and must remain distinct in PMCP: (1) workflow execution outcome, (2) governance assessment and tier-gate outcome, and (3) authorisation to proceed. GitHub Actions status is never itself the authority over PMCP's governance process.
+
+Implementation scope: this decision establishes evidence and gate authority semantics. It does not expand the agreed GitHub Actions assurance boundary.
+
+## Session 65 — Verification evidence and gate authority approved
+
+- User approved A-038 defining workflow results as evidence, not governance decisions.
+- Tier gates are aggregate governance assessments; incomplete, invalid, failed, cancelled, inaccessible, or revision-mismatched required evidence cannot pass. Unestablished significance remains unresolved.
+- Higher tiers inherit lower-tier requirements: integration includes fast; full includes fast and integration.
+- Gate completion remains distinct from authorisation and process advancement.
+- No implementation changes or tests.
+- **Resume at:** define the shared evidence contract PMCP requires from each of the three verification workflows, including identity, scope, target revision, execution provenance, result, and retained evidence; keep workflow-specific test content outside the shared contract.
