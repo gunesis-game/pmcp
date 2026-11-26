@@ -1,568 +1,97 @@
-## SESSION HANDOFF — START HERE
+# PMCP Repository Review — Consolidated
 
 **Last updated:** 2026-11-26  
-**Branch:** `main` only. All review work happens on `main`; do not create/use other branches.  
-**Persistent tracker:** `review.md`; read it before continuing.
+**Repository:** `gunesis-game/pmcp`  
+**Branch:** `main` only  
+**Review type:** Static source review; not exhaustive runtime verification.
 
-### Resume instructions
-1. Fetch this tracker from `main` and inspect latest `main` HEAD before reviewing.
-2. Review only. Do not implement fixes or remediation commits without explicit user approval.
-3. Findings are confirmed only when code and requirements establish a defect. Draft/under-review scope mismatches are tracked as completeness risks.
-4. No tests have been executed during this review so far; code conclusions are static-review observations.
-5. **Next task:** if the user continues, review remaining validator/requirements test coverage or investigate a specific candidate finding. Avoid repeating the broad completeness reconciliation unless project scope is formally clarified.
+## Handoff
 
-### Current review snapshot
-- **Confirmed implementation defects:** none established in the current static review.
-- **Potential validator candidates R-005–R-009:** decision/reconciliation semantic invariants and normalization inconsistencies; requirements are draft and precise invariants need confirmation.
-- **Completeness/delivery risk:** governance core and coordinator exist, but the actual runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, and production GitHub adapters are absent from the source tree. This is not elevated to a confirmed defect because requirements/architecture are Draft/Under review and scope is unconfirmed.
-- **Prior P0 documentation status/authority issue:** remediation PR #1 is merged; architecture now accurately states Under review, requirements Draft, implementation substantial, verification not assessed.
-- No implementation changes; no tests executed.
+- Treat this document as the single review tracker. Chronological session notes have been removed because their substance is consolidated below.
+- Do not implement remediation without explicit approval.
+- No tests have been executed during this review.
+- Confirmed implementation defects: **none established**.
+- Candidate gaps are contract-dependent because requirements remain Draft and architecture Under review.
+- Next logical task: resolve intended delivery scope (complete runnable PMCP product vs governance core). If full product is in scope, review delivery gaps first; otherwise confirm invariants and create a test-first backlog.
 
----
+## Review discipline
 
-## Cohesive review roll-up (Sessions 1–31)
+- Separate confirmed defects from potential gaps and design trade-offs.
+- Static inspection is not runtime proof; never claim tests ran unless they actually did.
+- No implementation changes without approval.
+- Avoid repeating review already captured here; update this roll-up when new evidence changes a disposition.
 
-This matrix supersedes the chronological session notes for day-to-day review navigation; the session log remains below as audit trail.
+## Consolidated review matrix
 
-### Review areas and consolidated disposition
+### Review areas and disposition
 
-| Review area | Sessions | Coverage consolidated | Result / disposition |
+| Review area | Sessions consolidated | Coverage | Result / disposition |
 |---|---:|---|---|
-| Documentation authority & project status | 1, 4, 23 | README, architecture/requirements status, decision authority, remediation PR | Initial P0 status/authority issue remediated in merged PR #1. Requirements remain Draft and architecture Under review. |
-| Coordinator/request lifecycle & replay | 2, 8, 11, 16, 19, 22 | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 request-ID payload mismatch is a robustness question under REQ-015. |
-| CI/evidence selection, polling & gates | 1, 8, 10, 11, 17–19 | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure handling, policy timing | R-001 downgraded to policy-snapshot semantics question. R-002 tier overwrite aligns with specified per-SHA model. R-003 full-tier pass requirement is observed behavior, not a finding. |
-| State/snapshot encoding & integrity | 3, 7, 9, 14, 21 | Typed state, clone/re-encode, canonical encoding, digest scope, integrity acceptance | No confirmed defect. Digest covers sorted .pmcp/*.json state files; project documents/policy excluded by design. |
-| Decision ledger & approvals | 4, 7, 14, 20, 28 | Propose/record/list, attested and issue-comment approvals, decision fields, policy approval refs, cross-record refs | R-005 remains validator-invariant candidate; cross-record handoff links are not required explicitly by current draft. |
-| Plan updates & reconciliation | 5–8, 12, 14, 20, 29–30 | Tasks/criteria, matching, add/remove, evidence, no-op, reviewed sources, item/reference normalization, persisted reconciliation metadata | R-006–R-009 and R-013 remain candidates; no explicit reset/removal feature is required by current draft. |
+| Documentation authority & project status | 1, 4, 23 | README, architecture/requirements status, decision authority, remediation PR | Initial P0 documentation/status issue remediated in merged PR #1. Requirements remain Draft; architecture Under review. |
+| Coordinator/request lifecycle & replay | 2, 8, 11, 16, 19, 22 | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 is a robustness question under REQ-015. |
+| CI/evidence selection, polling & gates | 1, 8, 10, 11, 17–19 | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure, policy timing | R-001 is a policy-snapshot semantics question. R-002 tier overwrite aligns with per-SHA model. R-003 is observed behavior, not a finding. |
+| State/snapshot encoding & integrity | 3, 7, 9, 14, 21 | Typed state, clone/re-encode, canonical encoding, digest scope, integrity acceptance | No confirmed defect. Digest covers sorted `.pmcp/*.json` state files; project docs/policy excluded by design. |
+| Decision ledger & approvals | 4, 7, 14, 20, 28 | Propose/record/list, approval modes, decision fields, policy approval refs, cross-record refs | R-005 remains an invariant candidate; cross-record handoff links are not explicitly required by the Draft contract. |
+| Plan updates & reconciliation | 5–8, 12, 14, 20, 29–30 | Task/criterion mutations, matching, evidence, no-op, reviewed sources, item/reference normalization, persisted reconciliation metadata | R-006–R-009 and R-013 remain candidates; no criterion reset/removal requirement identified. |
 | Cycle lifecycle, order, preemption & completion | 5–6, 13–14, 24–25, 29 | Start/pause/block/unblock/cancel/reorder, micro-cycle promotion, default order, phase gates, timestamps, micro metadata | No confirmed lifecycle defect. R-010 timestamp presence and R-011 micro-field nonblankness are validator candidates. |
-| Checkpoint, handoff, journal & audit | 4, 9, 15, 26–28 | Handoff/checkpoint fields and update semantics, event log, journal, audit window/watermark, audit advancement | R-012 checkpoint/handoff semantic validation candidate. Audit watermark checks meet explicit REQ-101; historical audit semantic validation not specified, no candidate elevated. |
+| Checkpoint, handoff, journal & audit | 4, 9, 15, 26–28 | Handoff/checkpoint fields, event log, journal, audit window/watermark, audit advancement | R-012 is a checkpoint/handoff semantic-validation candidate. Audit watermark checks meet explicit REQ-101; historical audit validation is not specified. |
 | Repository-store/publication boundary | 3, 8–9, 18–21 | Store interface/fake, expected-head checks, concurrency retry, commit/read-back/ancestry, atomic publication and failure paths | MemoryStore paths reviewed; production adapter absent, so real GitHub atomicity/no-force behavior unverified. No defect confirmed. |
-| MCP product/bootstrap and delivery scope | 16, 21–23 | Architecture-to-tree reconciliation, tool/resource/prompt exposure, configuration, server transport, GitHub MCP passthrough/adapters | Significant completeness risk if in current scope; not a confirmed defect while scope/requirements remain Draft/Under review. |
-| Test coverage and adversarial cases | 7–8, 9, 14–21, 24–30 | Existing test inventory reviewed and gaps mapped across validators, plan/reconcile, evidence, replay, store, bootstrap | Tests were source-inspected only; none executed. Direct validator and plan/reconciliation test files not observed in tree inventory. |
+| MCP product/bootstrap & delivery scope | 16, 21–23 | Architecture-to-tree reconciliation, tool/resource/prompt exposure, configuration, transport, GitHub MCP passthrough/adapters | Material completeness risk if in current scope; not a confirmed defect while scope is unapproved. |
+| Test coverage & adversarial cases | 7–8, 9, 14–21, 24–30 | Test inventory and gaps across validators, plan/reconcile, evidence, replay, store, bootstrap | Tests were source-inspected only. Dedicated validator and plan/reconciliation test files were not observed in the inventory. |
 
 ### Unified candidate register
 
-| ID | Area | Candidate invariant / concern | Priority | Confidence / disposition |
+| ID | Area | Candidate / concern | Priority | Disposition |
 |---|---|---|---|---|
-| R-008 | Reconciliation validation | Reconciliation metadata should be either pristine/unrecorded or fully recorded; partial metadata currently passes validation | P2 | Strong validator-gap candidate; confirm invariant |
-| R-005 | Decision validation | Recorded decisions should have consistent approval, recorded-at, specification and verified-revision metadata | P2 | Validator omission confirmed; invariant authority draft |
-| R-007 | Reconciliation items | Stored item and evidence text should be nonblank/trim-valid, matching action path | P2 | Validator omission confirmed; contract candidate |
-| R-006 | Reviewed-source list | Reconciliation should require a nonempty, nonblank reviewed-source list | P2 | Action accepts empty list; served procedure/REQ semantics suggest completeness |
-| R-010 | Cycle validation | Require created_at presence and lifecycle-appropriate timestamp sequence | P2 candidate | Null created_at may pass; define cancelled/never-started cases |
-| R-012 | Checkpoint/handoff | Validate handoff fields, journal entries, timestamp/event consistency | P2 candidate | Normal action path populates; persisted-state rules need definition |
-| R-011 | Micro-cycle validation | Eligibility reason and acceptance criteria should be trim-aware nonblank, not merely non-null | P2 candidate | Requirements applicability to state validation needs confirmation |
-| R-013 | Plan criterion validation | Done/evidence consistency: done criterion should have evidence; evidence on unmet criterion semantics should be defined | P2 candidate | Normal mutation enforces evidence; REQ-101 is less explicit |
-| R-009 | Reconciliation references | Scalar whitespace reference accepted unlike whitespace list element | P3 | Normalization inconsistency; verify intended semantics |
-| R-001 | Evidence governance | Policy change during CI wait: evidence-selection policy snapshot vs revalidation | Design question | Not a confirmed defect; downgraded |
-| R-004 | Request idempotency | Same request ID reused with different payload returns prior result | Robustness | Contract currently treats repeated ID as replay; not a defect |
-| R-002 | Evidence storage | Same cycle/SHA evidence replaced when tier changes | Design/storage trade-off | Explicitly consistent with one-record-per-SHA model; no defect |
-| R-003 | Completion gate | Full-tier pass required for completion | Behavior | Confirmed behavior; not a finding |
+| R-008 | Reconciliation validation | Recorded metadata should be either pristine/unrecorded or fully populated; partial metadata currently passes validation | P2 | Strong gap candidate; invariant needs confirmation |
+| R-005 | Decision validation | Recorded decisions should have consistent approval, recorded-at, specification and verified-revision metadata | P2 | Validator omission confirmed; invariant authority Draft |
+| R-007 | Reconciliation items | Stored item and evidence text should be nonblank/trim-valid, consistent with action path | P2 | Validator omission confirmed; contract candidate |
+| R-006 | Reviewed sources | Reconciliation should require nonempty, nonblank reviewed-source list | P2 | Empty list accepted; procedure suggests completeness |
+| R-010 | Cycle validation | Require created_at and lifecycle-appropriate timestamp sequence | P2 candidate | Null created_at may pass; cancelled/never-started semantics need definition |
+| R-012 | Checkpoint/handoff | Validate handoff fields, journal entries, and timestamp/event consistency | P2 candidate | Normal paths populate these; persisted-state invariant needs definition |
+| R-011 | Micro-cycle validation | Eligibility reason and acceptance criteria should be trim-aware nonblank | P2 candidate | Applicability to persisted-state validation needs confirmation |
+| R-013 | Plan criterion validation | Consistency between criterion done-state and evidence | P2 candidate | Normal mutation enforces evidence; REQ-101 less explicit |
+| R-009 | Reconciliation references | Scalar whitespace reference accepted unlike whitespace list element | P3 | Normalization inconsistency; intended semantics to verify |
+| R-001 | Evidence governance | Policy changes during CI wait: snapshot selection vs revalidation | Design question | Not a confirmed defect; downgraded |
+| R-004 | Request idempotency | Same request ID reused with different payload returns prior result | Robustness | Current contract defines repeated-ID replay; not a defect |
+| R-002 | Evidence storage | Same cycle/SHA evidence replaced when tier changes | Design trade-off | Consistent with one-record-per-SHA model |
+| R-003 | Completion gate | Full-tier passing evidence required for completion | Behavior | Confirmed behavior; not a finding |
 
-### Unified test/verification backlog (ordered)
+### Prioritized test and verification backlog
 
-| Priority | Test group | Required coverage |
+| Priority | Test group | Coverage |
 |---|---|---|
-| 1 — scope decision | Product completeness | Decide full runnable MCP product vs governance core; define release/milestone acceptance |
-| 2 — validator invariant tests | Decision/reconciliation/cycle/checkpoint/plan persisted-state validity | Pristine vs recorded reconciliation; partial metadata combinations; decision metadata states; blank item/evidence/reviewed/reference; null timestamps; blank micro fields; criterion evidence combinations; valid minimal states |
-| 3 — plan/reconcile action tests | Action-path validation and atomic mutation | Omitted/empty/whitespace reviewed sources; zero reconciliation items allowed; scalar/list reference normalization; plan add/remove/meet-criteria/task completion; ambiguous matches; no-op rejection |
-| 4 — evidence semantics tests | Policy/evidence race, tier replacement, completion gates | Policy mutation during CI wait; same SHA across tiers (both orders); fast/integration/full pass/fail/pending gate matrix |
-| 5 — idempotency tests | Request replay integrity | Same ID/same payload replay; same ID/different action/args policy; confirm no additional publish |
-| 6 — publication fault injection | Production store contract | Head movement/retry; ref update failure; publish then read-back failure; uncertain retry; multi-file atomic commit; delete vs empty content; ancestry and no-force semantics |
-| 7 — delivery integration tests | Actual MCP/server/adapters | Tool inventory and schema parity; config propagation; lockdown/read-only; startup/transport; malformed request mapping; GitHub MCP passthrough; production GitHub facts/store |
-| 8 — execution verification | CI and runtime | Run relevant Go tests and CI once approved/available; record actual results rather than inferring from source review |
-
-**Global status:** Static review only. No confirmed implementation defect established. No tests executed. No implementation changes approved. Candidates are not remediation tasks until their governing invariants and scope are agreed.
-
----
-
-# PMCP Repository Review — Persistent Tracking
-
-**Review status:** In progress  
-**Repository:** `gunesis-game/pmcp`  
-**Baseline:** `main` (latest tracker commit before Session 15: `025691f28c3234d643681c50ea24153f49b8e260`)  
-**Purpose:** Maintain review findings, confirmed facts, hypotheses, next steps, and remediation decisions across sessions.  
-**Scope:** Architecture/requirements reconciliation, implementation correctness, governance consistency, evidence integrity, idempotency/concurrency, CI, repository-store behavior, and test coverage.
-
-## Review discipline
-- Findings are distinguished as **confirmed**, **potential**, or **needs verification**.
-- Code presence is not equivalent to runtime behavior; tests are not assumed to have run unless execution is recorded.
-- No substantive implementation changes are made without discussing the proposed change and receiving approval.
-- All work happens on `main`; no other branches are created or used.
-- Update this file at each session boundary: current focus, new findings, disposition, next step.
-
-## Status summary
-
-| Area | Status | Notes |
-|---|---|---|
-| Documentation authority/status P0 | Remediated in PR #1 | Merged into `main`; see link below |
-| Coordinator orchestration | Under review | Request lifecycle and change path inspected partially |
-| Evidence collection and gate evaluation | Reviewed; findings recorded below | Evidence selection happens before lock |
-| State snapshot/encoding | Partially reviewed | Typed parsing, clone/re-encode, digest behavior inspected |
-| Cycle lifecycle rules | Reviewed for phase gates and ordering; adversarial tests pending | DR-02/03 gates, preemption, pending reorder, and default order inspected |
-| Decision governance | Reviewed; validation invariant gap recorded | Approval verification path reviewed; state validator appears to omit some semantic invariants |
-| Repository store / publish consistency | Interface and in-memory test store reviewed; production adapter absent from repository tree | Expected-head semantics specified at interface; adapter cannot be verified |
-| CI integration | Partially reviewed | Gate evaluation and evidence collector inspected; execution not performed |
-| Test coverage | Partially reviewed | Existing tests inspected; plan/reconciliation adversarial coverage absent; tests not run |
-
-## Findings
-
-### R-001 — Evidence is not bound to the policy revision used to select workflows
-**Status:** Potential correctness / traceability gap (impact requires semantics confirmation)  
-**Severity:** P1 candidate  
-**Area:** Coordinator / evidence governance
-
-Evidence preparation reads policy and selects workflows before taking the branch lock. It waits for GitHub Actions and then the change path reads the current repository snapshot and records the prepared evidence. Policy may change during the wait, meaning evidence could be recorded into newer governance state although workflow selection was based on older policy.
-
-Evidence is still evaluated against the selected commit SHA; this is not evidence that the CI results themselves are fabricated or wrong. The concern is whether the gate is current-policy compliant.
-
-**Suggested disposition:** Define policy snapshot semantics for evidence collection. Candidate solutions:
-1. capture a policy identity/digest and reject/retry if policy changes before recording; or
-2. re-evaluate current policy against collected runs and collect any newly required workflows before recording.
-
-Do not implement until the semantics and expected UX are agreed.
-
-### R-002 — Evidence records are keyed by cycle and SHA, not by tier
-**Status:** No defect confirmed; explicitly aligned with requirements/model
-**Area:** State / evidence / cycle completion
-
-Evidence is stored as `Evidence[cycleID][SHA]`; collecting another tier for the same SHA replaces the entry. REQ-073 and architecture's one-entry-per-SHA layout describe this model. Completion scans evidence entries for any full-tier pass. This is a design trade-off, not a requirements violation absent a multi-tier retention requirement.
-
-**Disposition:** No remediation recommendation under current requirements.
-
-### R-003 — Full-tier passing evidence is required for cycle completion
-**Status:** Confirmed implementation behavior  
-**Area:** Cycle rules
-
-Completion eligibility checks for recorded evidence where `IsFullPass()` is true (`tier == full` and `gate == pass`). A generic passing gate or fast-tier pass is not sufficient.
-
-**Note:** This is recorded as a behavior, not an objection to the requirement.
+| 1 — Scope/acceptance decision | Product completeness | Decide complete runnable MCP product vs governance core; establish milestone/acceptance criteria |
+| 2 — Validator invariant tests | Persisted decision, reconciliation, cycle, checkpoint and plan state | Pristine vs recorded reconciliation; partial metadata; decision metadata states; blank item/evidence/reviewed/reference; null timestamps; blank micro fields; criterion evidence combinations; valid minimal cases |
+| 3 — Plan/reconcile action tests | Mutations and argument normalization | Omitted/empty/whitespace reviewed list; allow zero reconciliation items; scalar/list references; add/remove/meet criteria/task completion; ambiguous matching; no-op rejection |
+| 4 — Evidence semantics | Policy timing, tier overwrite, completion gates | Policy mutation during CI wait; same SHA across tiers both orders; fast/integration/full pass/fail/pending matrix |
+| 5 — Idempotency | Replay integrity | Same ID/same payload replay; same ID/different payload behavior; ensure no extra publish |
+| 6 — Publication fault injection | Production store | Head movement/retry; ref update failure; publish then read-back failure; uncertain retry; multi-file atomic commit; delete vs empty content; ancestry and no-force behavior |
+| 7 — Delivery integration | Real MCP server/adapters | Tool inventory/schema parity; config propagation; lockdown/read-only; startup/transport; malformed request mapping; GitHub MCP passthrough; production facts/store adapter |
+| 8 — Execution verification | Go tests and CI | Run and record actual test/CI results when approved/available |
 
 ## Confirmed implementation facts (not findings by themselves)
-- Evidence collection is prepared before the branch lock to avoid holding the lock during CI polling.
-- Evidence collection uses a commit SHA and records selected required workflow names.
-- `required_workflows` overrides policy workflow selection.
-- Default tier is `full`; default wait is configured policy wait when present, otherwise 15 minutes.
-- Evidence collector polls runs for the SHA, evaluates latest run per workflow, and attaches failure details for failed workflows.
-- `Snapshot` parses state into typed structures and can encode typed state back into canonical files.
-- `Snapshot.Clone()` encodes and reparses state, yielding a reconstituted snapshot.
-- Cycle completion checks for full-tier passing evidence.
+
+- Evidence preparation occurs before the branch lock to avoid holding the lock during CI polling.
+- Evidence is collected against a commit SHA and stores tier, required workflows, checks, SHA and gate.
+- `required_workflows` overrides policy workflow selection; default tier is full; default wait is policy-configured or 15 minutes.
+- Evidence polling evaluates latest run per workflow and attaches failure details.
+- Snapshot parsing/encoding is typed; clone encodes and reparses; state digest covers sorted `.pmcp/*.json` files only.
+- Cycle completion requires a recorded full-tier passing evidence result.
+- MemoryStore checks expected-head equality under its mutex and copies written bytes; it is test infrastructure, not production-adapter verification.
+- Decision approval modes include attested and issue-comment validation; issue-comment checks approver membership, excludes the acting account, requires post-proposal timing and decision-specific approval text.
+- Registry-to-record references and evidence SHA/tier are validated; strategy gates require approved Recorded decisions.
+- Audit advancement records watermark, audit row, handoff boundary and journal entry together; validator checks watermark non-negative and anchored to completed execution order.
+
+## Delivery/completeness risk
+
+The source tree reviewed contains governance rules, coordinator abstractions and test fakes, but lacks the runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, MCP adapters/transport, and production GitHub store/facts adapters described by architecture. If those are in-scope delivery requirements, this is a material completeness gap. Because requirements are Draft and architecture Under review, it remains a scope risk—not a confirmed defect.
 
 ## Remediation / PR tracking
-- **PR #1:** [Remediate P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1)
-  - Merged into `main`.
-  - Updates architecture/requirements documentation to reflect implementation status and clarify proposed/approved/superseded authority.
-  - No implementation remediation in that PR.
 
-### R-004 — Idempotency replay is keyed only by request ID
-**Status:** Robustness question; no defect confirmed under REQ-015
-**Area:** Coordinator / replay / request identity
+- **PR #1:** [Remediate P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1) — merged. Updates documentation status and clarifies proposed/approved/superseded authority; no implementation remediation.
 
-Replay matches request ID and returns the stored result, without comparing incoming tool/action/arguments. REQ-015 defines repeating an applied ID as returning the earlier result and changing nothing. Reusing a UUID with a different payload is caller misuse under the current contract; mismatch rejection could improve diagnostics but is not a confirmed defect.
+## Overall status
 
-**Disposition:** No remediation recommendation absent a clarified request-ID payload-binding requirement.
+**Static review only.** No confirmed implementation defect established. No tests executed. No implementation fixes made. Candidate items are not remediation tasks until governing invariants and delivery scope are agreed.
 
-### R-006 — Reconciliation allows an empty reviewed-source list
-**Status:** Confirmed contract-validation gap; severity P2 candidate  
-**Area:** Reconciliation / completeness / validation
-
-`plan.reconcile` requires the `reviewed` argument, but accepts an empty list. REQ-041 defines it as the list of sections and decision IDs read in full, and the served reconcile procedure requires reading the canonical project requirements, architecture, decisions, and current state before classification. An empty list can therefore produce a reconciliation record with no declared source review. The validator also does not enforce non-empty `reviewed`. This is distinct from `items` being empty, which could be legitimate if no candidate items were found.
-
-**Suggested disposition:** Require at least one non-empty reviewed source and validate each entry is non-blank (trim whitespace); add tests for omitted, empty, and whitespace-only entries, while retaining the ability to record zero reconciliation items when a thorough review finds none.
-
-
-## Adversarial test coverage map (Session 8)
-
-Test coverage below is source-inspected only; no tests were executed.
-
-| Finding / behavior | Existing coverage observed | Missing adversarial tests |
-|---|---|---|
-| R-001 policy changes during evidence wait | Evidence gates cover pending/fail/no-required-checks; no policy mutation during collection wait found | Change required workflows after collection preparation but before recording; assert evidence is revalidated or rejected/recollected under changed policy |
-| R-002 tier overwrite for same SHA | Standard cycle exercises full-tier collection; no same-SHA cross-tier retention/overwrite test found | Collect full then fast (and reverse) for same cycle/SHA; assert storage semantics and completion gate behavior explicitly |
-| R-003 full-pass completion requirement | End-to-end test explicitly rejects verify transition without full-tier pass, then succeeds with full pass | Add matrix for fast-pass, integration-pass, full-fail, full-pending, and full-pass; some gates already indirectly exercised but not isolated |
-| R-004 replay request mismatch | End-to-end test repeats same request ID/request and confirms no publish | Reuse identical request ID with different tool/action/args; expect mismatch rejection, not replay of old result; confirm unchanged head |
-| R-005 Recorded decision metadata | Decision recording tests approval path and normal successful record | Validator tests for Recorded without approval, without recorded_at, without specification, malformed verified revision; Proposed-state constraints too, once invariants are specified |
-| R-006 reviewed sources | Standard-cycle happy path reconciles with one reviewed source | reviewed omitted, empty list, whitespace-only element; expect reject/validator invalid; legitimate zero-item reconciliation remains allowed |
-| R-007 reconciliation item/evidence | Happy path reconciliation has non-empty item/evidence | Validator rejects blank/whitespace item and evidence, while action-level trimming and reject behavior are asserted |
-| R-008 reconciliation metadata atomicity | No validator test suite identified | Test pristine record, fully recorded record, each partial metadata combination, null revision/time, empty/blank reviewed; permit recorded zero-item case |
-
-### Session 8 — Adversarial test matrix
-- Verified current main HEAD is fb3b94155418479837e799781640da8d901514dc before continuing; this is the previous tracker update, no intervening commit.
-- Source-read the existing evidence rules, coordinator safeguards, standard-cycle end-to-end, harness, and canonical JSON tests to map R-001–R-008 against actual tests.
-- Coverage confirms basic evidence request validation and workflow dependency expansion; evidence gate states; standard-cycle completion requires full pass; normal same-request idempotent replay; expected-head retry under concurrent movement; micro-cycle preemption; decision approval checks; canonical strict decoding/encoding.
-- Added the adversarial coverage matrix above. Key gaps: cross-tier same-SHA evidence overwrite; policy changes during evidence preparation; request-ID reuse with different action; malformed Recorded decision/reconciliation validator states; and missing direct validator/plan-reconciliation tests.
-- Tests have not been run. No implementation changes.
-- Next: review repository-store/audit edge cases and then re-evaluate evidence findings (R-001/R-002) with requirements semantics.
-
-### Session 9 — Store and audit edge-case review
-- Reviewed RepoStore contract, MemoryStore implementation, audit.check/audit.advance, audit-window calculation, and checkpoint journal.
-- Publish in MemoryStore enforces expected-head equality while holding its mutex and clones file contents on write; however this is only a test implementation. The production adapter remains absent from the repository, so the contract's real atomicity cannot be confirmed.
-- MemoryStore's PushFiles treats empty string content as deletion (test helper semantics); therefore it cannot model creating an empty file. No coordinator path relies on this behavior confirmed, and no finding assigned.
-- Audit window includes completed cycles with execution order greater than watermark, sorts by execution order, and becomes due at 3 cycles. audit.advance requires a completed boundary above watermark and an active standard cycle; it records watermark, audit row, checkpoint boundary, and journal entry together in the state snapshot.
-- No additional store/audit defect confirmed from source review. Adversarial store tests still needed: missing branch/ref, invalid or duplicate changes, delete absent path, empty change set, ancestry on unknown SHA, audit boundary gaps including cancelled execution orders, and publish atomicity/error handling in a production adapter.
-- No tests run and no code changes.
-- Next: revisit R-001/R-002 against evidence policy semantics and coordinator ordering; then consolidate severity and present review findings/test recommendations for approval before any remediation.
-
-## Session log
-
-
-### R-008 — Validator accepts partially populated reconciliation records
-**Status:** Confirmed validation gap; P2 candidate
-**Area:** Reconciliation metadata integrity
-
-A reconciliation record is written atomically by `plan.reconcile`: it sets `revision`, `reviewed`, `items`, and `at` together. The snapshot validator does not enforce this relationship. It accepts partial metadata (for example, `at` set while `revision` is null, or a revision/reviewed/items payload with no `at` timestamp), so malformed or out-of-band state can look recorded or contain classifications without a recorded reconciliation event. `IsRecorded()` checks only `At != nil`, making the partial state particularly ambiguous.
-
-
-**Suggested disposition:** Validate reconciliation as either pristine/unrecorded (all metadata null/empty and no items) or recorded (non-null revision and timestamp, reviewed-source list present/non-blank, items structurally valid). Keep zero-item reconciliations valid when recorded. Add tests for each partial combination.
-
-### Session 6 — Plan mutations, reconciliation, cycle gates, and validator review
-- Read `review.md) from `main`, then checked current `main` HEAD: `c5fe7994cae24250939f7b09db9ae2fa9d798661` (commit message: “fixed review”; only tracker change since prior baseline).
-- Continued review of `PlanRules.update` / `reconcile`, cycle phase transitions and completion gates, preemption, promotion, pending reorder, DR-06 default ordering, and snapshot validator record checks.
-- R-006 remains confirmed: `reviewed` is required as an argument but can be empty or contain whitespace-only entries; validator does not enforce the reviewed-source list.
-- Added R-007: stored reconciliation item/evidence completeness is not validated (the action rejects blank values, but validator checks classifications only).
-- Cycle flow source review: phase exits match documented gates; preemption pauses the current cycle, micro preemption promotes first; default order is in-progress, paused by execution order, then pending in registry order. No new cycle-ordering finding confirmed in this pass.
-- Repository has no dedicated plan/reconciliation tests in the test-file tree. Tests remain unexecuted; source review only. No implementation changes.
-- Next: map R-001–R-007 to existing tests and adversarial/negative test gaps; continue cross-record validator consistency and then store/audit edge cases.
-
-### Session 5 — Reconciliation and cycle-ordering review
-- Verified tracker commit `52066d1` and `main` HEAD (`c72f139`); PR #1 remains open, draft, and unmerged.
-- Began review of plan mutations/reconciliation, cycle transition gates, completion, preemption, pending reorder, and snapshot validation.
-- Recorded R-006: `plan.reconcile` accepts an empty `reviewed` list despite REQ-041 describing it as the sources read in full; empty `items` may still be valid when no candidate issues are found.
-- No tests executed. No implementation changes. Review is still in progress.
-
-### Session 2 — Coordinator request/replay consistency review
-- Re-verified `review.md` exists before continuing.
-- Reviewed coordinator request validation, branch resolution, locking, read-only path, change retries, replay, and publish/read-back.
-- Reviewed harness and safeguards, migration, and standard-cycle end-to-end tests.
-- Confirmed replay matching is based on request ID alone; stored tool/action are not checked against incoming tool/action (R-004).
-- Expected-head publish retries recompute state; the test exercises concurrent external head movement and retryable refusal under continuously moving head.
-- Tests are source-reviewed only; no test execution was performed.
-- No implementation changes made.
-
-### Session 1 — Initial review and evidence consistency
-- Reconciled repository state and documentation status.
-- Identified P0 documentation status/decision-authority gaps; remediation drafted in PR #1.
-- Began source review of coordinator, state, evidence, CI, governance, and tests.
-- Inspected evidence selection and evaluator logic; recorded R-001 and R-002; confirmed R-003.
-- No implementation code changed; no local tests executed.
-
-## Next review tasks (priority order)
-1. Continue plan/reconciliation review: validate task and criterion mutation edge cases, source-list semantics, and cross-record consistency.
-2. Review cycle ordering/preemption and phase gates against DR-02 through DR-06; identify any adversarial tests missing.
-3. Review store implementations (GitHub repo store and memory store): expected-head semantics, atomicity, commit metadata, ancestry/read-back behavior.
-4. Review integrity/acceptance protocol and digest scope, especially state file inclusion/exclusion.
-5. Review audit/journal recording and whether failed/rejected/no-op actions are accurately represented.
-6. Map tests to findings and identify missing adversarial/race tests.
-7. Revisit R-001 and R-002, confirm severity and propose a coherent evidence model before coding.
-
-## Session handoff checklist
-When resuming:
-- Read this file first.
-- Confirm you are working on `main`; do not assume `main` is unchanged since the last session.
-- Check for changes since the recorded baseline.
-- Update the status summary, findings, and session log.
-- Continue from the highest-priority unfinished task.
-
-
-### Session 3 — Store and integrity/acceptance protocol review
-- Verified the persistent tracker and reviewed the store interface and in-memory implementation.
-- Repository tree contains only `internal/store/repo_store.go` and `internal/store/memory_store.go`; no production GitHub repository-store adapter is present in this repository, so its atomicity/branch-ref behavior cannot be verified here.
-- Confirmed `RepoStore.Publish` contract requires publishing against `expectedHead`, and coordinator handles `ErrHeadMoved` by retrying from a fresh read. The in-memory store enforces expected head under mutex and clones written file bytes; it is test infrastructure, not proof of production semantics.
-- Reviewed setup.accept and `StateDigest`: digest covers sorted `.pmcp/*.json` state files only, intentionally not `project/` documents/policy. accept requires `user_confirmed: true` and reason, and publishes an acceptance digest. Integrity check compares current state digest with recent pmcp commit digest or a later accept.
-- No new finding confirmed in this pass. Production adapter verification remains blocked by absence from this repo. Tests remain source-reviewed, not executed; no code changes.
-
-
-
-### R-005 — Decision ledger validator does not enforce Recorded-state approval invariants
-**Status:** Potential validation gap (confirmed omission in validator; impact depends on intended invariant)
-**Severity:** P2 candidate
-**Area:** Decision governance / state validation
-
-
-Decision recording verifies approval and writes approval metadata, but `SnapshotValidator.checkLedger` checks decision IDs, state labels, and `verified_revision` for Recorded entries only. It does not require a Recorded decision to have an `approval`, `recorded_at`, or `specification`, nor does it constrain those fields for Proposed entries. The normal `decision.record` path populates these fields, but an accepted/out-of-band state or malformed state that passes validation can represent an approval-less Recorded decision. Policy approval pointers can refer to that ledger entry because `checkApprovals` checks existence only.
-
-**Suggested disposition:** Confirm the intended schema invariants for Proposed vs Recorded decisions, then enforce them in snapshot validation and add malformed-state tests. Avoid claiming normal `decision.record` bypasses its approval checks; this finding concerns validator coverage.
-
-
-### Session 4 — Governance consistency review (decision and audit)
-- Reviewed decision propose/record/list, approval verification for attested and issue-comment modes, issue-comment validation, audit check/advance, checkpoint save, and cycle transition/completion paths.
-- Issue-comment approval checks approver membership, prevents the acting account from being an approver, requires comment timestamp after proposal, and checks the approval phrase for the specific decision.
-- Decision record validates specification markers and stores the verified revision; policy approvals are updated only when a recorded decision approves a strategy key.
-- Confirmed validator omission of several Recorded-state metadata invariants; recorded R-005 as a potential validation gap.
-- Audit watermark is tied to a completed execution order; audit.advance requires an active standard cycle and records outcome/boundary. Its user attestation is narrative outcome rather than checklist proof; no finding assigned pending requirement semantics.
-- Cycle transition and completion gates were partially reviewed; completion checks reconciliation, criteria, open tasks, full-pass evidence, and attestations.
-- No implementation changes, no tests executed.
-
-### R-007 — Snapshot validator does not enforce reconciliation item completeness
-**Status:** Confirmed validator omission; P2 candidate  
-**Area:** Reconciliation / state validation
-
-The normal `plan.reconcile` action trims and rejects empty `item` and `evidence` values, but snapshot validation checks only reconciliation classification. A manually edited, malformed, or otherwise out-of-band reconciliation record can therefore pass validation with blank item/evidence text. This is separate from R-006, which concerns the `reviewed` source list.
-
-**Suggested disposition:** Validate non-blank item and evidence in stored reconciliation records (trim-aware), and consider validating each `reviewed` entry too. Add malformed-state tests that demonstrate the validator rejects incomplete reconciliation records, while allowing a legitimate reconciliation with zero items.
-
-### Session 7 — Validator cross-record integrity and adversarial test mapping
-- Re-read the full tracker and verified latest main HEAD is the tracker commit from Session 6; no code changes were made during this pass.
-- Inspected snapshot validation and relevant state/reconciliation schemas. The repository has **no `internal/validate/*_test.go` validator tests, and no dedicated plan/reconciliation tests** in the current test tree.
-- Confirmed R-007 validator omission for blank reconciliation item/evidence; normal reconcile action trims/rejects them.
-- Added R-008: validator does not enforce reconciliation record atomicity/completeness (revision, reviewed sources, items, timestamp can be partially populated; `IsRecorded` relies only on timestamp). Normal reconcile writes these fields together; malformed/out-of-band snapshots can violate this.
-- Cross-record checks do enforce record-to-cycle existence and prohibit records on micro cycles, require plan/checkpoint on standard cycles, validate evidence SHA/tier, and validate audit watermark against completed-cycle execution order. No additional issue assigned from these checks yet.
-- Next: map R-001–R-008 to adversarial tests, then review repository-store/audit edge cases and re-evaluate evidence findings.
-- Tests have not been executed; this remains source review only.
-
-
-### Session 10 — Re-evaluate evidence-policy semantics (R-001/R-002)
-- Re-read current main HEAD and the tracker before proceeding; no intervening repository changes observed.
-- Traced `evidence.collect`: coordinator resolves branch, snapshots policy, parses tier/workflow selection, resolves SHA, polls CI outside the branch lock, then stores the prepared evidence against the state/cycle read under lock. The evidence payload retains tier, selected required workflows, checks, SHA and gate.
-- **R-001 disposition:** downgrade from P1 candidate to **unconfirmed policy-semantics question; not a confirmed defect**. Requirements define workflow selection at collection time and do not explicitly require invalidating/recollecting when policy changes during the wait. The stored required-workflow list makes the selection inspectable. Could be a deliberate snapshot model. Do not propose code remediation absent a clarified rule.
-- **R-002 disposition:** confirmed storage behavior remains: per-cycle evidence is keyed by SHA, so collecting a different tier for the same cycle/SHA replaces the prior tier's record. This is potentially destructive (e.g., fast collection after full pass removes the full-pass record and may block completion), but the requirements do not explicitly demand simultaneous tier retention. **Severity should be reconsidered as P2 design/data-retention concern rather than P1**, unless requirements establish tier-retention semantics. Need review the surrounding requirements and completion workflow for intended overwrite behavior before proposing a change.
-- No code changes; tests not run.
-- Next: finish R-002 semantics check and consolidate finding confidence/severity, then continue the review to additional areas per handoff.
-
-
-### Session 11 — Evidence semantics and idempotency replay review (R-002/R-004)
-- Verified tracker and current main; no intervening changes since Session 10.
-- **R-002 downgraded / no defect confirmed:** REQ-073 explicitly stores an evidence entry under the SHA; architecture and legacy evidence layout describe a cycle → SHA → Evidence map. This is one evidence record per SHA, so tier replacement is consistent with the specified model. Collecting another tier for the same SHA replaces that SHA's record; this is a design limitation/trade-off, not a requirements violation absent a requirement for multi-tier retention. Completion correctly scans evidence records for any full-tier pass.
-- **R-004 assessed as unresolved robustness question, not confirmed defect:** replay matches only request ID and returns the stored result, regardless of incoming tool/action/args. REQ-015 explicitly says repeating an already-applied request ID returns the earlier result and changes nothing. UUID reuse with different payload is caller misuse under that contract, but rejecting mismatched payloads could improve diagnosability. No confirmed defect; do not recommend remediation without a requirement.
-- No code changed; tests not run.
-- Next: review plan mutations/reconciliation, cycle ordering/preemption and validator consistency as specified in the tracker handoff.
-
-
-### Session 12 — Plan mutation and reconciliation validation review
-- Reviewed current `plan_rules.go`, `item_matcher.go`, and relevant snapshot-validator checks against REQ-040/REQ-041.
-- Plan update applies text/list replacements, task/criterion additions, task completion, criterion completion with evidence, and task removals. Task/criterion matching uses exact or unique-prefix semantics; ambiguity rejects. Additions detect exact duplicate entries, and criteria evidence is trim-checked. Task removals require a reason.
-- Reconciliation action trim-checks item/evidence, validates classification, normalizes nil references, and records revision/reviewed/items/timestamp atomically. However, `referenceList` treats a scalar string differently from a list: scalar is wrapped unchanged, so blank/whitespace reference strings are accepted, while list elements are trim-checked and normalized. Snapshot validation does not validate reconciliation references or trim-normalize them.
-- **R-009 (candidate, low severity): reconciliation scalar references bypass blank validation.** A scalar `references: "   "` is accepted and persisted as a meaningless reference, while `references: ["   "]` is rejected. REQ-041's reference semantics should be consistent; likely trim-aware non-empty validation for scalar strings, or normalize blank scalar to no reference. Severity P3/quality inconsistency; not yet tested.
-- No tests run; no code changes.
-- Next: review plan mutation invariants and cycle ordering/preemption/validator edge cases; distinguish actual governance gaps from intended behavior, then update findings and map negative tests.
-
-
-### Session 13 — Cycle ordering, preemption and plan mutation edge review
-- Reviewed `default_order.go`, relevant cycle lifecycle actions (`start`, `pause`, `block`, `unblock`, `cancel`, `reorder`, `complete`), validator cycle/record invariants, and standard-cycle tests.
-- Default order is deterministic by design: in-progress, paused by execution order, then pending registry order. Blocked cycles are excluded and require explicit unblock. Reorder only touches pending slots, preserves the other statuses' registry slots, and requires a reason.
-- Starting/resuming another cycle pauses the current one; micro cycles are promoted before interruption, preserving their historical micro metadata in the generated plan. Block/cancel paths similarly promote micro cycles before terminal/status changes.
-- Completion checks phase reconcile, open tasks, unmet criteria, full-tier passing evidence, recorded reconciliation, contradictory reconciliation, and attestations. No new confirmed defect found in these paths.
-- Plan mutation paths are transactional at the rule/snapshot level (rejected calls do not publish); exact/unique-prefix matching prevents ambiguous item mutation. A few negative cases remain in the test matrix; this source review does not establish runtime behavior because tests were not run.
-- No code changes; tests not run.
-- Next: reconcile the findings list/status summary with updated dispositions, then map the remaining R-005–R-009 validator and plan edge cases to adversarial tests and identify the highest-value next review target.
-
-
-### Session 14 — Validator and plan-mutation edge cases
-- Verified main HEAD is still `1e82727a42475995ff780d8342c43ccc08558460`; tracker blob SHA is current before this update. No intervening source changes found.
-- Re-read `snapshot_validator.go`, `decision.go`, `plan_record.go`, `plan_rules.go`, and the relevant requirements.
-- Confirmed validator's `checkRecords` only checks plan task/criterion text nonblank and reconciliation classification; reconciliation metadata, item/evidence completeness, reviewed list, and references remain unchecked as described in R-006–R-009.
-- Decision state schema has fields `specification`, `verified_revision`, `recorded_at`, `approval`, and `proposed_at`; validator requires only `verified_revision` for Recorded. The normal `decision.record` path fills the missing metadata, but Proposed/Recorded cross-field constraints still are not enforced by validator. R-005 remains a validation-gap candidate pending a precise state-invariant specification.
-- Plan mutation source inspection: global argument parsing enforces non-empty trimmed scalar/list strings for ordinary string arguments; `meet_criteria` trims criterion/evidence and rejects blanks; removals require reason; ambiguous matching rejects; duplicate additions are rejected. Empty list replacement is allowed and intentional. No new plan mutation defect confirmed.
-- R-009 remains a low-severity candidate: scalar `references: "   "` bypasses trim validation, unlike list form `references: ["   "]`; validator also does not inspect references. The argument is nested in the reconciliation item object, so its treatment under REQ-017 requires interpretation; no runtime tests performed.
-- R-001/R-002/R-004 dispositions reconciled in the Findings section and status summary to reflect Sessions 10–11 conclusions.
-- No code changes; no tests executed.
-- Next: consolidate R-005–R-009 into an invariant/test matrix; inspect decision/reconciliation validation requirements and surrounding state lifecycle to decide which candidates can be confirmed against explicit contract language. Continue review of audit/journal integrity and store failure paths.
-
-
-### Session 15 — Audit and journal integrity review
-- Verified the latest tracker and main HEAD before review: `025691f28c3234d643681c50ea24153f49b8e260`; no external repository changes observed.
-- Reviewed `audit_rules.go`, `audit_window.go`, `state/audit.go`, `journal.go`, checkpoint rules, validator audit checks, store interface, and MemoryStore implementation.
-- Audit actions align with REQ-080/081: audit.check lists completed cycles above watermark; audit.advance requires a higher watermark that corresponds to a completed execution order and an in-progress standard cycle, then writes the audit row, watermark, handoff boundary and journal event together. The validator checks watermark non-negative and anchored to a completed cycle. It does not validate the full audit-history sequence, but REQ-101's audit validation requirement only specifies watermark integrity; no defect assigned without a stronger history invariant.
-- Journal helper touches the cycle handoff timestamps/branch/revision and appends events for state-changing cycle-related actions; checkpoint.save appends the specified event and optional notes. No new journal defect confirmed in this source pass.
-- MemoryStore expected-head compare and commit are serialized under mutex; ancestry and commit traversal are guarded for unknown commits. Production adapter cannot be reviewed because it is absent from the repository tree despite architecture text describing a GitHub implementation.
-- Corrected stale R-002 and R-004 descriptions in Findings to match the later Sessions 10–11 dispositions. Tracker still needs a broader consolidation to remove duplicate/out-of-order session history and reconcile top-level finding inventory.
-- No tests executed; no implementation changes.
-- Next: review request result envelopes, validation/refusal semantics, and CI policy/workflow mapping; then consolidate findings and missing test matrix.
-
-
-### Session 16 — Result envelope, failure advice, next-request derivation, and CI gate semantics
-- Verified latest tracker blob SHA `62e04bca7bdc3b589d32ce694a5234cb5af3505f` and main HEAD `ca5fc8357b1d3143635cfc36ce0dba14a6a40995` before review; no intervening changes.
-- Reviewed `coordinator/result.go`, failure advice, next-request structs/deriver, CI gate evaluator, evidence collector, policy model, and REQ-012–REQ-015/REQ-072.
-- Result envelope `finish()` matches summary rules: first message on non-ok, last on ok; empty messages normalized. Coordinator `succeed` and `fail` preserve status/verdict/data and next-request derivation appropriately; failure results null data and changed files and no published revision.
-- REQ-014 failure advice mapping matches implementation, including gate-not-met, pending, fail, and no-required-checks outcomes. REQ-013 placeholders and approval attestations are generated as placeholders, and next-request is explicitly a suggestion rather than overriding the user's chosen work.
-- CI evaluator's treatment of optional workflows in polling was checked against REQ-072, which explicitly says poll while any workflow is in progress or a required workflow is not triggered; implementation matches. Latest run/attempt selection, required-workflow blocking, skipped/cancelled/other conclusions classification, and failure-detail bounds align with the stated contract. No new defect confirmed.
-- Tracker hygiene issue: the persistent Findings section had stale R-002 and R-004 descriptions despite the summary/session notes having downgraded them. Corrected those descriptions and refreshed the handoff priority.
-- No tests run; no code changes.
-- Next: inspect policy parsing and workflow/component selection edge cases, then review error paths where external CI reads fail, canceled polling, and idempotency/result publication boundaries. Consolidate findings and missing test coverage.
-
-
-### Session 17 — Policy workflow/component validation and CI preparation edge cases
-- Verified latest tracker SHA `8296e2ef5839af037cbd0dfd9945f99ff7777ab3` and main HEAD `05de33052de3107de9104685716492767306d653` before review.
-- Read `evidence_rules.go`, `policy.go`, `snapshot_validator.go`, `evidence_collector.go`, `gate_evaluator.go`, `coordinator.go`, `ci/run.go`, and REQ-070–REQ-073.
-- **Confirmed alignment:** `required_workflows` override takes precedence per REQ-071; component selection is fast-tier only, adds transitive dependants, rejects unknown requested components, and sorts the final workflow list. Cyclic dependant relationships terminate due to the visited set. Workflow run selection and gate classification/polling match REQ-072. No new defect confirmed in these paths.
-- **Potential policy-validation gap (not elevated to finding):** policy validation checks that component dependants refer to known components and that tier lists exist and decode, but does not appear to reject blank workflow names, blank component test names, duplicate entries, or invalid `evidence_wait_minutes` bounds. Some invalid values fail later during request preparation; duplicates are de-duplicated for policy-selected workflows. Requirements text around policy validity and normalization needs to be checked before classifying these as defects.
-- **No tests run; no implementation changes.**
-- Next: inspect exact policy requirements and tests for invalid workflow names/wait values, then review CI read failures/cancellation and idempotency/publish/read-back failure behavior. Consolidate the tracker findings and negative-test priorities.
-
-
-### Session 18 — Policy validation, CI failures/cancellation, and publish/read-back boundary
-- Re-read the tracker from `main` and rechecked the current repository tree/source before continuing. Policy and CI sources are unchanged from the prior review snapshot.
-- Checked REQ-070–REQ-073 against `ParseEvidenceRequest`, `requiredWorkflows`, and `checkTiers`: override precedence and selection behavior remain aligned. The policy validator requires exactly the three tier keys and non-null lists, but does not validate nonblank workflow names/component test names or duplicates. Duplicates are normalized for policy-based selection; blank names are likely invalid configuration but the requirements do not currently define name validation/normalization. **Not elevated as a finding**; recommend clarifying the policy contract and adding tests once specified.
-- `evidence_wait_minutes` policy bounds are not validated by snapshot validation. A policy-provided value outside the request limits is rejected later when `evidence.collect` parses the default wait, so it fails closed rather than silently using an out-of-range wait. REQ-070 does not explicitly define policy-value validation; **not elevated** absent that requirement.
-- Rechecked coordinator lifecycle: external CI preparation happens before branch locking; cancellation/errors from store/CI calls propagate to failure results. During publish, expected-head movement triggers retry with a fresh read/reapply; other publish errors fail without claiming a revision.
-- **Operational ambiguity (not a confirmed defect):** if publish succeeds but the subsequent branch read-back/ancestry confirmation fails, the caller receives an error and the failure envelope clears `PublishedRevision`/changed-files even though the commit may exist. The commit's request-ID trailer allows a retry with the same request ID to recover the stored result via replay. This behavior should be explicitly covered/documented with a fault-injection test (publish-success/read-back-failure/retry-same-ID); no code changes proposed.
-- No new confirmed defect. Existing candidates R-005–R-009 remain pending consolidation and requirement-level confirmation. No tests run and no implementation changes.
-- **Next:** consolidate R-005–R-009 against precise state invariants and map them to direct validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage. Continue with review only.
-
-
-### Session 19 — CI failure/cancellation and idempotent publication read-back follow-through
-- Verified `main` HEAD at `fdcd5d05fe911d1b4fa72b1bbf7d098e59dc9b95` (tracker-only commit from Session 18); reviewed current sources before continuing.
-- Followed `EvidenceCollector.Collect` through `RunsForSHA`, polling, `Sleep(ctx,...)`, and failed-run detail reads. Reader failures (runs/jobs/annotations) return errors; cancellation from the sleep path propagates. Failure details are attached only to failed checks with a run ID; annotation counts and message lengths are bounded. No defect confirmed.
-- Followed the publish path: state is validated before commit; `Publish` uses expected-head and returns `ErrHeadMoved` for retry/reapply; after commit, `confirmPublished` checks the ref or ancestry. Other publish/read-back/ancestry failures return an error and clear the reported published revision. A retry using the same request ID can replay the committed result if its state commit remains in the configured recent-commit window. This is an **uncertain-outcome operational behavior**, not a confirmed correctness defect; add fault-injection coverage for publish-success/read-back-failure/retry-same-ID.
-- Replay stores the result trailer with `PublishedRevision` and `NextRequest` stripped, then reconstructs those on replay from the commit and current snapshot. Replay is request-ID-only, matching the previously recorded R-004 contract interpretation.
-- Rechecked policy validation: tiers require exactly fast/integration/full and non-null lists; component tests must be present as a list; dependants must name known components. Blank workflow/component test names and duplicate policy values are not explicitly prohibited by the currently inspected requirements, so these remain clarification/test candidates, **not findings**. Policy evidence-wait values are checked when used as the request default and fail closed if outside request bounds; snapshot-level bounds are not explicitly required.
-- Production `RepoStore` adapter remains absent from the repository tree, so real GitHub atomicity/branch-ref behavior cannot be verified. This is a scope/verification limitation, not a defect assigned to the in-repository interface or MemoryStore.
-- No implementation changes. No tests executed.
-- **Next:** consolidate R-005–R-009 against precise state invariants and map them to direct validator tests; then review remaining store-integrity/production-adapter boundaries and fault-injection coverage. Continue with review only.
-
-
-### Session 20 — R-005–R-009 invariant consolidation
-
-- Re-verified latest `main` commit `64e54a6212e79a7aba1b783d02d9950aed7da1c2` (tracker-only from Session 19); source files reviewed are current.
-- Consolidated validator observations against the stated requirements and normal action paths. **No candidate was upgraded to a confirmed correctness defect**, because the requirements are Draft and several invariants are not explicit:
-  - **R-005 (decision ledger):** normal `decision.record` writes approval, recorded_at, specification, and verified_revision. Validator only requires a valid verified_revision for Recorded. The Proposed/Recorded cross-field rules need a schema invariant before strict validation is justified.
-  - **R-006 (reviewed sources):** empty reviewed list accepted; REQ-041 and operating guidance describe reviewed sources, but explicit minimum/blank normalization is not stated strongly enough to settle every edge. Keep as P2 candidate pending requirement confirmation.
-  - **R-007 (item/evidence):** action rejects blank item/evidence, but validator only checks classification. This is a concrete validation asymmetry; malformed/out-of-band state can pass. P2 candidate.
-  - **R-008 (reconciliation atomicity):** normal action writes revision, reviewed, items and timestamp together; validator does not enforce pristine-vs-recorded combinations and `IsRecorded` uses timestamp only. Strong candidate for explicit cross-field validation, P2.
-  - **R-009 (references):** scalar whitespace reference accepted while list whitespace entries are rejected. Low-impact input normalization inconsistency; P3 candidate.
-- Direct validator test coverage remains absent (`internal/validate/*_test.go` was not found in the prior tree review). Action-path happy tests do not substitute for constructing malformed snapshots and testing `Validate`.
-- Proposed invariant/test matrix (tests only; no code changes):
-  1. Decision: Proposed state must be pristine for recorded-only metadata; Recorded state requires approval, timestamp, specification, and valid verified revision—confirm exact schema first.
-  2. Reconciliation: either pristine/unrecorded (no metadata/items) or recorded (revision/time, nonblank reviewed sources, valid items); zero items remain valid when recorded.
-  3. Item: nonblank item/evidence and valid classification; references normalized/validated consistently for scalar/list.
-  4. Test each invariant directly at validator boundary, plus normal action-path tests and state round-trip tests.
-- No new finding beyond the candidates already tracked. No tests run and no implementation changes.
-- **Next:** continue reviewing store-integrity and production-adapter boundaries; then prioritize a focused adversarial/fault-injection test plan. Continue review only.
-
-
-### Session 21 — Store integrity and publication-boundary review
-
-- Verified current `main` is tracker commit `b3b3c26942577362e6a0b1fddb116fde21decd1`; the repository tree has no intervening source changes. The tracker was fetched fresh before update.
-- Reviewed `RepoStore` contract, `MemoryStore`, coordinator publish/retry/confirm/replay, commit trailers, and concurrency safeguards tests.
-- **Expected-head concurrency:** contract requires `Publish(expectedHead)`; coordinator resets/recomputes after `ErrHeadMoved`, and the memory fake checks head under its mutex. Existing adversarial test forces one concurrent head move and verifies it survives; repeated head movement is surfaced as retryable rejection. No in-repo defect confirmed.
-- **MemoryStore immutability:** changed bytes are copied before storage, snapshot reads copy selected file bytes, and commits retain independent maps. Existing unchanged byte slices are shared between internal commit snapshots but are not mutated by store operations, so no defect confirmed from inspected paths.
-- **Publication/read-back:** coordinator accepts a commit only after head/ancestry confirmation. Read-back errors produce an error result with no claimed published revision. Previously noted retry-same-request-ID ambiguity after a commit/read-back failure remains a fault-injection case, not a confirmed defect.
-- **Production implementation gap remains significant:** the tree contains only `repo_store.go` (interface) and `memory_store.go` (test fake); no GitHub `RepoStore` adapter, server entrypoint, or MCP server implementation appears in the Go source tree. Architecture.md describes a GitHub implementation, so this is a delivery/completeness gap to reconcile against project scope, not a runtime defect in the adapter (which cannot be reviewed because it is absent). This is the primary limitation for verifying real GitHub branch-ref atomicity and no-force publication guarantees.
-- Test coverage currently proves the fake's compare-and-publish race, but cannot prove production behavior. Highest-value future tests once an adapter exists: branch moved between preflight and ref update; branch ref update rejects non-fast-forward; commit is created but ref update fails; publish succeeds but head/ancestry read fails; retry of same request ID after uncertain publication; multi-file change is one commit; deletion and empty file behavior.
-- No tests run and no implementation changes.
-- **Next:** review request envelope parsing, tool exposure and server/bootstrap boundaries against REQ-001–REQ-017 and architecture claims; map which components are implemented vs. missing rather than assuming production readiness. Continue review only.
-
-
-### Session 22 — Request envelope, tool exposure, and bootstrap boundary
-
-- Verified the latest tracker and `main` HEAD before review: `abdf514f49de9861ff729af87980067bf1a8204d`; no source changes since Session 21.
-- Reviewed `coordinator/request.go`, `coordinator/result.go`, `coordinator/identity.go`, `governance/args.go`, `governance/call.go`, `governance/toolset.go`, `setup/setup_rules.go`, `guide/served_content.go`, coordinator request dispatch, and safeguards tests. Rechecked REQ-001–REQ-017 and architecture's server/config/bootstrap sections.
-- **Request and args validation:** request requires owner/repo and UUID-shaped request ID; tool/action are allowlisted against governance tool rules plus setup's explicit special case; action unknown is rejected with accepted actions. Args are decoded as JSON object, null entries removed, unknown keys are rejected per action, scalar strings and list entries trimmed and validated. No defect confirmed from this source review.
-- **Result envelope:** result includes request ID, tool/action, status/verdict, summary/messages, data, changed files, read/published revisions, branch, completion time, retry/fix, optional read section and next_request. finish() normalizes message/changed-file lists and selects summary as documented. No new defect confirmed.
-- **Governance exposure in current source:** seven rule groups (status, cycle, plan, checkpoint, decision, evidence, audit) are assembled by `governance.Toolset()`; setup is routed separately by coordinator. The rules interface/actions are implemented, but no MCP adapter layer registers these as actual MCP tools in the source tree.
-- **Architecture vs repository completeness:** architecture describes the target `cmd/pmcp`, `internal/config`, `internal/server`, `internal/githubclient`, `internal/tools`, embedded GitHub MCP integration, configuration parity, and stdio transport. The repository tree currently has none of those packages, no `main.go`/CLI, no MCP server assembly/transport, no GitHub MCP dependency in `go.mod`, and no production GitHub RepoStore/GitHubFacts implementation. Thus this checkout contains governance rules and coordinator abstractions/test fakes, but not a runnable PMCP MCP server or the promised GitHub tool passthrough.
-- **Disposition:** this is a material delivery/scope gap against REQ-001/REQ-002 and architecture's server/bootstrap description if those are considered current release obligations. However, architecture status is explicitly “Under review,” requirements/decisions are Draft, and no approved scope/release milestone was located in this pass; therefore record as **completeness risk, not confirmed implementation defect** pending scope confirmation.
-- Existing in-repository tests validate coordinator behavior through test harness and fake GitHub facts/store, not the actual MCP tool inventory, configuration propagation, server startup, transport, or exposed GitHub tool parity. Once adapters/bootstrap exist, highest-value contract tests: tool inventory parity and filtering/config options; tool schemas/annotations; read-only/lockdown behavior on PMCP tools; malformed MCP arguments/envelope mapping; startup/config failures; tool/resource/prompt registration; integration with real GitHub clients and atomic repository-store semantics.
-- No tests executed; no implementation changes.
-- **Next:** reconcile target architecture claims and project scope/milestone status; then consolidate confirmed findings vs completeness risks and produce a prioritized test plan. Continue review only.
-
-
-### Session 23 — Architecture/scope reconciliation and review consolidation
-
-- Freshly fetched `review.md`, `architecture.md`, `requirements.md`, `README.md`, repository tree, issue list and pull-request list. `main` HEAD before this tracker update: `8fa1fd9e380838f2a96a257799b1128120ddffb2` (Session 22 tracker commit).
-- Confirmed scope authority remains unresolved: README says follow GitHub MCP operations and main-only workflow; architecture status is **Under review** and says requirements are **Draft**, architecture approval not established, verification not assessed, and drift not catalogued. The repository has one closed issue/merged PR for P0 documentation-status/decision-authority remediation; no milestone or release-scope signal was found in the retrieved issue/PR set.
-- Consolidated current assessment:
-  - **Confirmed defects:** none established by this static review.
-  - **Potential candidates:** R-005 decision cross-field invariants, R-006 reconciliation reviewed-source requirements, R-007 reconciliation item/evidence validator asymmetry, R-008 recorded/pristine reconciliation atomicity, R-009 scalar/list reference whitespace normalization. R-007/R-008 are the strongest validation candidates, but formal requirement/schema authority remains Draft; they are not promoted to confirmed findings.
-  - **Delivery/completeness risk:** governance rules/coordinator/test fakes exist, but the source tree lacks the runnable MCP server, GitHub tool/resource/prompt passthrough, configuration/bootstrap, MCP adapters/transport, and production GitHub store/facts adapters. These would be critical to REQ-001/002 and architecture if in current scope; until scope is approved, label this an implementation completeness risk rather than a defect.
-- Prioritized adversarial test plan (static review proposes; tests not run):
-  1. **P0 scope/acceptance decision first:** approve, defer, or remove the target-server/production-adapter obligations; define a milestone/acceptance boundary. This is governance, not a code test.
-  2. **P1 validator direct tests:** malformed snapshots with inconsistent decision and reconciliation metadata; blank item/evidence; empty reviewed list; scalar/list whitespace references; validate pristine and recorded cases. Establish exact schema invariants first.
-  3. **P1 publication fault injection:** expected-head movement; ref update failure after commit object creation; publish-success then read-back failure; same-request-ID replay; multi-file commit atomicity; deletion vs empty content; non-force ref semantics. Production adapter tests are impossible until it exists.
-  4. **P1 end-to-end acceptance:** once server exists, tool inventory/config parity, schema/annotations, toolset enablement, read-only/lockdown propagation, MCP resources/prompts, malformed input and startup errors, plus AC-02 complete standard cycle against dedicated GitHub test repository.
-  5. **P2 CI evidence tests:** run selection by latest run/attempt; required and optional workflows; transitive components; pending/cancelled/timeouts; API read failures; annotations bounds; same-SHA repeat collection; wait/cancel semantics.
-  6. **P2 governance lifecycle matrix:** preemption, promotion, default order, block/unblock, cancellation attestations, transition gates, decision marker verification, reconciliation contradictions, audit watermark. Assert rejected calls leave head unchanged.
-  7. **P2 migration/setup round-trip:** legacy migration preserves identifiers/orders/timestamps/evidence/decision/audit records; setup/accept validates and publishes in one commit; failure injection verifies no partial state.
-  8. **P3 robustness/contract tests:** malformed UUID, unsupported tool/action, unknown args, null/scalar args, whitespace-only strings/list values, replay with altered payload under same request ID (resolve contract question first), bounded result messages/annotations, clock/ID failures.
-- **Disposition:** this consolidation does not change findings' confirmation level. No implementation edits and no tests executed.
-- **Next:** review remaining validator edge cases or, preferably, establish scope/requirement approval before converting completeness risks into findings. Continue review only.
-
-
-### Session 24 — Cycle timestamp presence validator edge case
-
-- Re-fetched the persistent tracker and verified `main` HEAD is `7faeee9c50dd9b105531e7ed4570b69145cb0a21` before this review. No source changes observed.
-- Inspected `internal/validate/snapshot_validator.go`, cycle state types, `REQ-030`, `REQ-101`, and `DR-05`.
-- **R-010 candidate — cycle timestamps are order-checked only when present:** `checkTimestamps` skips nil timestamps, and neither `checkStandard` nor `checkMicro` requires `CreatedAt` to be non-null. Therefore a malformed cycle can pass the validator with missing `created_at`; even an active or completed cycle may have `started_at` (and `completed_at`) while `created_at` is absent, and the remaining present timestamps are still compared. REQ-030 says every created cycle receives `created_at`; REQ-101 explicitly requires timestamp ordering. This is a validator-contract gap candidate (requirements are Draft), not a confirmed defect.
-- Suggested direct tests: pending standard with null `created_at`; active standard with `started_at` but null `created_at`; completed standard with both start/completion but null `created_at`; equivalent micro cases; valid timestamp sequences and out-of-order sequences. Confirm exact required timestamps for cancelled records (which may never have started) before asserting.
-- No tests executed and no implementation changes. Next: investigate remaining validator cross-record/semantic edges without re-reviewing prior candidates, or seek scope/requirements approval to convert candidates into actionable findings.
-
-
-### Session 25 — Micro-cycle text field validation
-
-- Reviewed cycle validator invariants against DR-05, REQ-017, and state type definitions; focused on required micro-cycle metadata values.
-- **R-011 candidate — micro metadata can be whitespace-only:** `checkMicro` checks that `eligibility_reason` and `acceptance_criteria` pointers are non-nil, but does not trim or reject empty/whitespace values. DR-05 requires these fields to be set, and REQ-017 says string arguments must be non-empty after trimming. An externally malformed registry can therefore satisfy the pointer check with blank strings. Since requirements are Draft and REQ-017's direct applicability to persisted-state validation may need interpretation, this is a candidate, not a confirmed defect.
-- Suggested tests: both fields nil; each field empty and whitespace-only; valid trimmed content; completed micro cycle with empty verification evidence/outcome (those are only presence-checked too); ensure whitespace in these fields fails if the requirement is adopted as a state invariant.
-- No tests executed; no code changed. Tracker committed at this session boundary.
-
-
-### Session 26 — Checkpoint/handoff cross-record validation
-
-- Verified `main` HEAD at `e63a8b8c0417d00dd412be7f8f029e32e1296c0f` (Session 25 tracker commit); no source changes since then.
-- Re-read policy validation against REQ-017, REQ-062, REQ-071/DR-08. No new confirmed defect: validation matches the stated key/count/list requirements, while additional normalization constraints (blank workflow/component names, duplicates) are not explicit enough to elevate.
-- Reviewed checkpoint/handoff state schema and requirements REQ-018 and REQ-050. **R-012 candidate — checkpoint/handoff records are parsed but not semantically validated:** validator does not check that handoff `updated_at`, `branch`, and `revision` are populated/valid, that event changes update `checkpoint_at`, or that log entries conform to required event/status/phase/time fields. Normal action paths stamp these fields, but malformed/out-of-band checkpoint state may pass snapshot validation. This is a validator gap candidate under Draft requirements; no defect confirmed.
-- Suggested direct validator tests: malformed/null/invalid timestamps; missing branch/revision; event log entries with missing/invalid fields; event action with stale/missing checkpoint_at; and valid minimal/empty initial checkpoint. Confirm which invariants must apply to untouched new cycles and non-event changes before enforcing.
-- No code changes and no tests executed.
-- **Next:** continue validator cross-record checks (audit record chronology/boundaries and checkpoint-to-cycle references), avoiding duplication of R-005–R-011.
-
-
-### Session 27 — Audit history integrity and watermark semantics
-
-- Confirmed current `main` HEAD is `bc09d5948a8089b25804fb36278f9d6de29b699a` (Session 26 tracker commit); no source changes observed.
-- Reviewed `internal/state/audit.go`, `internal/governance/audit_rules.go`, `audit_window.go`, validator `checkAudit`, and REQ-080/081 plus REQ-101.
-- Validator enforces the explicitly stated REQ-101 audit invariant: watermark non-negative and, when nonzero, corresponds to a completed cycle's execution order. It does not semantically validate historical audit entries' timestamp/from/through/outcome/cycle or cross-link them to cycles/checkpoints. REQ-081 describes how entries are appended but REQ-101 does not currently specify history-validation rules. **No new candidate elevated**; adding constraints without requirements clarification would be speculative.
-- `audit.advance` checks increasing watermark, completed boundary, and in-progress standard cycle; writes watermark, history entry, handoff audit boundary and log event together through the snapshot mutation. Static review sees no confirmed inconsistency in this path. Test files for these components were not found in the tree listing; no tests run.
-- No code changes. **Next:** investigate cycle/record reference integrity and whether reconciliation/decision references are required to point to existing records under explicit requirements.
-
-
-### Session 28 — Cross-record reference integrity
-
-- Reviewed plan/reconciliation, checkpoint handoff, decision ledger, policy approval pointers, evidence ownership, registry references, and their governing requirements.
-- Registry-to-record references are validated: standard cycles require plan/checkpoint; micro cycles must have no records; plan/checkpoint/evidence keys must reference known cycle IDs. Evidence SHA/key and tier are validated.
-- Decision approvals in policy are validated as null or known decision IDs. Strategy gate separately checks they reference Recorded decisions, as required by REQ-101/DR-03. Therefore a known Proposed ID may be structurally valid but is rejected by the strategy gate; this is consistent with the layered checks, not a defect.
-- Handoff decision IDs are not checked against the ledger, nor are ledger decisions checked for presence in a cycle handoff when they were proposed/recorded in that cycle. REQ-060/061 describe normal action behavior but REQ-101 does not define these as snapshot invariants. No new finding elevated (possible state integrity enhancement only).
-- No new candidate; existing R-005–R-012 remain unchanged. No code changes; no tests executed.
-- Next: inspect requirements/validator boundary around plan acceptance criteria done/evidence consistency and whether completion gates prevent contradictory persisted states; clarify state invariant vs action-path semantics before elevating.
-
-
-### Session 29 — Acceptance-criterion evidence consistency
-
-- Confirmed latest `main` HEAD: `fff6cd2cae0ed2cf57cdfc8bbd569e3f6c789911` (tracker-only commit from Session 28); no source changes since Session 28.
-- Reviewed `internal/governance/plan_rules.go`, `internal/state/plan.go`, `internal/validate/snapshot_validator.go`, `internal/governance/cycle_rules.go`, and REQ-040/037/101.
-- Normal `plan.update` path marks an acceptance criterion `done` only through `meet_criteria`, which requires nonblank criterion and evidence and stores both. However, snapshot validation checks only criterion text; it does not validate evidence against the done state. Therefore out-of-band/malformed state can have `done=true` with nil/blank evidence, or `done=false` with evidence populated, and still pass validator. Cycle verify/complete gates rely on `UnmetCriteria()` (the done flag), not evidence presence. **R-013 candidate — acceptance-criterion evidence/state mismatch is not validated.** This is a validator-integrity gap candidate; REQ-101 only explicitly requires text and boolean done, and requirements remain Draft, so it is not a confirmed defect.
-- Suggested tests/schema decision: criterion not done + nil evidence (valid); criterion done + nonblank evidence (valid); done + nil/blank evidence (reject if evidence is mandatory); not done + evidence (decide whether allowed or reject). No tests executed; no code changes.
-- **Next:** inspect remaining plan invariants/action behavior (including criterion removal/reset and scope mutation) for explicit contract contradictions; then move to final test-gap consolidation without repeating prior review.
-
-
-### Session 30 — Plan mutation behavior and remaining plan invariants
-
-- Verified `main` HEAD before this checkpoint: `eb0d7c943eb2950ee0d798f5087bcec8adc2bcd1` (Session 29 tracker commit); no source changes observed.
-- Re-read `internal/governance/plan_rules.go`, `internal/state/plan.go`, `internal/validate/snapshot_validator.go`, `internal/governance/args.go`, and REQ-040/041.
-- Plan mutation behavior: tasks can be marked done and removed (removal requires a reason and is journaled); criteria can be added and marked met with evidence, but there is no criterion removal/reset action. Scope additions/removals are handled as plan edits; no explicit contradiction with the Draft contract identified. Updates are applied to a working snapshot and a no-op is rejected. String/list args are trimmed and reject blank values, matching REQ-017.
-- **No new finding/candidate elevated.** The contract does not specify a criterion reset/removal feature, nor a reset semantics for task completion, so absence is not treated as a defect. Existing R-013 remains a validation candidate subject to requirement approval.
-- Test-gap observation: repository tree has no dedicated `plan_rules_test.go` or plan/validator-specific test file. This does not prove there are no indirect tests, but direct unit coverage for plan update/reconcile behaviors is not visible in the named-file test inventory. No tests were executed.
-- **Next:** consolidate the review's test gaps and candidates into a prioritized final review summary, separating implementation completeness/scope risks from contract-dependent candidates and verified facts.
-
-
-### Session 31 — Review consolidation (static, prioritized)
-
-- Verified latest `main` HEAD before this checkpoint: `97aadd2cf76cf28698442cf4f8beb37cb4a81899`; no intervening changes observed beyond Session 30.
-- Consolidated the tracker’s recorded findings/candidates and test gaps. This is a static-review consolidation, **not a runtime/test verification or declaration that the review is exhaustive**.
-
-**Confirmed implementation defects:** none established to date.
-
-**Prioritized validation/contract candidates (requirements are Draft; confirm invariants before fixes):**
-1. **R-008 — reconciliation metadata atomicity** (P2 candidate): validator permits partial recorded metadata; define pristine-vs-recorded invariant.
-2. **R-005 — Recorded decision semantic fields** (P2 candidate): validator does not require approval/recorded_at/specification consistency for Recorded entries.
-3. **R-007 — reconciliation item completeness** (P2 candidate): persisted blank item/evidence can pass validator although action path rejects.
-4. **R-006 — reviewed-source completeness** (P2 candidate): reconciliation accepts empty reviewed list; served procedure expects source review.
-5. **R-010 — cycle timestamp presence**: creation timestamp is not required by validator despite lifecycle requirement.
-6. **R-012 — checkpoint/handoff semantic integrity**: required handoff fields and journal-entry consistency are not validated.
-7. **R-011 — micro-cycle text nonblankness**: validator checks presence but not trim-aware nonblank values.
-8. **R-013 — acceptance criterion evidence/done consistency**: validator does not enforce evidence when done; requirement currently ambiguous.
-
-**Lower-priority design/robustness questions (not defects under current draft):** R-001 policy revision binding during evidence wait; R-004 request-ID payload binding; R-002 tier overwrite/storage semantics; R-003 full-tier completion behavior (documented implementation behavior, not finding). Cross-record decision/handoff references remain a possible integrity enhancement but no explicit invariant found.
-
-**Coverage priorities:** add direct validator unit tests for malformed persisted states above; plan update/reconcile action tests; request-ID payload mismatch; policy mutation during evidence preparation; same-SHA cross-tier overwrite; explicit tier gate matrix. Test inventory/source review did not reveal dedicated plan-rule/validator test files. No tests executed.
-
-**Delivery/completeness risk:** runnable MCP server, GitHub MCP passthrough, configuration/bootstrap, and production GitHub adapters remain absent from the reviewed source tree; scope/requirements are Draft or Under review, so this remains an unconfirmed scope risk.
-
-- No source code changed. **Next:** pause broad static review and ask for a scope/requirements decision: confirm whether this repository is intended to be a complete runnable PMCP product now or only the governance core; if the former, prioritize delivery-scope gap review, otherwise turn the invariant candidates into a test-first backlog after requirements approval.
