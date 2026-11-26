@@ -1,24 +1,23 @@
 ## SESSION HANDOFF — START HERE
 
 **Last updated:** 2026-11-25  
-**Active review branch:** `review/session-persistent-tracking`  
-**Baseline branch:** `main`  
+**Branch:** `main` only. All review work happens on `main`; do not create or use any other branch (see [README.md](README.md)).  
 **Persistent tracker:** this file (`review.md`) — read it before continuing.
 
 ### Resume instructions
-1. Fetch/read this entire `review.md` from `review/session-persistent-tracking` first.
-2. Verify the branch still exists and inspect its latest commit. Check whether the remediation PR #1 is still open/draft and whether the review branch has drifted from `main`.
-3. Do not assume prior findings or branch snapshots are unchanged; verify relevant source before acting.
-4. Continue the review only. **Do not make implementation changes, create remediation commits, or merge anything without the user's explicit approval.**
+1. Fetch/read this entire `review.md` from `main` first, using the GitHub MCP server.
+2. Inspect the latest commit on `main`.
+3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
+4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
 5. Next task: review plan mutations, reconciliation classification, cycle ordering/preemption, and cross-record validator consistency. Then map findings to adversarial/negative tests.
 6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
 
 ### Review snapshot
-- Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), previously reported as draft/unmerged; verify current status.
-- Tracker branch: `review/session-persistent-tracking`.
+- Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), its changes are merged into `main`.
+- Tracker location: `review.md` on `main`.
 - Findings: **R-001** policy revision is not bound to selected CI evidence (P1 candidate); **R-002** evidence is keyed by cycle+SHA so tiers overwrite (P1 candidate); **R-003** full-tier pass is required for cycle completion (confirmed behavior); **R-004** idempotency replay does not verify stored tool/action against incoming request (potential correctness issue); **R-005** Recorded decisions' approval metadata invariants are not enforced by validator (P2 candidate).
 - Source/tests have been read, but tests have **not** been run. Findings are review observations, not yet runtime-verified.
-- No implementation changes have been made during this review; no merge performed.
+- No implementation changes have been made during this review.
 
 ---
 
@@ -34,14 +33,14 @@
 - Findings are distinguished as **confirmed**, **potential**, or **needs verification**.
 - Code presence is not equivalent to runtime behavior; tests are not assumed to have run unless execution is recorded.
 - No substantive implementation changes are made without discussing the proposed change and receiving approval.
-- No merge without explicit approval.
+- All work happens on `main`; no other branches are created or used.
 - Update this file at each session boundary: current focus, new findings, disposition, next step.
 
 ## Status summary
 
 | Area | Status | Notes |
 |---|---|---|
-| Documentation authority/status P0 | Remediation drafted in separate PR #1 | Draft/unmerged; see link below |
+| Documentation authority/status P0 | Remediated in PR #1 | Merged into `main`; see link below |
 | Coordinator orchestration | Under review | Request lifecycle and change path inspected partially |
 | Evidence collection and gate evaluation | Reviewed; findings recorded below | Evidence selection happens before lock |
 | State snapshot/encoding | Partially reviewed | Typed parsing, clone/re-encode, digest behavior inspected |
@@ -99,7 +98,7 @@ Completion eligibility checks for recorded evidence where `IsFullPass()` is true
 
 ## Remediation / PR tracking
 - **PR #1:** [Remediate P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1)
-  - Draft, not merged.
+  - Merged into `main`.
   - Updates architecture/requirements documentation to reflect implementation status and clarify proposed/approved/superseded authority.
   - No implementation remediation in that PR.
 
@@ -122,13 +121,13 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 
 ## Session log
 ### Session 5 — Reconciliation and cycle-ordering review
-- Verified the tracker branch HEAD (`52066d1`) and baseline `main` HEAD (`c72f139`); PR #1 remains open, draft, and unmerged.
+- Verified tracker commit `52066d1` and `main` HEAD (`c72f139`); PR #1 remains open, draft, and unmerged.
 - Began review of plan mutations/reconciliation, cycle transition gates, completion, preemption, pending reorder, and snapshot validation.
 - Recorded R-006: `plan.reconcile` accepts an empty `reviewed` list despite REQ-041 describing it as the sources read in full; empty `items` may still be valid when no candidate issues are found.
 - No tests executed. No implementation changes. Review is still in progress.
 
 ### Session 2 — Coordinator request/replay consistency review
-- Re-verified `review.md` exists on the review branch before continuing.
+- Re-verified `review.md` exists before continuing.
 - Reviewed coordinator request validation, branch resolution, locking, read-only path, change retries, replay, and publish/read-back.
 - Reviewed harness and safeguards, migration, and standard-cycle end-to-end tests.
 - Confirmed replay matching is based on request ID alone; stored tool/action are not checked against incoming tool/action (R-004).
@@ -155,7 +154,7 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 ## Session handoff checklist
 When resuming:
 - Read this file first.
-- Verify branch/PR state and current baseline; do not assume this review branch is current.
+- Confirm you are working on `main`; do not assume `main` is unchanged since the last session.
 - Check for changes since the recorded baseline.
 - Update the status summary, findings, and session log.
 - Continue from the highest-priority unfinished task.
@@ -188,4 +187,4 @@ Decision recording verifies approval and writes approval metadata, but `Snapshot
 - Confirmed validator omission of several Recorded-state metadata invariants; recorded R-005 as a potential validation gap.
 - Audit watermark is tied to a completed execution order; audit.advance requires an active standard cycle and records outcome/boundary. Its user attestation is narrative outcome rather than checklist proof; no finding assigned pending requirement semantics.
 - Cycle transition and completion gates were partially reviewed; completion checks reconciliation, criteria, open tasks, full-pass evidence, and attestations.
-- No implementation changes, no tests executed, no merge.
+- No implementation changes, no tests executed.
