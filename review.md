@@ -257,3 +257,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Cross-record checks do enforce record-to-cycle existence and prohibit records on micro cycles, require plan/checkpoint on standard cycles, validate evidence SHA/tier, and validate audit watermark against completed-cycle execution order. No additional issue assigned from these checks yet.
 - Next: map R-001–R-008 to adversarial tests, then review repository-store/audit edge cases and re-evaluate evidence findings.
 - Tests have not been executed; this remains source review only.
+
+
+### Session 10 — Re-evaluate evidence-policy semantics (R-001/R-002)
+- Re-read current main HEAD and the tracker before proceeding; no intervening repository changes observed.
+- Traced `evidence.collect`: coordinator resolves branch, snapshots policy, parses tier/workflow selection, resolves SHA, polls CI outside the branch lock, then stores the prepared evidence against the state/cycle read under lock. The evidence payload retains tier, selected required workflows, checks, SHA and gate.
+- **R-001 disposition:** downgrade from P1 candidate to **unconfirmed policy-semantics question; not a confirmed defect**. Requirements define workflow selection at collection time and do not explicitly require invalidating/recollecting when policy changes during the wait. The stored required-workflow list makes the selection inspectable. Could be a deliberate snapshot model. Do not propose code remediation absent a clarified rule.
+- **R-002 disposition:** confirmed storage behavior remains: per-cycle evidence is keyed by SHA, so collecting a different tier for the same cycle/SHA replaces the prior tier's record. This is potentially destructive (e.g., fast collection after full pass removes the full-pass record and may block completion), but the requirements do not explicitly demand simultaneous tier retention. **Severity should be reconsidered as P2 design/data-retention concern rather than P1**, unless requirements establish tier-retention semantics. Need review the surrounding requirements and completion workflow for intended overwrite behavior before proposing a change.
+- No code changes; tests not run.
+- Next: finish R-002 semantics check and consolidate finding confidence/severity, then continue the review to additional areas per handoff.
