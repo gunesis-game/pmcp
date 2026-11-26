@@ -466,3 +466,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Handoff decision IDs are not checked against the ledger, nor are ledger decisions checked for presence in a cycle handoff when they were proposed/recorded in that cycle. REQ-060/061 describe normal action behavior but REQ-101 does not define these as snapshot invariants. No new finding elevated (possible state integrity enhancement only).
 - No new candidate; existing R-005–R-012 remain unchanged. No code changes; no tests executed.
 - Next: inspect requirements/validator boundary around plan acceptance criteria done/evidence consistency and whether completion gates prevent contradictory persisted states; clarify state invariant vs action-path semantics before elevating.
+
+
+### Session 29 — Acceptance-criterion evidence consistency
+
+- Confirmed latest `main` HEAD: `fff6cd2cae0ed2cf57cdfc8bbd569e3f6c789911` (tracker-only commit from Session 28); no source changes since Session 28.
+- Reviewed `internal/governance/plan_rules.go`, `internal/state/plan.go`, `internal/validate/snapshot_validator.go`, `internal/governance/cycle_rules.go`, and REQ-040/037/101.
+- Normal `plan.update` path marks an acceptance criterion `done` only through `meet_criteria`, which requires nonblank criterion and evidence and stores both. However, snapshot validation checks only criterion text; it does not validate evidence against the done state. Therefore out-of-band/malformed state can have `done=true` with nil/blank evidence, or `done=false` with evidence populated, and still pass validator. Cycle verify/complete gates rely on `UnmetCriteria()` (the done flag), not evidence presence. **R-013 candidate — acceptance-criterion evidence/state mismatch is not validated.** This is a validator-integrity gap candidate; REQ-101 only explicitly requires text and boolean done, and requirements remain Draft, so it is not a confirmed defect.
+- Suggested tests/schema decision: criterion not done + nil evidence (valid); criterion done + nonblank evidence (valid); done + nil/blank evidence (reject if evidence is mandatory); not done + evidence (decide whether allowed or reject). No tests executed; no code changes.
+- **Next:** inspect remaining plan invariants/action behavior (including criterion removal/reset and scope mutation) for explicit contract contradictions; then move to final test-gap consolidation without repeating prior review.
