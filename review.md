@@ -44,11 +44,11 @@
 | Coordinator orchestration | Under review | Request lifecycle and change path inspected partially |
 | Evidence collection and gate evaluation | Reviewed; findings recorded below | Evidence selection happens before lock |
 | State snapshot/encoding | Partially reviewed | Typed parsing, clone/re-encode, digest behavior inspected |
-| Cycle lifecycle rules | Partially reviewed | Full-tier pass required for completion confirmed |
+| Cycle lifecycle rules | Reviewed for phase gates and ordering; adversarial tests pending | DR-02/03 gates, preemption, pending reorder, and default order inspected |
 | Decision governance | Reviewed; validation invariant gap recorded | Approval verification path reviewed; state validator appears to omit some semantic invariants |
 | Repository store / publish consistency | Interface and in-memory test store reviewed; production adapter absent from repository tree | Expected-head semantics specified at interface; adapter cannot be verified |
 | CI integration | Partially reviewed | Gate evaluation and evidence collector inspected; execution not performed |
-| Test coverage | Partially reviewed | Source tests read, but no local test run |
+| Test coverage | Partially reviewed | Existing tests inspected; plan/reconciliation adversarial coverage absent; tests not run |
 
 ## Findings
 
@@ -120,6 +120,15 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 
 
 ## Session log
+### Session 6 — Plan mutations, reconciliation, cycle gates, and validator review
+- Read `review.md) from `main`, then checked current `main` HEAD: `c5fe7994cae24250939f7b09db9ae2fa9d798661` (commit message: “fixed review”; only tracker change since prior baseline).
+- Continued review of `PlanRules.update` / `reconcile`, cycle phase transitions and completion gates, preemption, promotion, pending reorder, DR-06 default ordering, and snapshot validator record checks.
+- R-006 remains confirmed: `reviewed` is required as an argument but can be empty or contain whitespace-only entries; validator does not enforce the reviewed-source list.
+- Added R-007: stored reconciliation item/evidence completeness is not validated (the action rejects blank values, but validator checks classifications only).
+- Cycle flow source review: phase exits match documented gates; preemption pauses the current cycle, micro preemption promotes first; default order is in-progress, paused by execution order, then pending in registry order. No new cycle-ordering finding confirmed in this pass.
+- Repository has no dedicated plan/reconciliation tests in the test-file tree. Tests remain unexecuted; source review only. No implementation changes.
+- Next: map R-001–R-007 to existing tests and adversarial/negative test gaps; continue cross-record validator consistency and then store/audit edge cases.
+
 ### Session 5 — Reconciliation and cycle-ordering review
 - Verified tracker commit `52066d1` and `main` HEAD (`c72f139`); PR #1 remains open, draft, and unmerged.
 - Began review of plan mutations/reconciliation, cycle transition gates, completion, preemption, pending reorder, and snapshot validation.
@@ -188,3 +197,11 @@ Decision recording verifies approval and writes approval metadata, but `Snapshot
 - Audit watermark is tied to a completed execution order; audit.advance requires an active standard cycle and records outcome/boundary. Its user attestation is narrative outcome rather than checklist proof; no finding assigned pending requirement semantics.
 - Cycle transition and completion gates were partially reviewed; completion checks reconciliation, criteria, open tasks, full-pass evidence, and attestations.
 - No implementation changes, no tests executed.
+
+### R-007 — Snapshot validator does not enforce reconciliation item completeness
+**Status:** Confirmed validator omission; P2 candidate  
+**Area:** Reconciliation / state validation
+
+The normal `plan.reconcile` action trims and rejects empty `item` and `evidence` values, but snapshot validation checks only reconciliation classification. A manually edited, malformed, or otherwise out-of-band reconciliation record can therefore pass validation with blank item/evidence text. This is separate from R-006, which concerns the `reviewed` source list.
+
+**Suggested disposition:** Validate non-blank item and evidence in stored reconciliation records (trim-aware), and consider validating each `reviewed` entry too. Add malformed-state tests that demonstrate the validator rejects incomplete reconciliation records, while allowing a legitimate reconciliation with zero items.
