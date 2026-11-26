@@ -1005,3 +1005,10 @@ No implementation changes are authorized by this decision.
 
 - User agreed: **no verification ID** should be added to the evidence payload contract.
 - A-048 remains open; next resume by examining proposed report fields and identity relationships, avoiding redundant identifiers or mechanics already supplied by Git/GitHub.
+
+
+## Session 76 — Execution outcome field approved
+
+- User approved explicitly retaining the verification workflow's reported execution outcome in the evidence payload.
+- This is an execution fact, distinct from PMCP's governance assessment/gate conclusion. PMCP must independently validate it against execution details and provenance; a reported outcome alone does not establish governance success.
+- **Resume at:** Field 2, workflow identity—determine whether identity needs explicit repetition in the payload or can be derived from existing Git/GitHub provenance.
