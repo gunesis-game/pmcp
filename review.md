@@ -53,9 +53,11 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes the fixed-`main`, exact-HEAD, single-attempt optimistic publication model. A-020 now retires the existing `project/policy.json` concept as a mandatory architectural artifact. Its contents must be reassessed individually: duplicated approvals should be derived from the decision ledger; obsolete Git workflow configuration must not survive the fixed-`main` model; genuinely necessary project-specific configuration may remain only with an explicit owner and purpose. No automatic migration of the old schema is assumed.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. The user has now approved CI-owned configuration as the source of verification workflow selection instead of a replacement PMCP policy file.
 
-Next, finish defining the canonical repository/state model and classify every former policy field as derived governance information, canonical governance state, project documentation/configuration, CI-owned configuration, or unnecessary. Then reconcile validation, history/idempotency, evidence, audit, reconciliation, migration, and reporting contracts. No implementation changes without explicit approval.
+Continue classifying the former policy fields and reconcile A-014 carefully: verification evidence must retain the required policy snapshot/fingerprint semantics, but the source of workflow selection is the repository's CI-owned configuration. Define how PMCP discovers/interprets that configuration, maps workflows to evidence tiers, and fingerprints the exact relevant configuration. Do not assume that arbitrary CI configuration is automatically a sufficient or stable policy interface.
+
+Other former fields remain individually subject to disposition: approvals are derived from the decision ledger; Git workflow policy is superseded by fixed-`main`; decision approval modes/approver lists, performance settings, component mappings, commands, and wait overrides require explicit justification or removal. Reconcile the existing strategy gate and approved decision contracts before proposing changes. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -564,3 +566,27 @@ No implementation changes are authorized by this decision.
 - The existing policy fields are not to be copied wholesale into canonical state or automatically migrated. Approvals should be derived from the decision ledger; fixed-`main` supersedes configurable branch/workflow policy; remaining configuration requires individual justification and an explicit owner.
 - The handoff now prioritizes completing the canonical repository/state model and classifying the former policy fields before reconciling dependent contracts and documentation.
 - No implementation files or baseline documents changed; this session updates the review tracker only. No tests were executed.
+
+
+### A-021 | CI-owned verification workflow configuration
+
+**Status: Approved by the user on 2026-11-26.**
+
+- CI-owned repository configuration is the source of truth for selecting verification workflows used by evidence collection. PMCP must not require or introduce a replacement project policy file for this purpose.
+- Evidence tiers (such as fast, integration, and full) may remain as PMCP concepts, but the workflow selection associated with a tier must be derived from or explicitly mapped to the repository's CI-owned configuration.
+- PMCP must define a deterministic discovery and interpretation contract for the relevant CI configuration. It must not assume that arbitrary workflow files or CI settings automatically form an unambiguous tier mapping.
+- Evidence must record the selected workflows and their provenance. The exact relevant CI configuration used for selection must be fingerprinted so evidence remains bound to the verification policy in force when it was collected, preserving A-014's policy snapshot/fingerprint requirement without retaining `project/policy.json`.
+- This decision does not settle the CI discovery convention, supported CI providers, tier-to-workflow mapping syntax, or fingerprint algorithm. Those require explicit design and approval.
+- No automatic migration of former `testing.tiers` or `testing.components` fields is authorized. Component mapping remains optional and must be justified independently.
+
+Rationale: verification workflow definitions belong to the CI system that executes them. PMCP should consume a deterministic, revision-bound view of that configuration rather than maintaining a duplicate policy registry.
+
+No implementation changes are authorized by this decision.
+
+### Session 48 — CI-owned verification configuration approved
+
+- User approved A-021: CI-owned repository configuration is the source of verification workflow selection; no replacement PMCP policy file is to be introduced.
+- A-014 remains in force: evidence must preserve a policy snapshot/fingerprint. The next design must bind that snapshot to the exact CI configuration used for workflow selection and record selected workflow provenance.
+- CI discovery, provider support, tier mapping and fingerprinting remain unresolved design questions.
+- The review tracker is the only file changed. No implementation or baseline requirements/architecture files were changed; no tests were run.
+- **Resume at:** define deterministic CI configuration discovery and tier-to-workflow mapping, then reconcile A-014 and the strategy gate. Continue individual disposition of all former policy fields before rewriting requirements or architecture.
