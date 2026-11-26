@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows; unrelated repository workflows may retain automatic triggers.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return the genuinely unresolved assessment to the consumer as structured, evidence-backed findings.
 
-Continue by defining the precise validation contract for governed verification workflow files: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, and what PMCP can or cannot infer about job behaviour. Keep repository-wide workflow policy separate from the narrower PMCP verification-workflow contract. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
+Continue by defining the precise supported GitHub Actions configuration subset and validator response contract under A-027/A-029: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, expression handling, and explicit treatment of properties PMCP cannot determine. The validator must maximize deterministic governance, minimize consumer reasoning burden, and never imply that validation alone constitutes governance approval. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -776,3 +776,29 @@ Rationale: separating an explicitly dispatched caller from the reusable cleanup 
 - Local reusable workflow references are bound to the caller's commit; external references/actions must be pinned to full immutable commit SHAs.
 - This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the exact workflow configuration subset PMCP supports and validates, beginning with trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials.
+
+
+### A-029 | PMCP maximizes governance and delegates only the genuinely unresolved assessment
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP is responsible for performing as much of the governance work as it can reliably determine and enforce itself. It must not offload machine-checkable governance work to the consumer merely because the consumer may be an AI agent.
+- PMCP should reduce the consumer's reasoning burden, context requirements, and dependence on model capability. This is particularly important for consumers with limited context windows or less capable reasoning models.
+- When PMCP cannot reliably determine a property, it must make that limitation explicit and return the unresolved assessment to the consumer. It must neither silently assume the property is safe nor misrepresent an unknown as a confirmed violation.
+- Validation responses must distinguish at least: checks established as passing, confirmed violations, and unresolved items requiring consumer assessment. Findings should include the relevant evidence and location/context wherever available, and explain what PMCP could not establish.
+- The response must be structured, concise, actionable, and sufficiently evidenced for the consumer to assess the residual questions without repeating PMCP's completed checks.
+- The consumer may be an AI agent, but the principle is not dependent on a particular consumer type.
+- Validator output is governance evidence, not governance approval. The governing process remains responsible for deciding whether an operation or execution may proceed.
+- This is a foundational PMCP architectural principle and applies beyond GitHub Actions workflow validation to PMCP's governance and tool-consumer interactions generally.
+
+Rationale: PMCP exists to govern the consumer's work, not merely to provide a collection of checks for the consumer to interpret and orchestrate. Performing every reliable check centrally makes governance more consistent and lowers the context and reasoning burden on consumers. Explicitly surfacing the remaining uncertainty preserves honest boundaries without pretending PMCP can prove what it cannot.
+
+No implementation changes are authorized by this decision.
+
+### Session 56 — Core governance responsibility approved
+
+- User confirmed A-029 as a core concept of PMCP: PMCP should govern as much as it can on behalf of the consumer, returning only what it genuinely cannot determine for the consumer (likely an AI agent) to assess.
+- The rationale explicitly includes reducing context use and reasoning demands so less capable models can still consume PMCP effectively.
+- The handoff was refreshed to point to the remaining precise GitHub Actions validator contract. This corrects the stale top-level handoff, which had not kept pace with the decisions recorded later in the log.
+- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
