@@ -456,3 +456,13 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Validator enforces the explicitly stated REQ-101 audit invariant: watermark non-negative and, when nonzero, corresponds to a completed cycle's execution order. It does not semantically validate historical audit entries' timestamp/from/through/outcome/cycle or cross-link them to cycles/checkpoints. REQ-081 describes how entries are appended but REQ-101 does not currently specify history-validation rules. **No new candidate elevated**; adding constraints without requirements clarification would be speculative.
 - `audit.advance` checks increasing watermark, completed boundary, and in-progress standard cycle; writes watermark, history entry, handoff audit boundary and log event together through the snapshot mutation. Static review sees no confirmed inconsistency in this path. Test files for these components were not found in the tree listing; no tests run.
 - No code changes. **Next:** investigate cycle/record reference integrity and whether reconciliation/decision references are required to point to existing records under explicit requirements.
+
+
+### Session 28 — Cross-record reference integrity
+
+- Reviewed plan/reconciliation, checkpoint handoff, decision ledger, policy approval pointers, evidence ownership, registry references, and their governing requirements.
+- Registry-to-record references are validated: standard cycles require plan/checkpoint; micro cycles must have no records; plan/checkpoint/evidence keys must reference known cycle IDs. Evidence SHA/key and tier are validated.
+- Decision approvals in policy are validated as null or known decision IDs. Strategy gate separately checks they reference Recorded decisions, as required by REQ-101/DR-03. Therefore a known Proposed ID may be structurally valid but is rejected by the strategy gate; this is consistent with the layered checks, not a defect.
+- Handoff decision IDs are not checked against the ledger, nor are ledger decisions checked for presence in a cycle handoff when they were proposed/recorded in that cycle. REQ-060/061 describe normal action behavior but REQ-101 does not define these as snapshot invariants. No new finding elevated (possible state integrity enhancement only).
+- No new candidate; existing R-005–R-012 remain unchanged. No code changes; no tests executed.
+- Next: inspect requirements/validator boundary around plan acceptance criteria done/evidence consistency and whether completion gates prevent contradictory persisted states; clarify state invariant vs action-path semantics before elevating.
