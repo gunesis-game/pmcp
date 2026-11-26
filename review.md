@@ -1147,3 +1147,26 @@ No implementation changes are authorized by this decision.
 - Integrity/provenance does not itself prove substantive truth or sufficiency; unresolved contextual judgment is handed to AI with structured evidence and provenance.
 - Storage mechanism, artifact format, and retention implementation remain undecided. No implementation changes or tests.
 - **Resume at:** compare candidate evidence-storage and retention approaches against A-039/A-040 guarantees, including failure modes and how PMCP can independently verify integrity and recover evidence; do not choose a mechanism until the options have been assessed.
+
+## A-041 — Evidence storage location: PMCP project Git repository
+
+**Status:** Approved direction
+**Date:** 2026-11-26
+
+Verification evidence is to be preserved within the PMCP project Git repository itself. This direction is selected over a dedicated evidence repository or separate storage service, avoiding additional repositories, infrastructure, credentials, and storage-provider dependencies.
+
+This approval selects the repository as the evidence-storage location, but does not yet settle its concrete layout, lifecycle, publication mechanics, integrity metadata, backup/recovery expectations, or how evidence must be protected from the approved Git history-cleanup workflow. Git storage is not inherently immutable; these guarantees must be assessed and explicitly designed before this direction can be considered fully specified or implemented.
+
+Evidence must still satisfy A-039 and A-040. GitHub Actions artifacts may serve as temporary transport/staging but are not the authoritative retained evidence source.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 68 — Project-repository evidence storage direction approved
+
+- User selected Option 2: preserve verification evidence within PMCP's own Git repository.
+- This avoids adding a separate evidence repository or storage service.
+- The concrete evidence layout, retention/lifecycle, integrity metadata, publication process, recovery, and protections against history cleanup remain unresolved; selection of Git does not by itself guarantee immutability.
+- GitHub Actions artifacts remain temporary transport/staging only, not authoritative retained evidence.
+- No code changes or tests.
+- **Resume at:** define evidence archive lifecycle and protection requirements, especially interaction with history cleanup and repository rewrite/deletion risks, before deciding layout or mechanics.
