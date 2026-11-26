@@ -51,11 +51,14 @@ The assessment should establish and continually update:
 - Static review is not runtime proof. Only record tests or experiments as executed when they actually ran.
 - Update this document in place after every assessment session. Keep the matrix/register as the current synthesis; keep session history concise and focused on what changed, decisions made, and where to resume. Do not duplicate matrix content in session notes.
 
-## Handoff / current next step
+## Current status and handoff
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment. A-032 makes the mechanical-governance/AI-completion model a foundational North Star across the entire MCP: PMCP performs as much governance as it reliably can, then hands the remaining contextual or judgement-based assessment to the AI in a structured, evidence-backed form; the AI returns a structured assessment that PMCP incorporates into the governed process.
+**Review remains ongoing.** No confirmed defect has been established, no tests were executed in this review, and no implementation changes are authorized. Requirements, architecture, and implementation remain open to critical reassessment. The assessment matrix is partial, not exhaustive.
 
-The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. A-042 defines GitHub Actions workflow-history cleanup policy: per workflow, retain only the latest four runs whose outcomes are success or failure; globally remove runs with other terminal outcomes such as cancelled or skipped. A-043 establishes cleanup safeguards: completed-run-only eligibility, workflow-identity grouping, complete paginated inventory, deterministic outcome classification, a deletion plan, candidate revalidation, fail-safe behavior on uncertainty, and no per-run AI approval. This concerns GitHub Actions run history, not Git commit history. Resume by defining remaining exclusions/protections and operational authorization/verification, including evidence preservation. No implementation changes without explicit approval.
+**Current architectural anchor:** Session 34 / A-008 — canonical `.pmcp/state.json`, versioned solely by Git commits; governance compares snapshots as needed to interpret transitions. Workflows are runners, not canonical result/state stores: verification results flow back under their owning tool into the canonical model. PMCP mechanically governs what it can and hands genuinely unresolved assessment to the AI in a structured, evidence-backed form; the AI returns structured assessments for PMCP to validate and incorporate.
+
+**Next:** Resume the evidence-storage lifecycle/protection design after consolidating the review tracker, especially protection of governance evidence from GitHub Actions run-history cleanup. Keep the cleanup policy separate from Git commit history. Do not implement anything without explicit approval.
+
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -132,22 +135,67 @@ Earlier source-tree review suggested governance rules, coordinator abstractions 
 - No implementation changes without explicit approval.
 - Record approved changes here by commit and brief purpose; do not use PR tracking.
 
-## Session continuity log
+## Assessment observations / questions register
 
-This log exists specifically to recover continuity when agentic sessions end. Keep entries concise, recording the session's net progress, decisions, newly assessed scope, unresolved questions, and exact next step. Do not restate the matrix/register/backlog; update those sections directly and use session entries as pointers to the changed sections.
+These are retained from prior review work as observations to investigate—not a defect backlog and not a commitment to preserve the current requirements or design. They can be reclassified, rewritten, closed, or discarded as the assessment develops.
 
-### Session 31 — Consolidated review baseline (reframed)
+| ID | Area | Observation / question | Current disposition |
+|---|---|---|---|
+| R-008 | Reconciliation validation | Recorded metadata appears to allow partial states; should reconciliation metadata have atomic pristine-or-complete semantics? | Needs invariant/design decision |
+| R-005 | Decision validation | What consistency is required among approval, recorded-at, specification, and verified-revision metadata for recorded decisions? | Current validator omission observed; model/invariant open |
+| R-007 | Reconciliation items | Should persisted item and evidence text be trim-aware nonblank, consistent with action-path validation? | Consistency question |
+| R-006 | Reviewed sources | Is a nonempty reviewed-source list required, or can empty review be meaningful? | Workflow/requirement question |
+| R-010 | Cycle validation | What timestamps are required for each lifecycle state, including never-started/cancelled cases? | Lifecycle semantics open |
+| R-012 | Checkpoint/handoff | What integrity relationships should exist among handoff fields, journal entries, and timestamps/events? | State model question |
+| R-011 | Micro-cycle validation | Should eligibility reason and acceptance criteria be trim-aware nonblank, and should micro-cycle concepts exist in the model? | Requirements/design question |
+| R-013 | Plan criterion validation | What semantics should govern criterion done-state and evidence, including evidence on unmet criteria? | Requirement semantics open |
+| R-009 | Reconciliation references | Scalar whitespace references appear handled differently from whitespace list elements. Should normalization be consistent? | Consistency question |
+| R-001 | Evidence governance | Should evidence selection use a policy snapshot during CI wait or revalidate if policy changes? | Design question |
+| R-004 | Request idempotency | What should happen when a request ID is reused with a different payload? | Robustness/contract question |
+| R-002 | Evidence storage | Same cycle/SHA evidence is replaced when tier changes. Is one-record-per-SHA the right data model? | Design trade-off, not endorsed |
+| R-003 | Completion gate | Completion requires full-tier passing evidence. Is that gate appropriate for the intended workflow? | Existing behavior; design question |
 
-- Previous sessions reviewed broad implementation areas and accumulated R-001–R-013 observations; their chronological detail was removed in the earlier roll-up.
-- This review was reframed from defect-finding against presumed-correct requirements/architecture to a neutral assessment of requirements, architecture, and implementation—all of which may be wrong or redesigned.
-- Exhaustive traceability across every current code file/symbol and critical assessment of requirements and architecture has **not** been established.
-- No tests executed; no source changes made as part of the assessment.
-- **Resume at:** neutral, evidence-based traceability and critical assessment. Identify areas requiring deeper inspection; do not assume the goal is to evolve/preserve current architecture.
+## Prior investigation map (not a defect/test priority list)
+
+| Investigation | Previously noted coverage / questions |
+|---|---|
+| Requirements and architecture validation | Critically assess completeness, contradictions, assumptions, fitness for purpose, and whether the system is solving the right problem—not only code conformance. |
+| Persisted state model | Reconciliation states, decision metadata, cycle timestamps, handoff/journal relationships, micro-cycle text fields, criterion evidence semantics, valid minimal states. |
+| Mutation/workflow behavior | Plan/reconcile operations, reviewed-source semantics, reference normalization, ambiguous matching, no-op behavior, task/criterion updates, and whether these workflows are needed at all. |
+| Evidence and gates | Policy changes during CI wait; same SHA across tiers; pass/fail/pending gate combinations; completion-gate suitability. |
+| Request replay | Same ID/same payload and same ID/different payload semantics; replay side effects. |
+| Publication/storage | Head movement, retry, ref update failure, read-back failure, uncertain retry, multi-file atomicity, delete vs empty content, ancestry/no-force guarantees, and suitability of the store abstraction. |
+| Product delivery | Server/tool/resource/prompt shape, configuration, transport, GitHub MCP passthrough, adapters, and what product scope is actually intended. |
+| Runtime evidence | Run tests or targeted experiments only when approved/available; record commands, outcomes, and limitations. |
+
+## Previously recorded implementation observations
+
+These are factual observations from earlier static inspection, subject to re-verification as the repository changes. They are not endorsements of the design.
+
+- Evidence preparation occurs before the branch lock to avoid holding the lock during CI polling.
+- Evidence is collected against a commit SHA and stores tier, required workflows, checks, SHA and gate.
+- `required_workflows` overrides policy workflow selection; default tier is full; default wait is policy-configured or 15 minutes.
+- Evidence polling evaluates latest run per workflow and attaches failure details.
+- Snapshot parsing/encoding is typed; clone encodes and reparses; state digest covers sorted `.pmcp/*.json` files only.
+- Cycle completion requires a recorded full-tier passing evidence result.
+- MemoryStore checks expected-head equality under its mutex and copies written bytes; it is test infrastructure, not production-adapter verification.
+- Decision approval modes include attested and issue-comment validation; issue-comment checks approver membership, excludes the acting account, requires post-proposal timing and decision-specific approval text.
+- Registry-to-record references and evidence SHA/tier are validated; strategy gates require approved Recorded decisions.
+- Audit advancement records watermark, audit row, handoff boundary and journal entry together; validator checks watermark non-negative and anchored to completed execution order.
+
+## Delivery/scope question
+
+Earlier source-tree review suggested governance rules, coordinator abstractions and test fakes exist, while runnable MCP server/bootstrap, GitHub MCP passthrough, MCP transport/adapters, and production GitHub store/facts adapters described by architecture were not found. This observation needs re-verification against the current tree and against a deliberately reconsidered product scope. It must not be treated as proof that those components are necessarily required.
+
+## Direct-to-main change tracking
+
+- All repository work happens directly on `main`. No branches or pull requests.
+- No implementation changes without explicit approval.
+- Record approved changes here by commit and brief purpose; do not use PR tracking.
 
 ## Overall assessment status
 
 **Ongoing current-state and design assessment.** No confirmed defect established to date. No tests executed. No implementation fixes made. Requirements, architecture, and code are all open to reconsideration. The current matrix is a partial assessment map—not an exhaustive inventory or a statement that the current system is correct.
-
 
 ## Architectural decisions established during the current review
 
@@ -186,6 +234,14 @@ flowchart TD
 - No code changes were authorized. This session only updates the review tracker.
 - **Resume at:** critically inspect governance/domain operations in current source, one issue at a time, and persist each approved decision to `review.md` on `main` before moving forward. Decision A-007 now settles the separation of parsing, domain interpretation, and operation-specific semantic validation.
 
+## Review update — Product North Star added to baseline documents
+
+- At the user's direction, added the shared **Product North Star — Reliable work across limited agent sessions** to the opening of both `architecture.md` and `requirements.md`.
+- The framing states that PMCP must support agents with limited reasoning capability, small context windows, short/interrupted sessions, and lost conversation history.
+- It establishes the governed GitHub repository as the single durable project memory, containing both the project implementation and its PMCP governance/project knowledge. It explicitly rules out a separate PMCP-managed project database or independently maintained governance store.
+- It explains PMCP's role as interpreting and validating repository-resident knowledge and exposing explicit MCP operations/guidance so agents can recover context and continue after session loss or agent replacement.
+- This product framing belongs in the requirements and architecture baseline documents. `review.md` remains the delta assessment record and logs this change rather than redefining the product purpose.
+- Verified both documents on `main` after writing: `architecture.md` content SHA `e42c51d9d23b5b98db92492ab40c1779176f90d8`; `requirements.md` content SHA `b9a017bbe6610246f8501e0625249fc91cb51bd4`.
 
 ## Review update — Product North Star added to baseline documents
 
@@ -196,6 +252,17 @@ flowchart TD
 - This product framing belongs in the requirements and architecture baseline documents. `review.md` remains the delta assessment record and logs this change rather than redefining the product purpose.
 - Verified both documents on `main` after writing: `architecture.md` content SHA `e42c51d9d23b5b98db92492ab40c1779176f90d8`; `requirements.md` content SHA `b9a017bbe6610246f8501e0625249fc91cb51bd4`.
 
+## Compact decision/session history
+
+- **Sessions 31–32:** Reframed review as neutral, evidence-based assessment of requirements, architecture, and implementation; reinforced that `review.md` must be updated in-repository as decisions are approved. A-001–A-006 and the conceptual layering were established.
+- **Sessions 33–42:** Separated parsing, domain interpretation, and semantic validation; adopted canonical `.pmcp/state.json` with Git history; defined operation-specific contracts, reconciliation, evidence collection, audit, and governance-history mechanics.
+- **Sessions 43–46:** Established commit classification/metadata, status-report contract, and fixed-`main`, exact-HEAD, one-shot optimistic publication.
+- **Sessions 47–55:** Retired mandatory `project/policy.json`; moved workflow selection authority to CI configuration; established GitHub Actions verification, tiering, naming, explicit read-only initiation, validation, and a reusable history-cleanup workflow structure.
+- **Sessions 56–63:** Established PMCP’s mechanical-governance responsibility, structured AI assessment return, workflow discovery/parsing boundaries, trigger/input contracts, normalization, and safe input consumption.
+- **Sessions 64–70:** Defined bounded assurance; separated execution outcomes, governance gates, and authorization; established shared verification evidence, integrity/retention/retrievability, repository-based evidence storage, workflow-run history retention, and cleanup safeguards.
+- The Product North Star was added to `architecture.md` and `requirements.md`, including durable repository-based project memory, support for limited/interrupted AI sessions, mechanical governance, and structured AI completion. The relevant requirement updates (REQ-113–REQ-115) and architecture direction are recorded in the prior approved baseline update.
+
+## Approved decisions (preserved in full)
 
 ### A-007 | Parsing, domain interpretation, and semantic validation
 
@@ -209,12 +276,6 @@ flowchart TD
 - Raw repository files, serialization, cloning, digests, and changed-path detection remain outside the PMCP domain model.
 
 Rationale: syntactically malformed data and semantically invalid governance state are different failure classes. Their relevance depends on the operation being performed. Keeping repository representation and mechanics out of the domain model preserves the agreed boundary in A-001/A-002/A-006.
-
-### Session 33 — Parsing and validation separation
-
-- User approved A-007. Recorded the decision above and updated the unresolved parsing question and resume point.
-- No implementation changes authorized or made.
-- **Resume at:** inspect the current governance operations and their actual input dependencies/validation behavior. Use concrete call sites to assess whether the operation-specific boundary is respected; propose one next design decision at a time and record approval here before continuing.
 
 ### A-008 | Canonical governance state file and Git-backed history
 
@@ -232,11 +293,6 @@ Rationale: Git already provides immutable commit snapshots and historical retrie
 
 No implementation changes are authorized by this decision.
 
-### Session 34 — Canonical state representation decision
-
-- User approved A-008: one canonical `.pmcp/state.json`, with Git commits as the sole state history and operation-dependent historical comparison.
-- Recorded A-008 in this review tracker on `main`; no implementation files changed.
-- **Resume at:** continue inspecting actual governance operation call sites and their input dependencies/validation behavior. Then assess operation-specific validation as a separate decision. The previously discussed validation proposal is not yet approved.
 ### A-009 | Operation-specific dependencies and validation
 
 **Status: Approved by the user on 2026-11-26.**
@@ -255,12 +311,6 @@ Rationale: operations have different state dependencies and governance obligatio
 
 No implementation changes are authorized by this decision.
 
-### Session 35 — Operation-specific validation decision
-
-- User approved A-009: explicit per-operation state dependencies, preconditions, mutation effects, and post-mutation invariants; no global usability gate.
-- Record that full-state validation remains diagnostic rather than a universal operation gate.
-- No implementation files changed.
-- **Resume at:** construct and verify the operation-dependency matrix from all registered operations, including exact state fields, repository inputs, historical reads, and mutation effects. Reconcile the matrix with requirements and architecture docs before proposing implementation changes.
 ### A-010 | Normative operation contract
 
 **Status: Approved by the user on 2026-11-26.**
@@ -279,12 +329,6 @@ Rationale: a normative contract makes operation dependencies, governance obligat
 
 No implementation changes are authorized by this decision.
 
-### Session 36 — Normative operation contract decision
-
-- User approved A-010 as written.
-- The first-pass operation-dependency matrix is accepted as the basis for detailed contracts, subject to refinement against actual registered actions and call paths.
-- No implementation files changed.
-- **Resume at:** formalize and verify the detailed operation contracts for every registered action, including conditional branches, exact fields, external inputs, mutation side effects, preconditions, postconditions, and historical requirements. Then reconcile `requirements.md` and `architecture.md` with A-007 through A-010 before proposing coordinator redesign.
 ### A-011 | Detailed cycle operation contracts
 
 **Status: Approved by the user on 2026-11-26.**
@@ -298,11 +342,6 @@ No implementation changes are authorized by this decision.
 
 No implementation changes are authorized by this decision.
 
-### Session 37 — Cycle operation contract approval
-
-- User approved all ten detailed cycle operation contracts.
-- No implementation files changed.
-- **Resume at:** formalize the remaining non-cycle operation contracts (plans, checkpoints, decisions, evidence, audit, and status), then verify all contracts against registered actions and implementation call paths. Reconcile requirements and architecture with A-007 through A-011 before proposing implementation.
 ### A-012 | Reconciliation as a mandatory governed workflow gate
 
 **Status: Approved by the user on 2026-11-26.**
@@ -319,16 +358,6 @@ No implementation changes are authorized by this decision.
 
 Rationale: a governed process must determine when reconciliation happens and enforce it as a lifecycle gate. A revision-bound record makes the review auditable and prevents stale reconciliation from authorizing completion after relevant changes.
 
-### Session 38 — Non-cycle operation contract approvals and tracking correction
-
-- User approved the reconciliation workflow and invalidation rule in A-012.
-- User approved the detailed contracts for `checkpoint.save`, `plan.update`, `decision.propose`, `decision.record`, and `decision.list`. These are accepted operation contracts under A-010; they are not implementation authorization.
-- The contracts require explicit minimal dependencies, conditional cycle/checkpoint requirements, atomic publication of all declared side effects, clean rejection instead of nil-pointer panics, and no unrelated global semantic validation.
-- `decision.record` requires both verified approval and published-specification evidence; decision/policy/checkpoint/journal effects publish atomically.
-- The user correctly identified that the review's North Star had been violated: approved decisions were accumulated in chat without updating `review.md` before proceeding. This update restores the durable tracker. Future progression must stop after each approval until `review.md` is updated and the commit is verified.
-- No implementation files changed. This commit updates the review tracker only.
-- **Resume at:** continue detailed contracts for remaining registered operations, beginning with the next decision operation after `decision.list`; verify each against actual registered actions and call paths. After each user approval, update and verify this file on `main` before moving to the next contract. Reconcile the requirements and architecture baselines with the approved decisions before coordinator redesign.
-
 ### A-013 | Bind collected evidence to its verification policy
 
 **Status: Approved by the user on 2026-11-26.**
@@ -343,13 +372,6 @@ Rationale: a governed process must determine when reconciliation happens and enf
 Rationale: evidence is meaningful only relative to both the implementation revision and the rules used to verify it. Without policy binding, evidence collected under weaker or otherwise different requirements could be reused to satisfy a newer gate.
 
 No implementation changes are authorized by this decision.
-
-### Session 39 — Evidence policy binding decision
-
-- User approved A-013: evidence must be bound to the implementation revision and the verification-relevant policy snapshot that selected required checks.
-- The initial tracker write accidentally replaced the document with only the appended section. This was immediately identified and recovered from the parent commit; the complete prior review history is restored below, with A-013 appended.
-- The corrective commit restores the full tracker and records A-013. No implementation files changed and no tests were executed.
-- **Resume at:** continue the remaining non-cycle operation contracts after `evidence.collect`, beginning with `audit.check`; verify each against registered actions and implementation call paths. Then reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before proposing coordinator redesign.
 
 ### A-014 | Complete contract for `evidence.collect`
 
@@ -376,14 +398,6 @@ Rationale: evidence is meaningful only when its implementation revision and veri
 
 No implementation changes are authorized by this decision.
 
-### Session 40 — Evidence collection contract approval
-
-- User approved A-014, completing the detailed `evidence.collect` contract after A-013 established policy-bound evidence.
-- Static inspection confirmed current gaps: the evidence model has no policy revision/fingerprint; evidence is keyed by SHA alone; cycle resolution occurs after CI collection; optional in-progress workflows can prolong polling; and coordinator replay occurs after evidence preparation.
-- No implementation files changed and no tests were executed. This update records the approved contract only.
-- **Resume at:** continue with the next remaining non-cycle operation contract, `audit.check`, and verify it against registered actions and implementation call paths. After each approval, update and verify this file on `main` before proceeding. Reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before coordinator redesign.
-
-
 ### A-015 | Complete contract for `audit.check`
 
 **Status: Approved by the user on 2026-11-26.**
@@ -400,29 +414,6 @@ No implementation changes are authorized by this decision.
 - The response is an index of material to review; it does not assert that documentation has been reviewed or reconciled. Review occurs separately, followed by `audit.advance`.Rationale: audit discovery and audit completion are separate actions. A read-only query must reliably identify the exact outstanding window without modifying it or being blocked by unrelated governance defects.
 
 No implementation changes are authorized by this decision.
-
-### Session 41 — Audit check contract approval and canonical-state alignment reminder
-
-- User approved A-015, the complete `audit.check` contract.
-- User reiterated that all work reviewed and approved so far must align with the Git-commit history and canonical `.pmcp/state.json` architecture established by A-008.
-- This is a mandatory cross-cutting reconciliation constraint, not a new persistence exception: the approved operation contracts must be reconciled so their state inputs, records, mutation effects, audit/evidence identities, journal/checkpoint effects, and historical comparisons are represented through one canonical state document at each Git commit. Git history is the only durable state-version history; no parallel PMCP history/version store and no retained multi-file `.pmcp/*.json` state model.
-- The architecture reconciliation must explicitly revisit every approved contract (A-007 onward), including A-011 cycle side effects, A-012 revision-bound reconciliation, A-013/A-014 policy-bound evidence, and A-015 audit-window calculation. Where a contract describes logical records or atomic effects, map them into the single state document and a single Git commit rather than interpreting them as separate persisted files.
-- The current `requirements.md` and `architecture.md` still describe the multi-file state layout and therefore require deliberate reconciliation; do not treat the current documentation as already aligned.
-- No implementation files changed and no tests were executed. This commit records A-015 and the architecture-alignment constraint only.
-- **Resume at:** review the final remaining non-cycle operation contract, `status.report`, against registered actions and call paths. Then reconcile requirements, architecture, and all approved operation contracts with A-008's canonical `.pmcp/state.json` and Git-history model before proposing coordinator redesign. Update and verify `review.md` after every subsequent approval. No implementation without explicit approval.
-
-
-### Session 42 — Shared governance history infrastructure and commit metadata direction
-
-- User corrected the proposed `status.report` contract: `status.report` is only the agent-facing tool that requests and presents a report. The underlying Git-history and state-reconstruction infrastructure must be reusable by other components and operations; it must not be implemented as logic owned by `status.report`.
-- Agreed architectural direction: shared infrastructure must be able to filter Git commits. This requires commits produced by PMCP-governed components to carry useful, canonical, machine-readable commit metadata. Git commit trailers were proposed as a candidate representation (for example operation, record type, cycle and state schema), but the exact convention and its mandatory scope are **not yet approved**.
-- Authority rule proposed: commit metadata is a classification/indexing aid, while the committed `.pmcp/state.json` is authoritative for resulting governance state. The infrastructure must cross-check metadata against actual commit contents and state transitions; metadata alone never proves an operation succeeded. Legacy/missing metadata handling remains to be designed.
-- Shared infrastructure responsibilities identified: filter commit history; retrieve each relevant commit's `.pmcp/state.json`; compare snapshots; reconstruct transitions; validate transitions under applicable governance rules; preserve commit provenance; and expose reusable query/scope APIs to consumers. It must distinguish governance state transitions from ordinary code-only commits. Consumers must not duplicate this logic.
-- `status.report` remains the final non-cycle operation contract under review (A-017 is **not approved or recorded**). Its revised responsibility is to request an appropriate history reconstruction and render an agent-readable consolidated report; it does not own Git traversal or reconstruction.
-- The earlier A-016 draft that treated status as a direct current-snapshot diagnostic is superseded by this clarification and must not be treated as approved.
-- User explicitly raised the review North Star/continuity failure. This session entry and the revised handoff are being committed now before any further discussion. No implementation changes or tests were performed.
-- **Exact resume point:** continue the shared governance-history infrastructure design from the commit-filtering and canonical commit-metadata requirement. Decide the metadata convention and which commits require it; then finish the revised A-018 `status.report` consumer contract. After all operation contracts, reconcile requirements, architecture and every approved contract against the single `.pmcp/state.json` per Git commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
-
 
 ### A-016 | Shared governance-history commit classification and metadata
 
@@ -443,15 +434,6 @@ No implementation changes are authorized by this decision.
 Rationale: governance needs a reliable way to distinguish state transitions from ordinary repository work while retaining Git as the sole historical authority. Machine-readable metadata makes filtering practical, but verifying the committed state and actual transition prevents metadata from becoming a parallel or self-authenticating record.
 
 No implementation changes are authorized by this decision.
-
-### Session 43 — Commit metadata and shared history classification approved
-
-- User approved A-016, establishing the principles for classifying governance, implementation, and external/unclassified commits and using metadata as a verifiable filtering aid.
-- The revised `status.report` consumer contract is tracked as A-017 because the earlier A-016 status draft was superseded and never approved.
-- The exact trailer spelling/format, mandatory schema/version compatibility rules, legacy migration behavior, and whether a separate transition identifier is needed remain to be specified against the existing implementation before any implementation proposal.
-- No implementation files changed and no tests were executed. This commit updates the review tracker only.
-- **Resume at:** inspect the existing commit metadata implementation against A-016, settle the precise canonical metadata convention and legacy handling, then define A-017 `status.report` as a thin consumer of shared history reconstruction. After approval, update and verify this file before proceeding to architecture/requirements reconciliation. No implementation without explicit approval.
-
 
 ### A-017 | Canonical PMCP commit metadata convention and legacy handling
 
@@ -476,14 +458,6 @@ Rationale: a versioned, strict metadata envelope gives shared history infrastruc
 
 No implementation changes are authorized by this decision.
 
-### Session 44 — Canonical metadata convention approved
-
-- User approved A-017: versioned metadata for new PMCP governance commits, strict validation of the six required trailers, digest binding to canonical `.pmcp/state.json`, and non-destructive treatment of legacy unversioned commits.
-- The metadata-version trailer is distinct from the state-document schema version.
-- The revised `status.report` consumer contract is A-018. The earlier A-016 status draft was superseded and never approved; A-017 is the metadata convention.
-- Existing implementation has not been changed. Static inspection identified the current five-trailer format, permissive parser, and lack of explicit metadata versioning. No tests were executed.
-- **Resume at:** define A-018 `status.report` as a thin agent-facing consumer of shared history/state reconstruction. Then reconcile requirements, architecture and all approved contracts against the single canonical `.pmcp/state.json` per commit and Git-history-only versioning. Update and verify this tracker after every approval. No implementation without explicit approval.
-
 ### A-018 | Revised `status.report` consumer contract
 
 **Status: Approved by the user on 2026-11-26.**
@@ -502,16 +476,6 @@ Rationale: status is an agent-facing view over authoritative state and verified 
 
 No implementation changes are authorized by this decision.
 
-### Session 45 — A-018 status consumer contract approved
-
-- User approved A-018, defining `status.report` as a read-only, no-argument consumer of shared governance-history reconstruction.
-- The contract retains the current REQ-020 status fields and adds history-derived transitions, provenance, classification/metadata findings, and explicit completeness/limitations.
-- Current-state validity and historical reconstruction validity are separate report dimensions. Partial or invalid history must be disclosed rather than presented as complete.
-- Static inspection confirmed the current implementation is still snapshot-centric: `StatusReport.Apply` consumes prepared validation/integrity facts and the current typed snapshot; the coordinator's read-only path reads a bounded recent commit set. Shared history reconstruction does not yet exist. This is an observation, not an implementation change.
-- No implementation files changed and no tests were executed. The full tracker was preserved and updated in place.
-- **Resume at:** read `requirements.md` and `architecture.md` in full, then reconcile their multi-file state layout, commit/history assumptions, and all approved operation contracts (A-007 onward) against the canonical `.pmcp/state.json` per commit and Git-history-only versioning. Do not redesign or implement until the contradictions and contract impacts have been assessed and presented for approval.
-
-
 ### A-019 | Optimistic single-attempt publication execution model
 
 **Status: Approved by the user on 2026-11-26.**
@@ -527,15 +491,6 @@ No implementation changes are authorized by this decision.
 Rationale: the operation's decision and validation are bound to the exact state the caller acted upon. A single expected-parent publication prevents lost updates without introducing hidden retries or PMCP-owned concurrency orchestration. Requiring a fresh request after conflict keeps the agent aware that its governing context changed.
 
 No implementation changes are authorized by this decision.
-
-### Session 46 — Foundational execution model approved
-
-- User approved A-019, establishing fixed-`main`, exact-HEAD mutation planning, and one expected-parent publication attempt.
-- A moved `main` produces an explicit revision conflict; the caller rereads and submits a new request. No PMCP lock, retry, serialization, or automatic replay subsystem is permitted.
-- A failed publication is not a governance transition.
-- Updated the handoff to the next foundational reconciliation decision: define the canonical repository/state model, including the boundary between `.pmcp/state.json` and separately owned project policy.
-- No implementation files changed and no tests were executed. This tracker update is the only repository change in this session.
-
 
 ### A-020 | Retire the current policy-file concept
 
@@ -553,14 +508,6 @@ Rationale: the existing policy file mixes duplicated governance state, obsolete 
 
 No implementation changes are authorized by this decision.
 
-### Session 47 — Policy-file concept retired
-
-- User approved A-020: retire `project/policy.json` as a required architectural concept.
-- The existing policy fields are not to be copied wholesale into canonical state or automatically migrated. Approvals should be derived from the decision ledger; fixed-`main` supersedes configurable branch/workflow policy; remaining configuration requires individual justification and an explicit owner.
-- The handoff now prioritizes completing the canonical repository/state model and classifying the former policy fields before reconciling dependent contracts and documentation.
-- No implementation files or baseline documents changed; this session updates the review tracker only. No tests were executed.
-
-
 ### A-021 | CI-owned verification workflow configuration
 
 **Status: Approved by the user on 2026-11-26.**
@@ -575,15 +522,6 @@ No implementation changes are authorized by this decision.
 Rationale: verification workflow definitions belong to the CI system that executes them. PMCP should consume a deterministic, revision-bound view of that configuration rather than maintaining a duplicate policy registry.
 
 No implementation changes are authorized by this decision.
-
-### Session 48 — CI-owned verification configuration approved
-
-- User approved A-021: CI-owned repository configuration is the source of verification workflow selection; no replacement PMCP policy file is to be introduced.
-- A-014 remains in force: evidence must preserve a policy snapshot/fingerprint. The next design must bind that snapshot to the exact CI configuration used for workflow selection and record selected workflow provenance.
-- CI discovery, provider support, tier mapping and fingerprinting remain unresolved design questions.
-- The review tracker is the only file changed. No implementation or baseline requirements/architecture files were changed; no tests were run.
-- **Resume at:** define deterministic CI configuration discovery and tier-to-workflow mapping, then reconcile A-014 and the strategy gate. Continue individual disposition of all former policy fields before rewriting requirements or architecture.
-
 
 ### A-022 | Mandatory testing workflows with GitHub Actions as the initial provider
 
@@ -602,15 +540,6 @@ Rationale: testing is part of the governed path from design to implementation, a
 
 No implementation changes are authorized by this decision.
 
-### Session 49 — Mandatory testing workflow direction approved
-
-- User approved GitHub Actions as the initial and only CI provider in scope, with other providers deferred to explicit future extensions.
-- User clarified that testing/verification workflows are mandatory governance, not optional configuration. The project must establish its strategy during governance/design; applicable workflows become mandatory validation gates when cycles reach implementation.
-- The handoff now focuses on deterministic GitHub Actions discovery/mapping and the agent-facing workflow execution/result/evidence path, while reconciling A-014's revision-bound evidence contract and the strategy gate.
-- No implementation files or baseline requirements/architecture files changed; this session updates the review tracker only. No tests were run.
-- **Resume at:** inspect existing CI/evidence and strategy-gate contracts against A-021/A-022, then propose the exact GitHub Actions discovery and workflow mapping contract. Update and verify this tracker after every approval. No implementation without explicit approval.
-
-
 ### A-023 | Progressively inclusive verification tiers
 
 **Status: Approved by the user on 2026-11-26.**
@@ -625,14 +554,6 @@ No implementation changes are authorized by this decision.
 Rationale: cumulative tiers make the strength of each verification level unambiguous and prevent a nominally broader validation run from accidentally skipping lower-level checks.
 
 No implementation changes are authorized by this decision.
-
-### Session 50 — Progressive verification tiers approved
-
-- User approved A-023: `integration` includes all `fast` workflows plus integration workflows; `full` includes all lower-tier workflows plus acceptance workflows.
-- Tier membership is cumulative and deterministic; duplicate workflow identities are evaluated once.
-- The handoff now proceeds to the concrete GitHub Actions discovery, workflow identity, and tier-mapping contract.
-- This tracker update records the approval before moving to the next design topic. No requirements, architecture, or implementation files were changed and no tests were run.
-
 
 ### A-024 | Filename-based verification tier declaration
 
@@ -659,15 +580,6 @@ Rationale: workflow filenames provide a small, discoverable, version-controlled 
 
 No implementation changes are authorized by this decision.
 
-### Session 51 — Workflow tier declaration approved
-
-- User approved A-024: workflow filename patterns declare fast, integration, and acceptance tiers.
-- Workflow paths are stable identities; display names are not.
-- Unmatched workflows are not implicitly assigned; empty tiers and invalid/missing required workflow configuration block validation.
-- Next topic: define the validity and executability contract for discovered workflows.
-- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-
-
 ### A-025 | Explicitly initiated, revision-bound, read-only verification execution
 
 **Status: Approved by the user on 2026-11-26.**
@@ -689,16 +601,6 @@ Rationale: verification is a governed action, not a passive reaction to reposito
 
 No implementation changes are authorized by this decision.
 
-### Session 52 — Verification execution safety contract approved
-
-- User approved A-025, including the additional requirement that governed verification workflows never run automatically.
-- PMCP must explicitly initiate verification through `workflow_dispatch`; event-based triggers are prohibited. Runs initiated outside PMCP are not accepted as governance evidence.
-- Evidence is accepted only for an exact `head_sha` match. Jobs must have read-only repository permissions and must not mutate the governed repository.
-- PMCP checks HEAD after execution; any change invalidates the result and is treated as a governance violation.
-- The contract acknowledges that workflow inspection and GitHub Actions permissions cannot prove arbitrary job code has no external side effects.
-- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the precise workflow-file validity and safety inspection rules, distinguishing enforceable configuration constraints from guarantees PMCP cannot make about arbitrary job code and external effects. Then reconcile the evidence fingerprint and strategy-gate contracts.
-
 ### A-026 | Scope of the no-automatic-trigger rule
 
 **Status: Approved by the user on 2026-11-26.**
@@ -713,14 +615,6 @@ No implementation changes are authorized by this decision.
 Rationale: the safety restriction is specifically about the workflows PMCP treats as authoritative verification evidence. Extending it to every repository workflow would impose a broader CI policy that is not necessary to establish that boundary and was not the user's intended scope.
 
 No implementation changes are authorized by this decision.
-
-### Session 53 — Verification trigger scope clarified
-
-- User selected Option 1: only PMCP-governed verification workflows are subject to the A-025 no-automatic-trigger rule.
-- Other workflows, including the current `ci.yml`, may retain automatic triggers unless separately governed by another decision.
-- The A-025 execution-safety controls remain fully applicable to all workflows discovered as PMCP verification workflows.
-- This tracker update records the scope decision before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the exact PMCP validation contract for governed verification workflows, including triggers, YAML/schema, effective permissions, credentials/secrets, reusable workflows/actions, and limits on proving job behaviour.
 
 ### A-027 | Governed verification workflow validation contract
 
@@ -739,14 +633,6 @@ No implementation changes are authorized by this decision.
 
 Rationale: validating only YAML syntax would accept workflows whose effective triggers, permissions, dependencies, or expressions undermine the governed verification boundary. A deliberately small, inspectable configuration surface makes enforcement more deterministic. The separately scoped history-cleanup reusable workflow serves an operational purpose and must not be conflated with workflows that produce verification evidence.
 
-### Session 54 — Workflow validation direction approved
-
-- User approved effective-configuration validation, including explicit least-privilege permissions, restrictions on secrets/credentials, immutable references for reusable workflows/actions, and rejection of constructs PMCP cannot safely inspect.
-- User added one explicit exception: Git workflow-history cleanup must be implemented as a reusable workflow. The exception is limited to that operational capability; it is not a verification workflow and cannot be used to produce or participate in verification evidence.
-- The cleanup workflow's invocation and permission model remain open and must be designed separately; the exception does not grant it broad permissions by implication.- This tracker update records the approved direction before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the precise supported GitHub Actions YAML subset and effective-configuration inspection rules, including expression handling, secret/credential detection, the platform-provided token boundary, and the separately scoped invocation/permission contract for the history-cleanup reusable workflow.
-
-
 ### A-028 | Git workflow-history cleanup invocation structure
 
 **Status: Approved by the user on 2026-11-26.**
@@ -762,16 +648,6 @@ Rationale: validating only YAML syntax would accept workflows whose effective tr
 - No implementation changes are authorized by this decision.
 
 Rationale: separating an explicitly dispatched caller from the reusable cleanup implementation gives the maintenance operation a clear invocation boundary while allowing the cleanup logic to be reused. Restricting the caller's authority and the reusable workflow's inputs prevents this operational exception from weakening the read-only verification boundary.
-
-### Session 55 — History-cleanup reusable workflow structure approved
-
-- User approved a dedicated `workflow_dispatch` caller workflow invoking a dedicated `workflow_call` reusable cleanup workflow.
-- The reusable workflow receives only narrowly defined inputs. It is operational maintenance, cannot be used by governed verification workflows, and cannot produce verification evidence.
-- Any write authority is confined to the cleanup invocation path; the called workflow cannot elevate the caller's permissions. The exact minimum permissions and cleanup authorization remain open.
-- Local reusable workflow references are bound to the caller's commit; external references/actions must be pinned to full immutable commit SHAs.
-- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the exact workflow configuration subset PMCP supports and validates, beginning with trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials.
-
 
 ### A-029 | PMCP maximizes governance and delegates only the genuinely unresolved assessment
 
@@ -789,13 +665,6 @@ Rationale: separating an explicitly dispatched caller from the reusable cleanup 
 Rationale: PMCP exists to govern the consumer's work, not merely to provide a collection of checks for the consumer to interpret and orchestrate. Performing every reliable check centrally makes governance more consistent and lowers the context and reasoning burden on consumers. Explicitly surfacing the remaining uncertainty preserves honest boundaries without pretending PMCP can prove what it cannot.
 
 No implementation changes are authorized by this decision.
-
-### Session 56 — Core governance responsibility approved
-
-- User confirmed A-029 as a core concept of PMCP: PMCP should govern as much as it can on behalf of the consumer, returning only what it genuinely cannot determine for the consumer (likely an AI agent) to assess.
-- The rationale explicitly includes reducing context use and reasoning demands so less capable models can still consume PMCP effectively.
-- The handoff was refreshed to point to the remaining precise GitHub Actions validator contract. This corrects the stale top-level handoff, which had not kept pace with the decisions recorded later in the log.
-- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.- **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
 
 ### A-030 | Structured governance assessment response contract
 
@@ -838,16 +707,6 @@ Rationale: a common response model allows PMCP to perform the deterministic work
 
 No implementation changes are authorized by this decision.
 
-### Session 57 — Structured assessment response contract approved
-
-- User approved A-030: governance findings distinguish `passed`, `violation`, and `unresolved`; inability to determine a check must never be represented as a pass.
-- The common response includes a versioned, machine-readable envelope, subject/revision, outcome summary, and stable, evidence-backed, actionable findings.
-- Validation execution failure is represented separately from assessment findings; infrastructure/tool failures are not delegated as consumer reasoning tasks.
-- Validation evidence is not governance authorization. Validation execution, assessment outcome, and authorization remain separate questions.
-- The exact schema and operation-specific extensions remain open. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the precise supported GitHub Actions configuration subset and effective-configuration inspection rules, applying A-027, A-029, and A-030. Begin with YAML/schema validity, trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials. No implementation changes without explicit approval.
-
-
 ### A-031 | Workflow discovery, parsing, and structural validation boundary
 
 **Status: Approved by the user on 2026-11-26, with explicit scope clarification.**
@@ -883,15 +742,6 @@ Rationale: a deliberately bounded structural language is a prerequisite for reli
 
 No implementation changes are authorized by this decision.
 
-### Session 58 — Workflow parsing boundary approved and scoped
-
-- User agreed to A-031 and clarified that discovery/parsing/structural validation is only one side/layer of the boundary; it must not be represented as final validation.
-- The decision now explicitly requires later semantic and security validation layers and an aggregate result under A-030. Structural parsing success alone cannot imply complete validation or authorization.
-- The handoff now points to trigger semantics, effective permissions, expressions, credentials, action/reusable-workflow resolution, and remaining static-analysis limits.
-- No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the trigger semantics and allowlist for governed verification workflows, including how GitHub Actions event forms and event filters are interpreted. No implementation changes without explicit approval.
-
-
 ### A-032 | Mechanical governance with AI completion — foundational North Star
 
 **Status: Approved by the user on 2026-11-26.**
@@ -912,16 +762,6 @@ Rationale: PMCP exists to govern work, not merely to provide tools or report mac
 
 No implementation changes are authorized by this decision.
 
-
-### Session 59 — Foundational mechanical-governance/AI-completion model approved
-
-- User clarified that PMCP's purpose is broader than automated validation: every governance process must be performed mechanically by PMCP to the fullest extent it can reliably manage, with the remaining contextual/judgement-based work deliberately presented to the AI so the process can be completed.
-- User confirmed that the AI's assessment must return to PMCP in structured form for incorporation into the governed process.
-- A-032 records this as a foundational North Star applying across the entire MCP.
-- The same principle was added to the Product North Star in `architecture.md` and `requirements.md`; REQ-113–REQ-115 define mechanical responsibility, structured AI assessment return/provenance, and completion semantics.
-- No implementation code or tests were changed/run.
-- **Resume at:** continue the GitHub Actions workflow-validation design, starting with trigger semantics, applying A-032 as the governing principle: mechanically determine what PMCP can and explicitly hand off only what it cannot reliably assess.
-
 ### A-033 | Governed verification workflow trigger semantics
 
 **Status: Approved by the user on 2026-11-26.**
@@ -938,15 +778,6 @@ No implementation changes are authorized by this decision.
 Rationale: the no-automatic-trigger rule must be proven from the complete effective trigger declaration, not inferred from a superficial YAML match. Supporting only a deliberately bounded representation and treating unsupported syntax as unresolved prevents incomplete inspection from creating false confidence. Separating declared trigger configuration from actual run provenance preserves the distinction between static configuration and execution evidence.
 
 No implementation changes are authorized by this decision.
-
-### Session 60 — Governed verification trigger semantics approved
-
-- User approved A-033: governed verification workflows may declare only `workflow_dispatch`; additional events are violations.
-- Scalar and mapping forms of `workflow_dispatch` are supported. Inputs are permitted only through a separately defined, explicitly validated schema.
-- Invalid trigger configuration is a violation; valid but unsupported or ambiguous syntax is unresolved. No trigger property or event declaration may be silently ignored.
-- Passing trigger validation does not establish run provenance, PMCP initiation, exact-SHA correspondence, overall workflow safety, final validation, or authorization.
-- No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the exact `workflow_dispatch` input schema and validation rules, including supported input types, required/default semantics, choice options, boolean/number handling, input count and size limits, and how dispatch inputs are bound to the governed verification request. Then continue with effective permission semantics.
 
 ### A-034 | Governed workflow-dispatch input contract
 
@@ -969,15 +800,6 @@ Rationale: PMCP should accept only a small, explicit parameter language it can v
 
 No implementation changes are authorized by this decision.
 
-### Session 61 — Workflow-dispatch input contract approved
-
-- User approved A-034: restricted input types (string, boolean, number, choice); environment excluded.
-- Explicit type and non-empty description required; required defaults false; defaults must match type; choice options must be non-empty unique strings and contain any declared default.
-- Unknown properties are violations; enforce maximum 25 inputs and 65,535-character dispatch payload.
-- Safe use of values and binding to the PMCP verification request remain separate assessment responsibilities.
-- No implementation changes or tests.
-- **Resume at:** define precise normalization and validation semantics for defaults and supplied dispatch values (including number representation, boolean representation, missing/empty values, choice matching, and GitHub's input/context coercions), then assess how the validated values are bound to the intended verification request.
-
 ### A-035 | Workflow-dispatch input value normalization and validation
 
 **Status: Approved by the user on 2026-11-26.**
@@ -996,16 +818,6 @@ No implementation changes are authorized by this decision.
 Rationale: strict typed acceptance prevents implicit coercion and ambiguity from creating false confidence. A single canonical representation makes request intent auditable, while post-dispatch comparison binds the resulting run to the exact workflow revision, target revision, and inputs PMCP intended. GitHub's differently typed input contexts must be treated explicitly rather than conflated.
 
 No implementation changes are authorized by this decision.
-
-### Session 62 — Workflow-dispatch input normalization approved
-
-- User approved A-035: exact input-name matching; reject undeclared or duplicate inputs; required inputs must be supplied; optional inputs require explicit defaults; required inputs cannot also have defaults.
-- Enforce strict typed values: strings remain unchanged; booleans must be Boolean; numbers must be finite JSON numbers; choice values must exactly match declared options.
-- PMCP maintains a canonical typed resolved input set and provenance for supplied and resolved values, then serializes according to the GitHub dispatch API contract.
-- Record workflow path/revision, intended target SHA, and canonical inputs before dispatch; verify the resulting run against that intent before accepting it as governance evidence.
-- Use the typed `inputs` context as semantic reference; do not assume `github.event.inputs` preserves Boolean types.
-- No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define how PMCP mechanically verifies that workflow inputs are consumed safely throughout expressions, shell commands, actions, and reusable workflows; distinguish statically provable safe patterns from unresolved or confirmed unsafe use.
 
 ### A-036 | Safe consumption of workflow-dispatch inputs
 
@@ -1028,16 +840,6 @@ Rationale: validating declarations alone cannot establish safe use. A conservati
 
 No implementation changes are authorized by this decision.
 
-### Session 63 — Workflow input safe-consumption assessment approved
-
-- User approved A-036: trace each input through supported expressions, environment variables, outputs, action/reusable-workflow interfaces, and all execution-affecting sinks.
-- Expression and shell handling must be structural and deliberately bounded; unsupported or ambiguous flows remain unresolved, and confirmed unsafe flows are violations.
-- Direct input interpolation into `run` scripts is prohibited. Environment indirection is not automatically safe; PMCP must establish that input-derived values remain data.
-- Local reusable workflows require recursive inspection at the governed revision. Pinned external actions establish identity only; opaque handling remains unresolved unless it can be established.
-- PMCP performs reliable mechanical analysis and hands only residual contextual assessment to the AI with precise evidence and provenance.
-- No requirements, architecture, implementation files, or tests were changed.
-- **Resume at:** define the supported expression language and evaluation semantics needed for A-036, including contexts, functions, operators, property/index access, type behavior, and fail-closed handling of unsupported expressions.
-
 ## A-037 — Bounded assurance scope for GitHub Actions governance
 
 **Status:** Approved
@@ -1058,12 +860,6 @@ This is a general architectural principle: PMCP assesses a governed subject agai
 
 Implementation scope: this decision establishes the assessment boundary; it does not approve implementing a complete GitHub Actions interpreter, arbitrary shell analysis, or broad static-analysis capabilities.
 
-## Session 64 — Assurance boundary established
-
-- Approved A-037 defining bounded assurance scope for GitHub Actions governance.
-- The review remains active; GitHub Actions assessment continues within the agreed boundary rather than expanding into a complete interpreter or arbitrary implementation analyser.
-- Next: return to the remaining governance-level questions for the three verification workflows and the separate Git history cleanup workflow, applying this boundary.
-
 ## A-038 — Verification evidence and gate authority
 
 **Status:** Approved
@@ -1078,15 +874,6 @@ Implementation scope: this decision establishes the assessment boundary; it does
 These are distinct concepts and must remain distinct in PMCP: (1) workflow execution outcome, (2) governance assessment and tier-gate outcome, and (3) authorisation to proceed. GitHub Actions status is never itself the authority over PMCP's governance process.
 
 Implementation scope: this decision establishes evidence and gate authority semantics. It does not expand the agreed GitHub Actions assurance boundary.
-
-## Session 65 — Verification evidence and gate authority approved
-
-- User approved A-038 defining workflow results as evidence, not governance decisions.
-- Tier gates are aggregate governance assessments; incomplete, invalid, failed, cancelled, inaccessible, or revision-mismatched required evidence cannot pass. Unestablished significance remains unresolved.
-- Higher tiers inherit lower-tier requirements: integration includes fast; full includes fast and integration.
-- Gate completion remains distinct from authorisation and process advancement.
-- No implementation changes or tests.
-- **Resume at:** define the shared evidence contract PMCP requires from each of the three verification workflows, including identity, scope, target revision, execution provenance, result, and retained evidence; keep workflow-specific test content outside the shared contract.
 
 ## A-039 — Shared verification evidence contract
 
@@ -1110,14 +897,6 @@ An absent, malformed, untraceable, incomplete, or inconsistent required evidence
 
 This shared contract does not make workflow-specific test content identical and does not expand the agreed bounded GitHub Actions assurance scope.
 
-## Session 66 — Shared verification evidence contract approved
-
-- User agreed to A-039: all three verification workflows provide a common evidence contract covering workflow identity/tier, target SHA, execution provenance, declared scope, execution outcome, evidence of what was actually verified, and a retained result reference.
-- Workflow-specific test logic remains separate; PMCP validates the shared contract and owns the governance assessment.
-- Missing, malformed, untraceable, incomplete, or inconsistent evidence cannot support a successful gate; unestablished claims remain unresolved.
-- No implementation changes or tests.
-- **Resume at:** determine the governance-level rules for evidence integrity, retention, and retrievability (what PMCP must be able to establish, without prescribing storage mechanics prematurely).
-
 ## A-040 — Evidence integrity, retention, and retrievability
 
 **Status:** Approved
@@ -1135,15 +914,6 @@ Rationale: Governance decisions must remain auditable and reproducible over time
 
 No implementation changes are authorized by this decision.
 
-
-## Session 67 — Evidence integrity and retention approved
-
-- User approved A-040: evidence must have mechanically established integrity and provenance, remain available for the governance record's lifetime, and be retrievable and inspectable.
-- Evidence alteration or retention failure is a violation; temporary inaccessibility or unestablished provenance is unresolved; demonstrated incompleteness/inconsistency is a violation, otherwise uncertainty remains unresolved.
-- Integrity/provenance does not itself prove substantive truth or sufficiency; unresolved contextual judgment is handed to AI with structured evidence and provenance.
-- Storage mechanism, artifact format, and retention implementation remain undecided. No implementation changes or tests.
-- **Resume at:** compare candidate evidence-storage and retention approaches against A-039/A-040 guarantees, including failure modes and how PMCP can independently verify integrity and recover evidence; do not choose a mechanism until the options have been assessed.
-
 ## A-041 — Evidence storage location: PMCP project Git repository
 
 **Status:** Approved direction
@@ -1156,16 +926,6 @@ This approval selects the repository as the evidence-storage location, but does 
 Evidence must still satisfy A-039 and A-040. GitHub Actions artifacts may serve as temporary transport/staging but are not the authoritative retained evidence source.
 
 No implementation changes are authorized by this decision.
-
-
-## Session 68 — Project-repository evidence storage direction approved
-
-- User selected Option 2: preserve verification evidence within PMCP's own Git repository.
-- This avoids adding a separate evidence repository or storage service.
-- The concrete evidence layout, retention/lifecycle, integrity metadata, publication process, recovery, and protections against history cleanup remain unresolved; selection of Git does not by itself guarantee immutability.
-- GitHub Actions artifacts remain temporary transport/staging only, not authoritative retained evidence.
-- No code changes or tests.
-- **Resume at:** define evidence archive lifecycle and protection requirements, especially interaction with history cleanup and repository rewrite/deletion risks, before deciding layout or mechanics.
 
 ## A-042 — Git workflow history cleanup retention policy
 
@@ -1180,16 +940,6 @@ GitHub Actions workflow-history cleanup is governed by the following retention p
 - This policy defines outcome classes and retention counts. Exact API selection, safeguards, exclusions/protection for runs carrying governance evidence, and operational authorization/validation remain to be specified.
 
 No implementation changes are authorized by this decision.
-
-
-## Session 69 — Workflow-history cleanup policy recorded
-
-- User specified the policy: per workflow, retain the latest four success or failure runs and remove the rest of that class; globally remove cancelled, skipped, and other non-success/non-failure outcomes.
-- Clarified the scope: this is GitHub Actions workflow run history, not Git commit history. Commit history immutability is unaffected.
-- Workflow selection mechanics, safety exclusions for evidence-related runs, and authorization/verification safeguards remain open.
-- No implementation changes or tests.
-- **Resume at:** specify cleanup selection boundaries and safeguards, particularly how cleanup must preserve governance evidence and what validation is required before deletion.
-
 
 ## A-043 — Workflow-history cleanup safeguards
 
@@ -1209,11 +959,3 @@ The cleanup workflow must determine and validate its complete deletion scope bef
 These safeguards define a two-phase process: inventory/classify/plan first, then revalidate/execute. The deletion plan is mechanical; the approved retention policy is its authority, not an AI per-run decision.
 
 These safeguards do not yet specify additional exclusions or protection for runs carrying governance evidence, operational authorization, deletion execution mechanics, or post-deletion verification. No implementation changes are authorized by this decision.
-
-## Session 70 — Cleanup safeguards approved
-
-- User approved A-043: only completed runs eligible; group retention by actual workflow identity; complete paginated inventory required; outcome classification deterministic; prepare exact deletion plan; revalidate each candidate; fail safely on uncertainty; no per-run AI approval.
-- Cleanup follows two phases: scope/plan, then revalidation/execution.
-- Additional exclusions/evidence protection, authorization, execution mechanics, and post-delete verification remain open.
-- No implementation changes or tests.
-- **Resume at:** define what runs or evidence must be excluded/protected from deletion, including interaction with PMCP governance evidence.
