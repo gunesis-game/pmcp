@@ -420,3 +420,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
   8. **P3 robustness/contract tests:** malformed UUID, unsupported tool/action, unknown args, null/scalar args, whitespace-only strings/list values, replay with altered payload under same request ID (resolve contract question first), bounded result messages/annotations, clock/ID failures.
 - **Disposition:** this consolidation does not change findings' confirmation level. No implementation edits and no tests executed.
 - **Next:** review remaining validator edge cases or, preferably, establish scope/requirement approval before converting completeness risks into findings. Continue review only.
+
+
+### Session 24 — Cycle timestamp presence validator edge case
+
+- Re-fetched the persistent tracker and verified `main` HEAD is `7faeee9c50dd9b105531e7ed4570b69145cb0a21` before this review. No source changes observed.
+- Inspected `internal/validate/snapshot_validator.go`, cycle state types, `REQ-030`, `REQ-101`, and `DR-05`.
+- **R-010 candidate — cycle timestamps are order-checked only when present:** `checkTimestamps` skips nil timestamps, and neither `checkStandard` nor `checkMicro` requires `CreatedAt` to be non-null. Therefore a malformed cycle can pass the validator with missing `created_at`; even an active or completed cycle may have `started_at` (and `completed_at`) while `created_at` is absent, and the remaining present timestamps are still compared. REQ-030 says every created cycle receives `created_at`; REQ-101 explicitly requires timestamp ordering. This is a validator-contract gap candidate (requirements are Draft), not a confirmed defect.
+- Suggested direct tests: pending standard with null `created_at`; active standard with `started_at` but null `created_at`; completed standard with both start/completion but null `created_at`; equivalent micro cases; valid timestamp sequences and out-of-order sequences. Confirm exact required timestamps for cancelled records (which may never have started) before asserting.
+- No tests executed and no implementation changes. Next: investigate remaining validator cross-record/semantic edges without re-reviewing prior candidates, or seek scope/requirements approval to convert candidates into actionable findings.
