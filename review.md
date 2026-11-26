@@ -283,3 +283,13 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - **R-009 (candidate, low severity): reconciliation scalar references bypass blank validation.** A scalar `references: "   "` is accepted and persisted as a meaningless reference, while `references: ["   "]` is rejected. REQ-041's reference semantics should be consistent; likely trim-aware non-empty validation for scalar strings, or normalize blank scalar to no reference. Severity P3/quality inconsistency; not yet tested.
 - No tests run; no code changes.
 - Next: review plan mutation invariants and cycle ordering/preemption/validator edge cases; distinguish actual governance gaps from intended behavior, then update findings and map negative tests.
+
+
+### Session 13 — Cycle ordering, preemption and plan mutation edge review
+- Reviewed `default_order.go`, relevant cycle lifecycle actions (`start`, `pause`, `block`, `unblock`, `cancel`, `reorder`, `complete`), validator cycle/record invariants, and standard-cycle tests.
+- Default order is deterministic by design: in-progress, paused by execution order, then pending registry order. Blocked cycles are excluded and require explicit unblock. Reorder only touches pending slots, preserves the other statuses' registry slots, and requires a reason.
+- Starting/resuming another cycle pauses the current one; micro cycles are promoted before interruption, preserving their historical micro metadata in the generated plan. Block/cancel paths similarly promote micro cycles before terminal/status changes.
+- Completion checks phase reconcile, open tasks, unmet criteria, full-tier passing evidence, recorded reconciliation, contradictory reconciliation, and attestations. No new confirmed defect found in these paths.
+- Plan mutation paths are transactional at the rule/snapshot level (rejected calls do not publish); exact/unique-prefix matching prevents ambiguous item mutation. A few negative cases remain in the test matrix; this source review does not establish runtime behavior because tests were not run.
+- No code changes; tests not run.
+- Next: reconcile the findings list/status summary with updated dispositions, then map the remaining R-005–R-009 validator and plan edge cases to adversarial tests and identify the highest-value next review target.
