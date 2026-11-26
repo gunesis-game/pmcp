@@ -15,6 +15,10 @@ The AI is a participant in completing the governed process, not an external appr
 
 This principle applies across the entire MCP and every governance process—not only validation. It is a foundational product and architecture constraint: **PMCP does as much governance mechanically as it reliably can, then structures and directs the remaining work to the AI so the governed process can be completed.**
 
+
+
+**Canonical governance/results model.** Git is the sole durable source of truth, and `.pmcp/state.json` is the canonical representation of PMCP's current governance state at a commit. GitHub Actions is only an execution runner: its run status and provenance may be presented to governance, but workflow runs and artifacts are not the canonical results store. Each verification tool owns publishing its results back through that tool; those results flow into the canonical state. PMCP interprets and governs the committed state, mechanically resolves what it can, and structures the remaining genuinely judgment-dependent work for the AI. No parallel result store or independently maintained state history is introduced.
+
 Design and requirements should therefore favour:
 - durable, discoverable project knowledge stored alongside the project it describes;
 - explicit decisions, state, constraints, progress, and outstanding work;
