@@ -1095,3 +1095,33 @@ Implementation scope: this decision establishes evidence and gate authority sema
 - Gate completion remains distinct from authorisation and process advancement.
 - No implementation changes or tests.
 - **Resume at:** define the shared evidence contract PMCP requires from each of the three verification workflows, including identity, scope, target revision, execution provenance, result, and retained evidence; keep workflow-specific test content outside the shared contract.
+
+## A-039 — Shared verification evidence contract
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+The three governed verification workflows (`verify-fast-*`, `verify-integration-*`, and `verify-acceptance-*`) must produce evidence conforming to one shared governance contract. The contract is independent of workflow-specific test content.
+
+The shared evidence contract identifies:
+- **Workflow identity:** the canonical governed workflow identity and its verification tier.
+- **Target revision:** the exact commit SHA the verification claims to assess.
+- **Execution provenance:** a traceable identity for the GitHub Actions run and its originating dispatch/request, sufficient for PMCP to establish that the run corresponds to the execution it initiated.
+- **Declared verification scope:** the scope the workflow claims to cover, consistent with its assigned tier and approved role.
+- **Execution outcome:** the workflow's reported result, retained distinctly from PMCP's governance assessment.
+- **Verification evidence:** traceable evidence identifying what was actually executed or checked, sufficient for PMCP to assess whether the declared scope was fulfilled.
+- **Retained result reference:** a durable, retrievable reference to the execution results and supporting evidence, with integrity and provenance that PMCP can assess.
+
+Each workflow remains responsible for its own verification logic and test content. PMCP owns validation of the shared contract, association with the intended request and target revision, assessment of evidence completeness and integrity, and the resulting governance gate decision.
+
+An absent, malformed, untraceable, incomplete, or inconsistent required evidence field cannot be treated as a successful verification result. If PMCP cannot establish a claim from available evidence, that claim remains unresolved; it must not be inferred from a green workflow conclusion alone.
+
+This shared contract does not make workflow-specific test content identical and does not expand the agreed bounded GitHub Actions assurance scope.
+
+## Session 66 — Shared verification evidence contract approved
+
+- User agreed to A-039: all three verification workflows provide a common evidence contract covering workflow identity/tier, target SHA, execution provenance, declared scope, execution outcome, evidence of what was actually verified, and a retained result reference.
+- Workflow-specific test logic remains separate; PMCP validates the shared contract and owns the governance assessment.
+- Missing, malformed, untraceable, incomplete, or inconsistent evidence cannot support a successful gate; unestablished claims remain unresolved.
+- No implementation changes or tests.
+- **Resume at:** determine the governance-level rules for evidence integrity, retention, and retrievability (what PMCP must be able to establish, without prescribing storage mechanics prematurely).
