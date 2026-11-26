@@ -20,6 +20,61 @@
 
 ---
 
+## Cohesive review roll-up (Sessions 1–31)
+
+This matrix supersedes the chronological session notes for day-to-day review navigation; the session log remains below as audit trail.
+
+### Review areas and consolidated disposition
+
+| Review area | Sessions | Coverage consolidated | Result / disposition |
+|---|---:|---|---|
+| Documentation authority & project status | 1, 4, 23 | README, architecture/requirements status, decision authority, remediation PR | Initial P0 status/authority issue remediated in merged PR #1. Requirements remain Draft and architecture Under review. |
+| Coordinator/request lifecycle & replay | 2, 8, 11, 16, 19, 22 | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 request-ID payload mismatch is a robustness question under REQ-015. |
+| CI/evidence selection, polling & gates | 1, 8, 10, 11, 17–19 | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure handling, policy timing | R-001 downgraded to policy-snapshot semantics question. R-002 tier overwrite aligns with specified per-SHA model. R-003 full-tier pass requirement is observed behavior, not a finding. |
+| State/snapshot encoding & integrity | 3, 7, 9, 14, 21 | Typed state, clone/re-encode, canonical encoding, digest scope, integrity acceptance | No confirmed defect. Digest covers sorted .pmcp/*.json state files; project documents/policy excluded by design. |
+| Decision ledger & approvals | 4, 7, 14, 20, 28 | Propose/record/list, attested and issue-comment approvals, decision fields, policy approval refs, cross-record refs | R-005 remains validator-invariant candidate; cross-record handoff links are not required explicitly by current draft. |
+| Plan updates & reconciliation | 5–8, 12, 14, 20, 29–30 | Tasks/criteria, matching, add/remove, evidence, no-op, reviewed sources, item/reference normalization, persisted reconciliation metadata | R-006–R-009 and R-013 remain candidates; no explicit reset/removal feature is required by current draft. |
+| Cycle lifecycle, order, preemption & completion | 5–6, 13–14, 24–25, 29 | Start/pause/block/unblock/cancel/reorder, micro-cycle promotion, default order, phase gates, timestamps, micro metadata | No confirmed lifecycle defect. R-010 timestamp presence and R-011 micro-field nonblankness are validator candidates. |
+| Checkpoint, handoff, journal & audit | 4, 9, 15, 26–28 | Handoff/checkpoint fields and update semantics, event log, journal, audit window/watermark, audit advancement | R-012 checkpoint/handoff semantic validation candidate. Audit watermark checks meet explicit REQ-101; historical audit semantic validation not specified, no candidate elevated. |
+| Repository-store/publication boundary | 3, 8–9, 18–21 | Store interface/fake, expected-head checks, concurrency retry, commit/read-back/ancestry, atomic publication and failure paths | MemoryStore paths reviewed; production adapter absent, so real GitHub atomicity/no-force behavior unverified. No defect confirmed. |
+| MCP product/bootstrap and delivery scope | 16, 21–23 | Architecture-to-tree reconciliation, tool/resource/prompt exposure, configuration, server transport, GitHub MCP passthrough/adapters | Significant completeness risk if in current scope; not a confirmed defect while scope/requirements remain Draft/Under review. |
+| Test coverage and adversarial cases | 7–8, 9, 14–21, 24–30 | Existing test inventory reviewed and gaps mapped across validators, plan/reconcile, evidence, replay, store, bootstrap | Tests were source-inspected only; none executed. Direct validator and plan/reconciliation test files not observed in tree inventory. |
+
+### Unified candidate register
+
+| ID | Area | Candidate invariant / concern | Priority | Confidence / disposition |
+|---|---|---|---|---|
+| R-008 | Reconciliation validation | Reconciliation metadata should be either pristine/unrecorded or fully recorded; partial metadata currently passes validation | P2 | Strong validator-gap candidate; confirm invariant |
+| R-005 | Decision validation | Recorded decisions should have consistent approval, recorded-at, specification and verified-revision metadata | P2 | Validator omission confirmed; invariant authority draft |
+| R-007 | Reconciliation items | Stored item and evidence text should be nonblank/trim-valid, matching action path | P2 | Validator omission confirmed; contract candidate |
+| R-006 | Reviewed-source list | Reconciliation should require a nonempty, nonblank reviewed-source list | P2 | Action accepts empty list; served procedure/REQ semantics suggest completeness |
+| R-010 | Cycle validation | Require created_at presence and lifecycle-appropriate timestamp sequence | P2 candidate | Null created_at may pass; define cancelled/never-started cases |
+| R-012 | Checkpoint/handoff | Validate handoff fields, journal entries, timestamp/event consistency | P2 candidate | Normal action path populates; persisted-state rules need definition |
+| R-011 | Micro-cycle validation | Eligibility reason and acceptance criteria should be trim-aware nonblank, not merely non-null | P2 candidate | Requirements applicability to state validation needs confirmation |
+| R-013 | Plan criterion validation | Done/evidence consistency: done criterion should have evidence; evidence on unmet criterion semantics should be defined | P2 candidate | Normal mutation enforces evidence; REQ-101 is less explicit |
+| R-009 | Reconciliation references | Scalar whitespace reference accepted unlike whitespace list element | P3 | Normalization inconsistency; verify intended semantics |
+| R-001 | Evidence governance | Policy change during CI wait: evidence-selection policy snapshot vs revalidation | Design question | Not a confirmed defect; downgraded |
+| R-004 | Request idempotency | Same request ID reused with different payload returns prior result | Robustness | Contract currently treats repeated ID as replay; not a defect |
+| R-002 | Evidence storage | Same cycle/SHA evidence replaced when tier changes | Design/storage trade-off | Explicitly consistent with one-record-per-SHA model; no defect |
+| R-003 | Completion gate | Full-tier pass required for completion | Behavior | Confirmed behavior; not a finding |
+
+### Unified test/verification backlog (ordered)
+
+| Priority | Test group | Required coverage |
+|---|---|---|
+| 1 — scope decision | Product completeness | Decide full runnable MCP product vs governance core; define release/milestone acceptance |
+| 2 — validator invariant tests | Decision/reconciliation/cycle/checkpoint/plan persisted-state validity | Pristine vs recorded reconciliation; partial metadata combinations; decision metadata states; blank item/evidence/reviewed/reference; null timestamps; blank micro fields; criterion evidence combinations; valid minimal states |
+| 3 — plan/reconcile action tests | Action-path validation and atomic mutation | Omitted/empty/whitespace reviewed sources; zero reconciliation items allowed; scalar/list reference normalization; plan add/remove/meet-criteria/task completion; ambiguous matches; no-op rejection |
+| 4 — evidence semantics tests | Policy/evidence race, tier replacement, completion gates | Policy mutation during CI wait; same SHA across tiers (both orders); fast/integration/full pass/fail/pending gate matrix |
+| 5 — idempotency tests | Request replay integrity | Same ID/same payload replay; same ID/different action/args policy; confirm no additional publish |
+| 6 — publication fault injection | Production store contract | Head movement/retry; ref update failure; publish then read-back failure; uncertain retry; multi-file atomic commit; delete vs empty content; ancestry and no-force semantics |
+| 7 — delivery integration tests | Actual MCP/server/adapters | Tool inventory and schema parity; config propagation; lockdown/read-only; startup/transport; malformed request mapping; GitHub MCP passthrough; production GitHub facts/store |
+| 8 — execution verification | CI and runtime | Run relevant Go tests and CI once approved/available; record actual results rather than inferring from source review |
+
+**Global status:** Static review only. No confirmed implementation defect established. No tests executed. No implementation changes approved. Candidates are not remediation tasks until their governing invariants and scope are agreed.
+
+---
+
 # PMCP Repository Review — Persistent Tracking
 
 **Review status:** In progress  
