@@ -8,6 +8,13 @@ The governed GitHub repository is the durable memory of the project. It contains
 
 PMCP interprets and validates that repository-resident information and exposes clear, explicit MCP operations and guidance so an agent can recover the relevant context and determine what to do next after a session reset or agent replacement. The system must not assume a sophisticated model, a large context window, durable conversational memory, or the ability to reconstruct missing context correctly.
 
+
+**Governance is a cooperative process between PMCP and its AI consumer.** PMCP must perform mechanically every part of the governing process that it can reliably determine and enforce. It must not delegate deterministic, machine-checkable work merely because an AI could also perform it. When a matter genuinely requires contextual interpretation, judgement, or reasoning beyond what PMCP can reliably establish, PMCP must explicitly identify the remaining assessment and present the AI with the relevant evidence, context, constraints, and a precise question or task.
+
+The AI is a participant in completing the governed process, not an external approval layer or a substitute for PMCP's mechanical responsibilities. The AI returns its assessment in a structured form that PMCP can validate, associate with the exact subject and revision, incorporate into the overall assessment, and use when determining the next governed step. PMCP must distinguish its mechanically established findings from AI-provided assessments, preserve unresolved matters until they have been addressed, and never represent an incomplete assessment as complete. A confirmed violation remains a violation; an unresolved matter is a deliberate handoff for further assessment, not automatically a failure or a pass.
+
+This principle applies across the entire MCP and every governance process—not only validation. It is a foundational product and architecture constraint: **PMCP does as much governance mechanically as it reliably can, then structures and directs the remaining work to the AI so the governed process can be completed.**
+
 Design and requirements should therefore favour:
 - durable, discoverable project knowledge stored alongside the project it describes;
 - explicit decisions, state, constraints, progress, and outstanding work;
