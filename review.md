@@ -928,3 +928,30 @@ No implementation changes are authorized by this decision.
 - The same principle was added to the Product North Star in `architecture.md` and `requirements.md`; REQ-113–REQ-115 define mechanical responsibility, structured AI assessment return/provenance, and completion semantics.
 - No implementation code or tests were changed/run.
 - **Resume at:** continue the GitHub Actions workflow-validation design, starting with trigger semantics, applying A-032 as the governing principle: mechanically determine what PMCP can and explicitly hand off only what it cannot reliably assess.
+
+### A-033 | Governed verification workflow trigger semantics
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP must mechanically parse and evaluate the complete `on` declaration for every governed verification workflow identified under A-024/A-026.
+- The only permitted event is `workflow_dispatch`. Any additional event, including `push`, `pull_request`, `schedule`, or `workflow_run`, is a confirmed `violation`.
+- The supported representations of `workflow_dispatch` are the scalar form and mapping form. Workflow-dispatch inputs may be supported, but only under an explicitly defined and validated input schema; they must not introduce arbitrary trigger behavior or bypass the governed execution contract.
+- Unsupported or ambiguous trigger syntax that is valid GitHub Actions syntax but cannot be reliably interpreted is `unresolved`, not a pass. Demonstrably invalid configuration is a `violation`.
+- Trigger properties, activity types, filters, and other event declarations must not be silently ignored. PMCP must account for the complete trigger declaration.
+- A passing trigger assessment establishes only that the inspected workflow configuration declares the permitted manual trigger. It does not establish who initiated a particular run, that the run was initiated by PMCP, that the run targets the intended revision, or that the workflow is otherwise safe or authorized.
+- Execution provenance and exact-revision matching remain separate mechanical validation responsibilities. A run is not accepted as governance evidence merely because its workflow passed trigger validation or because it was manually dispatched.
+- Trigger validation is one layer of the complete workflow assessment under A-030/A-031; it must be incorporated into the aggregate assessment and must not itself be represented as final validation or authorization.
+
+Rationale: the no-automatic-trigger rule must be proven from the complete effective trigger declaration, not inferred from a superficial YAML match. Supporting only a deliberately bounded representation and treating unsupported syntax as unresolved prevents incomplete inspection from creating false confidence. Separating declared trigger configuration from actual run provenance preserves the distinction between static configuration and execution evidence.
+
+No implementation changes are authorized by this decision.
+
+### Session 60 — Governed verification trigger semantics approved
+
+- User approved A-033: governed verification workflows may declare only `workflow_dispatch`; additional events are violations.
+- Scalar and mapping forms of `workflow_dispatch` are supported. Inputs are permitted only through a separately defined, explicitly validated schema.
+- Invalid trigger configuration is a violation; valid but unsupported or ambiguous syntax is unresolved. No trigger property or event declaration may be silently ignored.
+- Passing trigger validation does not establish run provenance, PMCP initiation, exact-SHA correspondence, overall workflow safety, final validation, or authorization.
+- No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the exact `workflow_dispatch` input schema and validation rules, including supported input types, required/default semantics, choice options, boolean/number handling, input count and size limits, and how dispatch inputs are bound to the governed verification request. Then continue with effective permission semantics.
+
