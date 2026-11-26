@@ -943,3 +943,25 @@ No implementation changes are authorized by this decision.
 
 - A-045 approved the namespace ownership, preservation, atomic commit, exact observed-parent, stale rejection, no retry/lock, SHA separation, and uncertain-publication rules.
 - **Resume at:** design the evidence representation and lifecycle in the canonical PMCP Git repository, including how accepted evidence remains retained/retrievable and protected from workflow-history cleanup; then reassess A-039–A-041.
+
+
+## A-046 — Structured verification results and supporting evidence payloads
+
+**Status:** Approved architectural direction  
+**Date:** 2026-11-26
+
+- Structured verification results, gate-relevant facts, provenance, and evidence references live in canonical `.pmcp/state.json`.
+- Detailed reports and test outputs are retained as separate evidence payload files committed to the PMCP repository and referenced from the corresponding result by path and SHA-256 integrity metadata.
+- A verification publication must include the state namespace update and its supporting evidence payloads in the same atomic Git commit, avoiding dangling references or separately published payloads.
+- GitHub Actions artifacts may be used as temporary staging/transport, but are not the retained governance record.
+- Accepted evidence is retained permanently in repository history; no automatic evidence deletion is introduced.
+
+This distinguishes canonical structured governance state from its supporting evidence content without introducing a separate results store. The mechanics of evidence format, layout, size constraints, integrity verification, and protection from workflow-history cleanup remain open.
+
+No implementation changes are authorized by this decision.
+
+## Session 73 — Evidence payload separation approved
+
+- A-046 approved structured results and evidence references in canonical `.pmcp/state.json`, with detailed payload files retained in the PMCP Git repository and published together atomically.
+- Accepted evidence has permanent retention; Actions artifacts are staging only.
+- **Resume at:** determine the concrete evidence payload format, repository layout, size/boundary constraints, integrity verification, and protections against cleanup. Then reconcile A-039–A-041 and update the architecture/requirements North Star as needed.
