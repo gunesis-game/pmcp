@@ -274,3 +274,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - **R-004 assessed as unresolved robustness question, not confirmed defect:** replay matches only request ID and returns the stored result, regardless of incoming tool/action/args. REQ-015 explicitly says repeating an already-applied request ID returns the earlier result and changes nothing. UUID reuse with different payload is caller misuse under that contract, but rejecting mismatched payloads could improve diagnosability. No confirmed defect; do not recommend remediation without a requirement.
 - No code changed; tests not run.
 - Next: review plan mutations/reconciliation, cycle ordering/preemption and validator consistency as specified in the tracker handoff.
+
+
+### Session 12 — Plan mutation and reconciliation validation review
+- Reviewed current `plan_rules.go`, `item_matcher.go`, and relevant snapshot-validator checks against REQ-040/REQ-041.
+- Plan update applies text/list replacements, task/criterion additions, task completion, criterion completion with evidence, and task removals. Task/criterion matching uses exact or unique-prefix semantics; ambiguity rejects. Additions detect exact duplicate entries, and criteria evidence is trim-checked. Task removals require a reason.
+- Reconciliation action trim-checks item/evidence, validates classification, normalizes nil references, and records revision/reviewed/items/timestamp atomically. However, `referenceList` treats a scalar string differently from a list: scalar is wrapped unchanged, so blank/whitespace reference strings are accepted, while list elements are trim-checked and normalized. Snapshot validation does not validate reconciliation references or trim-normalize them.
+- **R-009 (candidate, low severity): reconciliation scalar references bypass blank validation.** A scalar `references: "   "` is accepted and persisted as a meaningless reference, while `references: ["   "]` is rejected. REQ-041's reference semantics should be consistent; likely trim-aware non-empty validation for scalar strings, or normalize blank scalar to no reference. Severity P3/quality inconsistency; not yet tested.
+- No tests run; no code changes.
+- Next: review plan mutation invariants and cycle ordering/preemption/validator edge cases; distinguish actual governance gaps from intended behavior, then update findings and map negative tests.
