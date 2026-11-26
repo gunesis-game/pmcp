@@ -1014,3 +1014,34 @@ No implementation changes are authorized by this decision.
 - Use the typed `inputs` context as semantic reference; do not assume `github.event.inputs` preserves Boolean types.
 - No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define how PMCP mechanically verifies that workflow inputs are consumed safely throughout expressions, shell commands, actions, and reusable workflows; distinguish statically provable safe patterns from unresolved or confirmed unsafe use.
+
+### A-036 | Safe consumption of workflow-dispatch inputs
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP must trace every declared workflow-dispatch input through expressions, environment variables, step outputs, job outputs, and other references to all execution-affecting uses. The analysis must account for supported indirect references, not only direct `inputs.<name>` expressions.
+- PMCP parses expressions structurally and evaluates supported semantics and types; it must not rely on textual searches. Invalid expressions are violations. Valid but unsupported expressions, functions, or data-flow paths are unresolved.
+- Input use in supported, type-correct control-flow conditions may pass mechanical analysis. Direct interpolation of input values into a `run` script is a violation because it inserts input data into executable script text.
+- Environment-variable indirection is not automatically safe. PMCP must trace the value into the consuming script and establish that it remains data rather than becoming shell syntax or executable content.
+- Shell analysis is deliberately restricted to constructs PMCP can parse and analyze reliably. PMCP must establish that input-derived values cannot become shell syntax or commands. Unquoted expansions, `eval`, dynamic command construction, unsupported shell syntax, and ambiguous expansion behavior must not pass. Confirmed injection or command-execution paths are violations; inability to establish safety is unresolved.
+- Inputs forwarded through action or reusable-workflow interfaces (`with`, environment variables, outputs, or other supported interfaces) must be traced. Local reusable workflows must be recursively inspected at the exact governed revision.
+- A pinned external action reference establishes immutable identity, not safe input handling. If PMCP cannot inspect and establish the relevant handling, the finding remains unresolved. Arbitrary action internals must not be assumed safe merely because the action is pinned.
+- Trace indirect and secondary flows, including values reaching another workflow, generated script, command, or other execution-affecting mechanism. Intermediate variables and outputs do not terminate the trace.
+- A confirmed unsafe flow is a violation. A valid flow that PMCP cannot fully analyze is unresolved, with exact source, path, destination, and missing evidence. This layer passes only when all input flows and relevant execution-affecting uses have been assessed.
+- Unused inputs may be reported informationally but are not automatically unsafe.
+- PMCP performs reliable parsing, tracing, and deterministic safety checks itself. Any remaining contextual assessment is handed to the AI with the exact workflow revision, source-to-sink path, relevant code, evidence, and precise question. The AI response returns as a structured assessment for PMCP to validate and incorporate.
+- Passing this layer establishes only that no unsafe input consumption was found within PMCP's supported analysis boundary. It does not establish that arbitrary action code, external services, or the workflow as a whole are safe.
+
+Rationale: validating declarations alone cannot establish safe use. A conservative data-flow model prevents indirection, forwarding, or opaque dependencies from being mistaken for safety. The explicit unresolved outcome preserves the distinction between confirmed unsafe behavior and behavior PMCP cannot reliably establish, while keeping deterministic analysis within PMCP.
+
+No implementation changes are authorized by this decision.
+
+### Session 63 — Workflow input safe-consumption assessment approved
+
+- User approved A-036: trace each input through supported expressions, environment variables, outputs, action/reusable-workflow interfaces, and all execution-affecting sinks.
+- Expression and shell handling must be structural and deliberately bounded; unsupported or ambiguous flows remain unresolved, and confirmed unsafe flows are violations.
+- Direct input interpolation into `run` scripts is prohibited. Environment indirection is not automatically safe; PMCP must establish that input-derived values remain data.
+- Local reusable workflows require recursive inspection at the governed revision. Pinned external actions establish identity only; opaque handling remains unresolved unless it can be established.
+- PMCP performs reliable mechanical analysis and hands only residual contextual assessment to the AI with precise evidence and provenance.
+- No requirements, architecture, implementation files, or tests were changed.
+- **Resume at:** define the supported expression language and evaluation semantics needed for A-036, including contexts, functions, operators, property/index access, type behavior, and fail-closed handling of unsupported expressions.
