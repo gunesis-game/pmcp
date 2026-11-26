@@ -193,7 +193,7 @@ flowchart TD
 - **Sessions 47–55:** Retired mandatory `project/policy.json`; moved workflow selection authority to CI configuration; established GitHub Actions verification, tiering, naming, explicit read-only initiation, validation, and reusable history-cleanup workflow structure.
 - **Sessions 56–63:** Established PMCP’s mechanical-governance responsibility, structured AI assessment return, workflow discovery/parsing boundaries, trigger/input contracts, normalization, and safe input consumption.
 - **Sessions 64–70:** Defined bounded assurance; separated execution outcomes, governance gates, and authorization; established shared verification evidence, integrity/retention/retrievability, repository-based evidence storage, workflow-run history retention, and cleanup safeguards.
-- The Product North Star was added to `architecture.md` and `requirements.md`, including durable repository-based project memory, support for limited/interrupted AI sessions, mechanical governance, and structured AI completion.
+- The Product North Star was added to `architecture.md` and `requirements.md`: support agents with limited reasoning, small context windows, interrupted/lost sessions; the governed GitHub repository is the sole durable project memory (implementation plus PMCP governance knowledge), with no separate PMCP project database/store. PMCP interprets and validates repository knowledge and exposes explicit MCP operations/guidance for recovery and continuity. The mechanical-governance/AI-completion principle was added to both documents, including structured AI return/provenance/completion requirements (REQ-113–REQ-115).
 
 ## Approved decisions (preserved in full)
 
