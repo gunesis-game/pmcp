@@ -1045,3 +1045,29 @@ No implementation changes are authorized by this decision.
 - PMCP performs reliable mechanical analysis and hands only residual contextual assessment to the AI with precise evidence and provenance.
 - No requirements, architecture, implementation files, or tests were changed.
 - **Resume at:** define the supported expression language and evaluation semantics needed for A-036, including contexts, functions, operators, property/index access, type behavior, and fail-closed handling of unsupported expressions.
+
+## A-037 — Bounded assurance scope for GitHub Actions governance
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+PMCP assesses governed subjects against an explicit assurance boundary. It does not attempt to prove arbitrary implementation properties beyond that boundary.
+
+GitHub Actions governance uses three assessment levels:
+1. **Fully establish the governance contract mechanically where reliable.** This includes governed-workflow identity, permitted initiation, permissions, repository mutation boundaries, immutable dependencies, input contract, exact revision association, and trustworthy execution evidence.
+2. **Assess structure and behaviour to a defined supported boundary.** Understand enough workflow structure, job dependencies, actions/reusable workflows, and relevant data/permission flows to establish compliance. Supported syntax and semantics are explicitly bounded. Unsupported or ambiguous constructs are unresolved, not silently passed.
+3. **Do not attempt to prove arbitrary implementation safety.** PMCP does not become a complete GitHub Actions interpreter, shell analyser, third-party action auditor, or verifier of external services. Where a property depends on arbitrary implementation details outside the supported boundary, identify the uncertainty and provide the precise evidence and question for AI assessment. AI assessment retains provenance and does not become mechanical verification.
+
+Apply this boundary to the three governed verification workflow classes (`verify-fast-*`, `verify-integration-*`, and `verify-acceptance-*`) using a common governance contract while allowing their verification purposes and test content to differ.
+
+Git history cleanup remains a separate maintenance workflow with its own constrained authorisation and security contract. It is not verification evidence and must not become a route around governance.
+
+This is a general architectural principle: PMCP assesses a governed subject against an explicit assurance boundary; it does not promise to prove properties outside that boundary. Deterministic checks should remain mechanical where reliable, and only genuinely unresolved assessment should be handed to AI.
+
+Implementation scope: this decision establishes the assessment boundary; it does not approve implementing a complete GitHub Actions interpreter, arbitrary shell analysis, or broad static-analysis capabilities.
+
+## Session 64 — Assurance boundary established
+
+- Approved A-037 defining bounded assurance scope for GitHub Actions governance.
+- The review remains active; GitHub Actions assessment continues within the agreed boundary rather than expanding into a complete interpreter or arbitrary implementation analyser.
+- Next: return to the remaining governance-level questions for the three verification workflows and the separate Git history cleanup workflow, applying this boundary.
