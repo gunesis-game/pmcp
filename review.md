@@ -27,7 +27,7 @@
 ### Review areas and disposition
 
 | Review area | Coverage | Result / disposition |
-|---|---:|---|---|
+|---|---|---|
 | Documentation authority & project status | README, architecture/requirements status, decision authority | Initial P0 documentation/status issue remediated. Requirements remain Draft; architecture Under review. |
 | Coordinator/request lifecycle & replay | Request validation, allowlisted dispatch, read-only/lock behavior, retries, replay, result envelope, next-request derivation | No confirmed defect. R-004 is a robustness question under REQ-015. |
 | CI/evidence selection, polling & gates | Workflow selection/validation, polling, evidence capture, tier/gate semantics, cancellation/failure, policy timing | R-001 is a policy-snapshot semantics question. R-002 tier overwrite aligns with per-SHA model. R-003 is observed behavior, not a finding. |
