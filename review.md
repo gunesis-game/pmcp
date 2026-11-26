@@ -7,6 +7,17 @@
 
 ## North Star — Design for agents with limited context and memory
 
+### Persistence boundary — the governed repository is the only durable store
+
+**PMCP does not own or operate a separate persistence system for project governance state. All durable PMCP state and project knowledge live in the same GitHub repository as the actual project being built.**
+
+- The governed repository contains both the project's implementation and its PMCP governance records, requirements, architecture, decisions, plans, progress, and other durable context needed to continue work.
+- Git is the persistence mechanism and source of truth: commits, trees, blobs, and history provide durable state and provenance.
+- PMCP reads, interprets, validates, and updates the governance material in that repository; it does not maintain a parallel database or separately managed project-state store.
+- An agent or PMCP installation must be replaceable without losing project knowledge. The repository carries the knowledge with the project.
+- Any proposed external or separate persistence mechanism is outside this architecture unless explicitly reconsidered and approved.
+
+
 **PMCP exists to let AI agents govern and execute project work reliably without depending on the agent's ability to retain the project's history in its own context window or conversation memory.**
 
 The system must assume that an agent may be less capable, have a small context window, lose its session, or be unable to reliably remember prior decisions and instructions. PMCP must therefore make the project's authoritative context, current state, constraints, decisions, and next actions recoverable from durable project records and explicit interfaces—not from the agent's recollection.
