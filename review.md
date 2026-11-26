@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019, the foundational execution model for state-changing operations, is approved and recorded. PMCP operates on `main`, computes each mutation from the exact HEAD it observed, and attempts one optimistic publication against that expected parent. If `main` has moved, the operation reports a revision conflict; PMCP does not lock, retry, serialize, or replay automatically. The caller must reread and submit a new request.
+A-019 establishes the fixed-`main`, exact-HEAD, single-attempt optimistic publication model. A-020 now retires the existing `project/policy.json` concept as a mandatory architectural artifact. Its contents must be reassessed individually: duplicated approvals should be derived from the decision ledger; obsolete Git workflow configuration must not survive the fixed-`main` model; genuinely necessary project-specific configuration may remain only with an explicit owner and purpose. No automatic migration of the old schema is assumed.
 
-The next reconciliation decision is the canonical repository/state model: define precisely what belongs in `.pmcp/state.json`, how project policy remains separately owned and revision-bound, and how one atomic state transition is represented by one Git commit. Then reconcile validation, history/idempotency, evidence, audit, reconciliation, migration, and reporting contracts against that model. No implementation changes without explicit approval.
+Next, finish defining the canonical repository/state model and classify every former policy field as derived governance information, canonical governance state, project documentation/configuration, CI-owned configuration, or unnecessary. Then reconcile validation, history/idempotency, evidence, audit, reconciliation, migration, and reporting contracts. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -540,3 +540,27 @@ No implementation changes are authorized by this decision.
 - A failed publication is not a governance transition.
 - Updated the handoff to the next foundational reconciliation decision: define the canonical repository/state model, including the boundary between `.pmcp/state.json` and separately owned project policy.
 - No implementation files changed and no tests were executed. This tracker update is the only repository change in this session.
+
+
+### A-020 | Retire the current policy-file concept
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Retire `project/policy.json` as a required architectural concept. PMCP must not assume that this file exists, must not require it as a setup prerequisite, and must not preserve its current schema merely for compatibility with the existing design.
+- Do not mechanically move the existing policy document into `.pmcp/state.json`. The existing file combines several different kinds of information and each must be reassessed according to its actual purpose.
+- Strategy approvals are governance facts already represented by Recorded decisions. Approval status and strategy gaps should be derived from the decision ledger rather than duplicated in a separate `approvals` object.
+- Branch-selection and Git-workflow settings that conflict with the fixed-`main` model (A-003, A-019) must not be retained as configurable PMCP policy.
+- Remaining fields—such as evidence-tier workflow mappings, component/test mappings, project commands, performance criteria, and decision-approval configuration—are not automatically retained or migrated. Each must be justified individually and assigned to the correct owner: canonical governance state, project documentation/configuration, CI configuration, or nowhere if unnecessary.
+- Any configuration that remains must have an explicit source of authority, lifecycle, and revision/fingerprint semantics where governance or evidence depends on it. This decision does not create a replacement policy file or authorize a new configuration store.
+- Requirements, architecture, and implementation must be reconciled to this direction before implementation changes are proposed.
+
+Rationale: the existing policy file mixes duplicated governance state, obsolete workflow controls, and potentially useful project/CI configuration. Treating all of these as one mandatory policy artifact creates unnecessary coupling and duplicated authority. Retiring the concept allows each remaining piece to be justified independently.
+
+No implementation changes are authorized by this decision.
+
+### Session 47 — Policy-file concept retired
+
+- User approved A-020: retire `project/policy.json` as a required architectural concept.
+- The existing policy fields are not to be copied wholesale into canonical state or automatically migrated. Approvals should be derived from the decision ledger; fixed-`main` supersedes configurable branch/workflow policy; remaining configuration requires individual justification and an explicit owner.
+- The handoff now prioritizes completing the canonical repository/state model and classifying the former policy fields before reconciling dependent contracts and documentation.
+- No implementation files or baseline documents changed; this session updates the review tracker only. No tests were executed.
