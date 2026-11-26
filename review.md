@@ -142,6 +142,15 @@ Test coverage below is source-inspected only; no tests were executed.
 - Tests have not been run. No implementation changes.
 - Next: review repository-store/audit edge cases and then re-evaluate evidence findings (R-001/R-002) with requirements semantics.
 
+### Session 9 — Store and audit edge-case review
+- Reviewed RepoStore contract, MemoryStore implementation, audit.check/audit.advance, audit-window calculation, and checkpoint journal.
+- Publish in MemoryStore enforces expected-head equality while holding its mutex and clones file contents on write; however this is only a test implementation. The production adapter remains absent from the repository, so the contract's real atomicity cannot be confirmed.
+- MemoryStore's PushFiles treats empty string content as deletion (test helper semantics); therefore it cannot model creating an empty file. No coordinator path relies on this behavior confirmed, and no finding assigned.
+- Audit window includes completed cycles with execution order greater than watermark, sorts by execution order, and becomes due at 3 cycles. audit.advance requires a completed boundary above watermark and an active standard cycle; it records watermark, audit row, checkpoint boundary, and journal entry together in the state snapshot.
+- No additional store/audit defect confirmed from source review. Adversarial store tests still needed: missing branch/ref, invalid or duplicate changes, delete absent path, empty change set, ancestry on unknown SHA, audit boundary gaps including cancelled execution orders, and publish atomicity/error handling in a production adapter.
+- No tests run and no code changes.
+- Next: revisit R-001/R-002 against evidence policy semantics and coordinator ordering; then consolidate severity and present review findings/test recommendations for approval before any remediation.
+
 ## Session log
 
 
