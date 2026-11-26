@@ -5,6 +5,22 @@
 **Working branch:** `main` only  
 **Assessment mode:** Ongoing, evidence-based assessment; static inspection unless execution is explicitly recorded.
 
+## North Star — Design for agents with limited context and memory
+
+**PMCP exists to let AI agents govern and execute project work reliably without depending on the agent's ability to retain the project's history in its own context window or conversation memory.**
+
+The system must assume that an agent may be less capable, have a small context window, lose its session, or be unable to reliably remember prior decisions and instructions. PMCP must therefore make the project's authoritative context, current state, constraints, decisions, and next actions recoverable from durable project records and explicit interfaces—not from the agent's recollection.
+
+Evaluate every requirement and design choice against this purpose:
+- An agent should be able to re-establish the relevant project context after losing its conversation history.
+- Important decisions, rationale, requirements, architecture, progress, and outstanding work must be persisted in an authoritative, discoverable form.
+- The system should provide the right context at the point of use, without requiring the agent to load or retain the entire project history.
+- Operations and guidance should be understandable and usable by agents with limited reasoning and context capacity.
+- Do not assume the agent will remember prior tool calls, infer undocumented conventions, or reconstruct missing context correctly.
+- Prefer explicit state, clear contracts, deterministic workflows, and actionable guidance over implicit conversational continuity.
+
+This is a product-design North Star, not merely a documentation or review-process rule. The review-tracking North Star below applies the same principle to this assessment itself.
+
 ## North Star — Review tracking and continuity
 
 **The review document is the durable source of truth for this review. Chat history is not the tracking mechanism.**
@@ -18,6 +34,8 @@
 ## Purpose
 
 This document is the persistent cross-session tracker for assessing PMCP as it currently exists and for informing decisions about what PMCP should become.
+
+The product purpose being evaluated is to support AI agents—particularly less capable agents and agents with small context windows—whose conversation history and working context may be lost. PMCP should externalize and preserve the project context and governance state those agents need, so reliable work does not depend on long-lived agent memory.
 
 **Requirements, architecture, and implementation are all open to criticism and change. None is presumed correct or authoritative simply because it exists today.** The goal is not to preserve the current design or merely find code defects against the current specification.
 
