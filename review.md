@@ -53,10 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes a manually initiated, read-only verification execution contract with exact-revision evidence and repository-integrity checks.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows; unrelated repository workflows may retain automatic triggers.
 
-Continue by defining the precise workflow-file validity and safety inspection rules, including how PMCP can establish the permitted trigger set, effective permissions, and absence of repository mutation capabilities. Be explicit about what PMCP can verify from workflow configuration versus what it cannot guarantee about arbitrary job code or external side effects. Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-025. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
-
+Continue by defining the precise validation contract for governed verification workflow files: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, and what PMCP can or cannot infer about job behaviour. Keep repository-wide workflow policy separate from the narrower PMCP verification-workflow contract. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -703,3 +702,26 @@ No implementation changes are authorized by this decision.
 - The contract acknowledges that workflow inspection and GitHub Actions permissions cannot prove arbitrary job code has no external side effects.
 - This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the precise workflow-file validity and safety inspection rules, distinguishing enforceable configuration constraints from guarantees PMCP cannot make about arbitrary job code and external effects. Then reconcile the evidence fingerprint and strategy-gate contracts.
+
+### A-026 | Scope of the no-automatic-trigger rule
+
+**Status: Approved by the user on 2026-11-26.**
+
+- The prohibition on automatic triggers established by A-025 applies only to PMCP-governed verification workflows: files matching the A-024 `verify-fast-*`, `verify-integration-*`, and `verify-acceptance-*` filename patterns under `.github/workflows/`.
+- Those governed verification workflows must use `workflow_dispatch` as their only trigger.
+- Other repository workflows that do not match the governed verification naming patterns are outside this specific trigger restriction and may retain automatic triggers.
+- This is not a general repository-wide prohibition on automatic GitHub Actions workflows.
+- The existing `ci.yml` remains outside the governed verification workflow set unless separately renamed/reclassified by an explicit decision. Its current automatic triggers are therefore not prohibited by A-025/A-026.
+- This decision does not weaken the safety requirements for governed verification workflows: PMCP initiation, exact `head_sha` matching, read-only repository permissions, no repository mutation, post-run HEAD integrity checking, and observable results remain required.
+
+Rationale: the safety restriction is specifically about the workflows PMCP treats as authoritative verification evidence. Extending it to every repository workflow would impose a broader CI policy that is not necessary to establish that boundary and was not the user's intended scope.
+
+No implementation changes are authorized by this decision.
+
+### Session 53 — Verification trigger scope clarified
+
+- User selected Option 1: only PMCP-governed verification workflows are subject to the A-025 no-automatic-trigger rule.
+- Other workflows, including the current `ci.yml`, may retain automatic triggers unless separately governed by another decision.
+- The A-025 execution-safety controls remain fully applicable to all workflows discovered as PMCP verification workflows.
+- This tracker update records the scope decision before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the exact PMCP validation contract for governed verification workflows, including triggers, YAML/schema, effective permissions, credentials/secrets, reusable workflows/actions, and limits on proving job behaviour.
