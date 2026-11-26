@@ -55,7 +55,7 @@ The assessment should establish and continually update:
 
 A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment. A-032 makes the mechanical-governance/AI-completion model a foundational North Star across the entire MCP: PMCP performs as much governance as it reliably can, then hands the remaining contextual or judgement-based assessment to the AI in a structured, evidence-backed form; the AI returns a structured assessment that PMCP incorporates into the governed process.
 
-The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. Continue by defining how this cooperative assessment model applies to the remaining GitHub Actions workflow-validation layers, beginning with trigger semantics. Each layer should mechanically establish what it can, and hand only genuinely unresolved matters to the AI. The overall process must not be treated as complete while required AI assessments remain outstanding. No implementation changes without explicit approval.
+The foundational principle has now been recorded in the North Stars of both `architecture.md` and `requirements.md`, with explicit requirements for mechanical responsibility, structured AI handoff/return, provenance, and completion. A-042 defines GitHub Actions workflow-history cleanup policy: per workflow, retain only the latest four runs whose outcomes are success or failure; globally remove runs with other terminal outcomes such as cancelled or skipped. This concerns GitHub Actions run history, not Git commit history. Resume by specifying cleanup selection boundaries and safeguards, including evidence protection, then reconcile A-027/A-028 workflow design details as needed. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -398,7 +398,6 @@ No implementation changes are authorized by this decision.
 - Its semantic validation is operation-specific: only the cycle registry and audit data necessary to calculate and represent the audit window must be valid. Unrelated semantic defects must not block the read.
 - Invalid or insufficient prerequisite data must produce a clear rejection/error, never a panic or misleading audit result.
 - The response is an index of material to review; it does not assert that documentation has been reviewed or reconciled. Review occurs separately, followed by `audit.advance`.
-
 Rationale: audit discovery and audit completion are separate actions. A read-only query must reliably identify the exact outstanding window without modifying it or being blocked by unrelated governance defects.
 
 No implementation changes are authorized by this decision.
@@ -797,8 +796,7 @@ No implementation changes are authorized by this decision.
 - User confirmed A-029 as a core concept of PMCP: PMCP should govern as much as it can on behalf of the consumer, returning only what it genuinely cannot determine for the consumer (likely an AI agent) to assess.
 - The rationale explicitly includes reducing context use and reasoning demands so less capable models can still consume PMCP effectively.
 - The handoff was refreshed to point to the remaining precise GitHub Actions validator contract. This corrects the stale top-level handoff, which had not kept pace with the decisions recorded later in the log.
-- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
-- **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
+- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.- **Resume at:** define the supported GitHub Actions configuration subset and structured validator response contract, applying A-029. Keep deterministic checks and consumer-assessment findings distinct; validation must not itself imply governance approval.
 
 
 ### A-030 | Structured governance assessment response contract
@@ -1170,3 +1168,26 @@ No implementation changes are authorized by this decision.
 - GitHub Actions artifacts remain temporary transport/staging only, not authoritative retained evidence.
 - No code changes or tests.
 - **Resume at:** define evidence archive lifecycle and protection requirements, especially interaction with history cleanup and repository rewrite/deletion risks, before deciding layout or mechanics.
+
+## A-042 — Git workflow history cleanup retention policy
+
+**Status:** Approved
+**Date:** 2026-11-26
+
+GitHub Actions workflow-history cleanup is governed by the following retention policy. This is cleanup of GitHub Actions workflow run records, not Git commit history; it does not authorize rewriting, truncating, rebasing, squashing, or force-pushing repository commits.
+
+- **Per-workflow retention:** For each workflow, retain only the latest four runs with outcomes of **success** or **failure**. Remove older success/failure runs beyond that limit.
+- **Global cleanup:** Remove runs with other outcomes, including **cancelled** and **skipped**, regardless of workflow.
+- Runs in the retained success/failure set are selected independently per workflow; the four-run limit is not a global limit.
+- This policy defines outcome classes and retention counts. Exact API selection, safeguards, exclusions/protection for runs carrying governance evidence, and operational authorization/validation remain to be specified.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 69 — Workflow-history cleanup policy recorded
+
+- User specified the policy: per workflow, retain the latest four success or failure runs and remove the rest of that class; globally remove cancelled, skipped, and other non-success/non-failure outcomes.
+- Clarified the scope: this is GitHub Actions workflow run history, not Git commit history. Commit history immutability is unaffected.
+- Workflow selection mechanics, safety exclusions for evidence-related runs, and authorization/verification safeguards remain open.
+- No implementation changes or tests.
+- **Resume at:** specify cleanup selection boundaries and safeguards, particularly how cleanup must preserve governance evidence and what validation is required before deletion.
