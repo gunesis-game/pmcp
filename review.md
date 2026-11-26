@@ -15,7 +15,7 @@
 ### Review snapshot
 - Remediation PR #1: [P0 documentation status and decision authority](https://github.com/gunesis-game/pmcp/pull/1), its changes are merged into `main`.
 - Tracker location: `review.md` on `main`.
-- Findings: **R-001** policy revision is not bound to selected CI evidence (P1 candidate); **R-002** evidence is keyed by cycle+SHA so tiers overwrite (P1 candidate); **R-003** full-tier pass is required for cycle completion (confirmed behavior); **R-004** idempotency replay does not verify stored tool/action against incoming request (potential correctness issue); **R-005** Recorded decisions' approval metadata invariants are not enforced by validator (P2 candidate).
+- Findings: R-001 (policy changes during CI wait) downgraded to unresolved semantics; R-002 (tier overwrite for same cycle+SHA) behavior is explicitly consistent with REQ-073's SHA-keyed evidence entry and architecture's one-entry-per-SHA layout, so no defect confirmed; R-003 full-tier pass requirement is intentional; R-004 replay on reused request ID is explicitly idempotent per REQ-015, but mismatched-payload handling remains a robustness question; R-005 approval metadata validator gap (P2 candidate), R-006–R-008 reconciliation validation gaps remain potential findings.
 - Source/tests have been read, but tests have **not** been run. Findings are review observations, not yet runtime-verified.
 - No implementation changes have been made during this review.
 
@@ -266,3 +266,11 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - **R-002 disposition:** confirmed storage behavior remains: per-cycle evidence is keyed by SHA, so collecting a different tier for the same cycle/SHA replaces the prior tier's record. This is potentially destructive (e.g., fast collection after full pass removes the full-pass record and may block completion), but the requirements do not explicitly demand simultaneous tier retention. **Severity should be reconsidered as P2 design/data-retention concern rather than P1**, unless requirements establish tier-retention semantics. Need review the surrounding requirements and completion workflow for intended overwrite behavior before proposing a change.
 - No code changes; tests not run.
 - Next: finish R-002 semantics check and consolidate finding confidence/severity, then continue the review to additional areas per handoff.
+
+
+### Session 11 — Evidence semantics and idempotency replay review (R-002/R-004)
+- Verified tracker and current main; no intervening changes since Session 10.
+- **R-002 downgraded / no defect confirmed:** REQ-073 explicitly stores an evidence entry under the SHA; architecture and legacy evidence layout describe a cycle → SHA → Evidence map. This is one evidence record per SHA, so tier replacement is consistent with the specified model. Collecting another tier for the same SHA replaces that SHA's record; this is a design limitation/trade-off, not a requirements violation absent a requirement for multi-tier retention. Completion correctly scans evidence records for any full-tier pass.
+- **R-004 assessed as unresolved robustness question, not confirmed defect:** replay matches only request ID and returns the stored result, regardless of incoming tool/action/args. REQ-015 explicitly says repeating an already-applied request ID returns the earlier result and changes nothing. UUID reuse with different payload is caller misuse under that contract, but rejecting mismatched payloads could improve diagnosability. No confirmed defect; do not recommend remediation without a requirement.
+- No code changed; tests not run.
+- Next: review plan mutations/reconciliation, cycle ordering/preemption and validator consistency as specified in the tracker handoff.
