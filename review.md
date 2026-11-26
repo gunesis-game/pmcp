@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-The assessment remains ongoing and is not yet exhaustive. A-018, the revised `status.report` consumer contract, is approved and recorded. The next active track is mandatory reconciliation of `requirements.md`, `architecture.md`, and every approved operation contract (A-007 onward) against the canonical `.pmcp/state.json` and Git-history model.
+A-019, the foundational execution model for state-changing operations, is approved and recorded. PMCP operates on `main`, computes each mutation from the exact HEAD it observed, and attempts one optimistic publication against that expected parent. If `main` has moved, the operation reports a revision conflict; PMCP does not lock, retry, serialize, or replay automatically. The caller must reread and submit a new request.
 
-A-016 establishes shared history classification and metadata principles; A-017 establishes the canonical metadata convention and legacy handling; A-018 establishes `status.report` as a thin agent-facing consumer of reusable history/state reconstruction. The next step is to read the full requirements and architecture documents and reconcile their current multi-file state assumptions and operation semantics against one canonical state document per Git commit. Git history remains the only durable version history. No implementation without explicit approval.
+The next reconciliation decision is the canonical repository/state model: define precisely what belongs in `.pmcp/state.json`, how project policy remains separately owned and revision-bound, and how one atomic state transition is represented by one Git commit. Then reconcile validation, history/idempotency, evidence, audit, reconciliation, migration, and reporting contracts against that model. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -515,3 +515,28 @@ No implementation changes are authorized by this decision.
 - Static inspection confirmed the current implementation is still snapshot-centric: `StatusReport.Apply` consumes prepared validation/integrity facts and the current typed snapshot; the coordinator's read-only path reads a bounded recent commit set. Shared history reconstruction does not yet exist. This is an observation, not an implementation change.
 - No implementation files changed and no tests were executed. The full tracker was preserved and updated in place.
 - **Resume at:** read `requirements.md` and `architecture.md` in full, then reconcile their multi-file state layout, commit/history assumptions, and all approved operation contracts (A-007 onward) against the canonical `.pmcp/state.json` per commit and Git-history-only versioning. Do not redesign or implement until the contradictions and contract impacts have been assessed and presented for approval.
+
+
+### A-019 | Optimistic single-attempt publication execution model
+
+**Status: Approved by the user on 2026-11-26.**
+
+- PMCP always operates on `main`, consistent with A-003. There is no branch-selection or branch-aware PMCP workflow.
+- Every state-changing operation reads the exact current `main` HEAD and computes its complete proposed change from that observed revision.
+- The operation makes one optimistic publication attempt whose expected parent is the exact HEAD it read. Publication must use Git's non-force ref-update/expected-parent protection so it cannot overwrite a newer commit.
+- If `main` has advanced before publication, the operation fails with a clear revision-conflict result. It does not silently recompute against the newer state.
+- The caller must reread the new HEAD and explicitly issue a new request based on the refreshed state.
+- PMCP does not implement locks, serialization, automatic retries, automatic replay, or a concurrency-management subsystem. Git's commit/ref-update semantics provide the publication boundary.
+- A failed publication creates no governance state transition and must not be reported as a successful operation.
+
+Rationale: the operation's decision and validation are bound to the exact state the caller acted upon. A single expected-parent publication prevents lost updates without introducing hidden retries or PMCP-owned concurrency orchestration. Requiring a fresh request after conflict keeps the agent aware that its governing context changed.
+
+No implementation changes are authorized by this decision.
+
+### Session 46 — Foundational execution model approved
+
+- User approved A-019, establishing fixed-`main`, exact-HEAD mutation planning, and one expected-parent publication attempt.
+- A moved `main` produces an explicit revision conflict; the caller rereads and submits a new request. No PMCP lock, retry, serialization, or automatic replay subsystem is permitted.
+- A failed publication is not a governance transition.
+- Updated the handoff to the next foundational reconciliation decision: define the canonical repository/state model, including the boundary between `.pmcp/state.json` and separately owned project policy.
+- No implementation files changed and no tests were executed. This tracker update is the only repository change in this session.
