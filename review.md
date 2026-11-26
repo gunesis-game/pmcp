@@ -59,7 +59,7 @@ The assessment should establish and continually update:
 
 **Latest approved direction (A-044):** Option A—direct, namespace-scoped publication into `.pmcp/state.json`. Each verification tool writes only its own section. PMCP reads and derives governance state; it does not overwrite the underlying tool result. The decision is recorded below. Concurrency/write-safety and the precise publication contract are not yet settled.
 
-**Resume next:** Continue reviewing evidence lifecycle and governance boundaries: how evidence is surfaced to AI for substantive assessment, and how PMCP mechanizes the remaining evidence-envelope checks without duplicating canonical state or Git metadata. No implementation changes without explicit approval.
+**Resume next:** Continue reviewing evidence lifecycle within the implementation-cycle model: PMCP mechanically governs and prepares evidence/context, presents it as part of the cycle interaction, and AI makes the final contextual assessment and determines the next step. PMCP validates that decision against governance constraints, records it in canonical state, and enforces permitted progression. Avoid a separate evidence-assessment feedback loop, universal evidence schema, or duplicating canonical metadata. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -1040,3 +1040,27 @@ No implementation changes are authorized by this decision.
 - A-050 approved the clarification of A-039–A-041 against A-049: shared governance applies to the evidence envelope/lifecycle, not a universal evidence-content schema.
 - PMCP remains responsible for reliable mechanical checks; AI receives unresolved contextual assessment with the relevant evidence and context.
 - **Resume at:** continue the evidence lifecycle assessment—specifically how evidence and contextual assessment are handed to AI and returned to PMCP—without reintroducing universal evidence structure or duplicating existing canonical metadata.
+
+
+## A-051 — Evidence assessment and next-step decisions are part of the implementation cycle
+
+**Status:** Approved architectural clarification  
+**Date:** 2026-11-26
+
+- Evidence assessment is not a separate PMCP-controlled feedback loop. Evidence and its contextual assessment are part of the broader implementation cycle.
+- PMCP mechanically governs the cycle, gathers and organizes evidence and context, establishes reliable mechanical findings, and presents the relevant governed context and unresolved assessment to the AI as part of the cycle interaction.
+- The AI makes the final contextual assessment and decides what happens next within the governance constraints. PMCP must not replace that judgment with an independently invented next-step decision or orchestrate a separate evidence-assessment loop.
+- PMCP validates the AI's returned decision against mechanical governance rules, preserves its provenance and association with the relevant subject/revision, incorporates it into canonical governance state, and enforces the permitted resulting progression.
+- The implementation cycle continues according to that governed decision. Possible outcomes include continued implementation, additional work/evidence, completion, escalation, or remaining unresolved; these are not a fixed PMCP-generated loop.
+- AI judgment is not unrestricted authority: PMCP still mechanically enforces governance constraints. AI assessment/decision does not override mechanically established findings or authorize a transition outside those constraints.
+
+**Boundary:** PMCP governs the implementation cycle and performs all reliable mechanical work. AI makes the contextual assessment and selects the next step within the governance rules. Evidence assessment is integrated into that interaction, not a standalone feedback process.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 81 — Evidence assessment lifecycle corrected and approved
+
+- User corrected the proposed lifecycle: evidence assessment is not a direct PMCP-to-AI feedback loop independent of implementation cycles.
+- A-051 approved: PMCP prepares and presents evidence/context within the implementation cycle; AI makes the final assessment and determines what happens next; PMCP validates the decision against governance rules, records it, and enforces permitted progression.
+- **Resume at:** Continue reviewing evidence lifecycle and implementation-cycle integration, then identify any remaining unresolved evidence envelope/storage mechanics without reintroducing standalone feedback loops, universal evidence structure, or redundant canonical metadata.
