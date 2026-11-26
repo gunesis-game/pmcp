@@ -55,9 +55,9 @@ The assessment should establish and continually update:
 
 **Review remains ongoing.** No confirmed defect has been established, no tests were executed in this review, and no implementation changes are authorized. Requirements, architecture, and implementation remain open to critical reassessment. The assessment matrix is partial, not exhaustive.
 
-**Current architectural anchor:** Session 34 / A-008 — canonical `.pmcp/state.json`, versioned solely by Git commits; governance compares snapshots as needed to interpret transitions. Workflows are runners, not canonical result/state stores: verification results flow back under their owning tool into the canonical model. PMCP mechanically governs what it can and hands genuinely unresolved assessment to the AI in a structured, evidence-backed form; the AI returns structured assessments for PMCP to validate and incorporate.
+**Current architectural anchor:** Session 34 / A-008 — canonical `.pmcp/state.json`, versioned solely by Git commits; governance compares snapshots as needed to interpret transitions. GitHub Actions is only the runner/execution mechanism, not the canonical results/state store. Verification results flow back under their owning tool into the canonical model. PMCP mechanically governs what it can and hands genuinely unresolved assessment to the AI in a structured, evidence-backed form; the AI returns structured assessments for PMCP to validate and incorporate.
 
-**Next:** Resume the evidence-storage lifecycle/protection design after consolidating the review tracker, especially protection of governance evidence from GitHub Actions run-history cleanup. Keep the cleanup policy separate from Git commit history. Do not implement anything without explicit approval.
+**Next:** Resume the evidence-storage lifecycle/protection design, especially protection of governance evidence from GitHub Actions run-history cleanup. Keep the cleanup policy separate from Git commit history. Do not implement anything without explicit approval.
 
 ## Current assessment matrix
 
@@ -257,10 +257,10 @@ flowchart TD
 - **Sessions 31–32:** Reframed review as neutral, evidence-based assessment of requirements, architecture, and implementation; reinforced that `review.md` must be updated in-repository as decisions are approved. A-001–A-006 and the conceptual layering were established.
 - **Sessions 33–42:** Separated parsing, domain interpretation, and semantic validation; adopted canonical `.pmcp/state.json` with Git history; defined operation-specific contracts, reconciliation, evidence collection, audit, and governance-history mechanics.
 - **Sessions 43–46:** Established commit classification/metadata, status-report contract, and fixed-`main`, exact-HEAD, one-shot optimistic publication.
-- **Sessions 47–55:** Retired mandatory `project/policy.json`; moved workflow selection authority to CI configuration; established GitHub Actions verification, tiering, naming, explicit read-only initiation, validation, and a reusable history-cleanup workflow structure.
+- **Sessions 47–55:** Retired mandatory `project/policy.json`; moved workflow selection authority to CI configuration; established GitHub Actions verification, tiering, naming, explicit read-only initiation, validation, and reusable history-cleanup workflow structure.
 - **Sessions 56–63:** Established PMCP’s mechanical-governance responsibility, structured AI assessment return, workflow discovery/parsing boundaries, trigger/input contracts, normalization, and safe input consumption.
 - **Sessions 64–70:** Defined bounded assurance; separated execution outcomes, governance gates, and authorization; established shared verification evidence, integrity/retention/retrievability, repository-based evidence storage, workflow-run history retention, and cleanup safeguards.
-- The Product North Star was added to `architecture.md` and `requirements.md`, including durable repository-based project memory, support for limited/interrupted AI sessions, mechanical governance, and structured AI completion. The relevant requirement updates (REQ-113–REQ-115) and architecture direction are recorded in the prior approved baseline update.
+- The Product North Star was added to `architecture.md` and `requirements.md`, including durable repository-based project memory, support for limited/interrupted AI sessions, mechanical governance, and structured AI completion.
 
 ## Approved decisions (preserved in full)
 
