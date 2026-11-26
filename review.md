@@ -53,11 +53,11 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 narrows initial provider support to GitHub Actions and clarifies that testing/verification workflows are mandatory governance, with mandatory execution and validation gates when cycles reach implementation.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers.
 
-Continue by defining deterministic GitHub Actions configuration discovery and tier-to-workflow mapping, including how PMCP identifies applicable workflows, validates that required workflows are present and usable, and binds evidence to the exact configuration/revision. The model must distinguish establishing the project's mandatory testing strategy during governance/design from enforcing its execution as an implementation-cycle gate. An agent must be able to determine what validation to run, invoke or inspect the relevant workflow results, and use those results to validate implementation; a missing or unconfigured mandatory workflow must not be treated as optional success.
+Continue by defining the deterministic GitHub Actions discovery and tier-to-workflow mapping contract. Determine how workflow files are discovered and identified, how each workflow declares or is assigned to a tier, and how PMCP rejects missing, ambiguous, invalid, or non-executable required workflows. Keep the distinction between strategy establishment during governance/design and execution as a mandatory implementation-cycle gate.
 
-Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-022. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
+Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-023. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -616,3 +616,26 @@ No implementation changes are authorized by this decision.
 - The handoff now focuses on deterministic GitHub Actions discovery/mapping and the agent-facing workflow execution/result/evidence path, while reconciling A-014's revision-bound evidence contract and the strategy gate.
 - No implementation files or baseline requirements/architecture files changed; this session updates the review tracker only. No tests were run.
 - **Resume at:** inspect existing CI/evidence and strategy-gate contracts against A-021/A-022, then propose the exact GitHub Actions discovery and workflow mapping contract. Update and verify this tracker after every approval. No implementation without explicit approval.
+
+
+### A-023 | Progressively inclusive verification tiers
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Verification tiers are progressively inclusive.
+- `fast` contains the rapid-feedback verification workflows.
+- `integration` contains every workflow required by `fast`, plus the integration verification workflows.
+- `full` contains every workflow required by `fast` and `integration`, plus the complete acceptance verification workflows.
+- A higher tier must never omit a workflow required by a lower tier. Tier expansion is deterministic and duplicate workflow identities are evaluated once.
+- This defines the relationship among tiers, not the discovery convention, workflow identity, or exact tier-mapping syntax; those remain open for explicit design.
+
+Rationale: cumulative tiers make the strength of each verification level unambiguous and prevent a nominally broader validation run from accidentally skipping lower-level checks.
+
+No implementation changes are authorized by this decision.
+
+### Session 50 — Progressive verification tiers approved
+
+- User approved A-023: `integration` includes all `fast` workflows plus integration workflows; `full` includes all lower-tier workflows plus acceptance workflows.
+- Tier membership is cumulative and deterministic; duplicate workflow identities are evaluated once.
+- The handoff now proceeds to the concrete GitHub Actions discovery, workflow identity, and tier-mapping contract.
+- This tracker update records the approval before moving to the next design topic. No requirements, architecture, or implementation files were changed and no tests were run.
