@@ -373,3 +373,16 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
   4. Test each invariant directly at validator boundary, plus normal action-path tests and state round-trip tests.
 - No new finding beyond the candidates already tracked. No tests run and no implementation changes.
 - **Next:** continue reviewing store-integrity and production-adapter boundaries; then prioritize a focused adversarial/fault-injection test plan. Continue review only.
+
+
+### Session 21 — Store integrity and publication-boundary review
+
+- Verified current `main` is tracker commit `b3b3c26942577362e6a0b1fddb116fde21decd1`; the repository tree has no intervening source changes. The tracker was fetched fresh before update.
+- Reviewed `RepoStore` contract, `MemoryStore`, coordinator publish/retry/confirm/replay, commit trailers, and concurrency safeguards tests.
+- **Expected-head concurrency:** contract requires `Publish(expectedHead)`; coordinator resets/recomputes after `ErrHeadMoved`, and the memory fake checks head under its mutex. Existing adversarial test forces one concurrent head move and verifies it survives; repeated head movement is surfaced as retryable rejection. No in-repo defect confirmed.
+- **MemoryStore immutability:** changed bytes are copied before storage, snapshot reads copy selected file bytes, and commits retain independent maps. Existing unchanged byte slices are shared between internal commit snapshots but are not mutated by store operations, so no defect confirmed from inspected paths.
+- **Publication/read-back:** coordinator accepts a commit only after head/ancestry confirmation. Read-back errors produce an error result with no claimed published revision. Previously noted retry-same-request-ID ambiguity after a commit/read-back failure remains a fault-injection case, not a confirmed defect.
+- **Production implementation gap remains significant:** the tree contains only `repo_store.go` (interface) and `memory_store.go` (test fake); no GitHub `RepoStore` adapter, server entrypoint, or MCP server implementation appears in the Go source tree. Architecture.md describes a GitHub implementation, so this is a delivery/completeness gap to reconcile against project scope, not a runtime defect in the adapter (which cannot be reviewed because it is absent). This is the primary limitation for verifying real GitHub branch-ref atomicity and no-force publication guarantees.
+- Test coverage currently proves the fake's compare-and-publish race, but cannot prove production behavior. Highest-value future tests once an adapter exists: branch moved between preflight and ref update; branch ref update rejects non-fast-forward; commit is created but ref update fails; publish succeeds but head/ancestry read fails; retry of same request ID after uncertain publication; multi-file change is one commit; deletion and empty file behavior.
+- No tests run and no implementation changes.
+- **Next:** review request envelope parsing, tool exposure and server/bootstrap boundaries against REQ-001–REQ-017 and architecture claims; map which components are implemented vs. missing rather than assuming production readiness. Continue review only.
