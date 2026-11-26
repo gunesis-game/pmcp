@@ -8,6 +8,13 @@ The governed GitHub repository is the durable memory of the project. It contains
 
 PMCP interprets and validates that repository-resident information and exposes clear, explicit MCP operations and guidance so an agent can recover the relevant context and determine what to do next after a session reset or agent replacement. The system must not assume a sophisticated model, a large context window, durable conversational memory, or the ability to reconstruct missing context correctly.
 
+
+**Governance is a cooperative process between PMCP and its AI consumer.** PMCP must perform mechanically every part of the governing process that it can reliably determine and enforce. It must not delegate deterministic, machine-checkable work merely because an AI could also perform it. When a matter genuinely requires contextual interpretation, judgement, or reasoning beyond what PMCP can reliably establish, PMCP must explicitly identify the remaining assessment and present the AI with the relevant evidence, context, constraints, and a precise question or task.
+
+The AI is a participant in completing the governed process, not an external approval layer or a substitute for PMCP's mechanical responsibilities. The AI returns its assessment in a structured form that PMCP can validate, associate with the exact subject and revision, incorporate into the overall assessment, and use when determining the next governed step. PMCP must distinguish its mechanically established findings from AI-provided assessments, preserve unresolved matters until they have been addressed, and never represent an incomplete assessment as complete. A confirmed violation remains a violation; an unresolved matter is a deliberate handoff for further assessment, not automatically a failure or a pass.
+
+This principle applies across the entire MCP and every governance process—not only validation. It is a foundational product and architecture constraint: **PMCP does as much governance mechanically as it reliably can, then structures and directs the remaining work to the AI so the governed process can be completed.**
+
 Design and requirements should therefore favour:
 - durable, discoverable project knowledge stored alongside the project it describes;
 - explicit decisions, state, constraints, progress, and outstanding work;
@@ -262,6 +269,9 @@ Both actions target an open standard cycle (`cycle` optional). Cancelled and com
 - **REQ-102** Re-exposed GitHub tools that write or delete repository contents refuse to change files in the state folder. Only governance tools change them.
 - **REQ-103** When `git_workflow.working_branch` is set and `integration` is `direct-push`, re-exposed GitHub tools refuse, in that governed repository, to create branches or to write to a branch other than the working branch. *(open: Q-05)*
 - **REQ-104** pmcp detects state that was changed outside pmcp, reports it in `status.report`, and refuses state changes until the state is accepted (REQ-112) or reverted.
+- **REQ-113** Across every governance process, pmcp performs all assessments, checks, decisions, and enforcement actions that it can reliably determine mechanically. It must not delegate a deterministic or machine-checkable responsibility to the AI consumer merely because the consumer could perform it. Where pmcp cannot reliably establish an answer, it identifies the specific unresolved matter and supplies the AI consumer with the relevant subject and revision, evidence, context, applicable constraints, and a precise assessment task. An unresolved finding is neither a pass nor, by itself, a confirmed violation.
+- **REQ-114** The AI consumer can return its assessment of handed-off matters in a defined, structured form. pmcp validates that response, associates it with the original finding and assessed subject/revision, preserves its provenance as an AI-provided assessment, and incorporates it into the overall governance process. The response contract must distinguish the AI's assessment from findings mechanically established by pmcp; an AI assertion must not be misrepresented as a mechanically verified fact.
+- **REQ-115** A governance process is not complete while required unresolved assessments remain unaddressed. After receiving the AI's structured assessment, pmcp determines the resulting governance state and next permitted action under the applicable rules. Confirmed violations remain violations; unresolved matters remain outstanding until appropriately assessed. Assessment completion, validation execution success, and authorization to perform an operation remain distinct.
 
 ### Setup and migration
 
