@@ -168,3 +168,14 @@ flowchart TD
 - Review focus moved toward governance/domain responsibilities. Initial source inspection surfaced `internal/state/snapshot.go` as combining parsed domain records with raw files, parse errors, serialization/clone, changed-file detection, and digest mechanics. The user agreed that the domain model should not own raw repository-file management or Git snapshot mechanics.
 - No code changes were authorized. This session only updates the review tracker.
 - **Resume at:** critically inspect governance/domain operations in current source, one issue at a time, and persist each approved decision to `review.md` on `main` before moving forward. The immediately preceding unresolved proposal is to distinguish parsing from semantic validation; it has not been agreed yet.
+
+
+## North Star — Review tracking and continuity
+
+**The review document is the durable source of truth for this review. Chat history is not the tracking mechanism.**
+
+- Every agreed decision, rejected proposal, unresolved question, review status, and resume point must be recorded in `review.md` on `main` as the review progresses.
+- After the user agrees to a decision, update and commit `review.md` **before moving to the next topic**.
+- Keep the checkpoint current enough that a lost session can be resumed without reconstructing context from chat.
+- If the tracker cannot be updated or the commit cannot be verified, stop review progression and explicitly report the failure. Do not continue accumulating unrecorded decisions.
+- Do not make implementation changes without explicit user approval.
