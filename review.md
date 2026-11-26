@@ -53,11 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations for GitHub Actions workflows.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes a manually initiated, read-only verification execution contract with exact-revision evidence and repository-integrity checks.
 
-Continue by defining the deterministic GitHub Actions discovery and tier-to-workflow mapping contract. Determine how workflow files are discovered and identified, how each workflow declares or is assigned to a tier, and how PMCP rejects missing, ambiguous, invalid, or non-executable required workflows. Keep the distinction between strategy establishment during governance/design and execution as a mandatory implementation-cycle gate.
-
-Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-023. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
+Continue by defining the precise workflow-file validity and safety inspection rules, including how PMCP can establish the permitted trigger set, effective permissions, and absence of repository mutation capabilities. Be explicit about what PMCP can verify from workflow configuration versus what it cannot guarantee about arbitrary job code or external side effects. Then reconcile A-014's evidence snapshot/fingerprint contract and the existing strategy gate with A-020–A-025. Continue individual disposition of former policy fields before rewriting requirements or architecture. No implementation changes without explicit approval.
 
 ## Current assessment matrix
 
@@ -673,3 +671,35 @@ No implementation changes are authorized by this decision.
 - Unmatched workflows are not implicitly assigned; empty tiers and invalid/missing required workflow configuration block validation.
 - Next topic: define the validity and executability contract for discovered workflows.
 - This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+
+
+### A-025 | Explicitly initiated, revision-bound, read-only verification execution
+
+**Status: Approved by the user on 2026-11-26.**
+
+- A discovered verification workflow must be valid GitHub Actions configuration, be located directly under `.github/workflows/`, and be explicitly dispatchable through `workflow_dispatch`.
+- `workflow_dispatch` is the only permitted trigger for governed verification workflows. They must not run automatically in response to `push`, `pull_request`, `schedule`, `workflow_run`, or other events.
+- PMCP is the authorized initiator of governed verification runs. A manually initiated run outside PMCP is not accepted as governance evidence.
+- PMCP explicitly requests execution; it must not rely on an automatic event-triggered run.
+- A run is evidence for an implementation only when its resulting `head_sha` exactly matches the implementation commit SHA being evaluated. A run resolving to another commit is not valid evidence.
+- Verification jobs must have read-only repository permissions. Write-capable repository credentials, tokens, or secrets must not be made available to them.
+- Verification must not commit to, push to, or otherwise modify the governed repository.
+- PMCP checks repository HEAD after execution. If HEAD changed during verification, the result is invalidated and the change is treated as a governance violation, not silently accepted as a new state.
+- PMCP must be able to observe the run's status, conclusion, jobs, and failure details. An inaccessible or unobservable run cannot pass.
+- These controls constrain repository mutation and the governed execution path, but they do not prove arbitrary job code has no external side effects. PMCP must not claim that GitHub Actions workflow inspection alone provides a fully sandboxed execution environment.
+- The GitHub Actions dispatch interface accepts a branch/tag ref rather than an arbitrary commit SHA. PMCP must therefore verify the actual run's `head_sha` against the intended implementation SHA and reject mismatches.
+- This decision does not authorize implementation changes or settle the complete mechanism for isolating arbitrary job code and external credentials. Those limitations and controls remain explicit in subsequent design.
+
+Rationale: verification is a governed action, not a passive reaction to repository events. Automatic triggers can create uncontrolled execution and side effects; a job that commits back to the repository can move the governed HEAD while the very revision under evaluation is being tested. Explicit initiation, least-privilege permissions, exact-SHA evidence, and post-run integrity checks make that risk visible and reject repository mutation as valid verification. The limits of workflow-level controls must remain explicit rather than overstating isolation guarantees.
+
+No implementation changes are authorized by this decision.
+
+### Session 52 — Verification execution safety contract approved
+
+- User approved A-025, including the additional requirement that governed verification workflows never run automatically.
+- PMCP must explicitly initiate verification through `workflow_dispatch`; event-based triggers are prohibited. Runs initiated outside PMCP are not accepted as governance evidence.
+- Evidence is accepted only for an exact `head_sha` match. Jobs must have read-only repository permissions and must not mutate the governed repository.
+- PMCP checks HEAD after execution; any change invalidates the result and is treated as a governance violation.
+- The contract acknowledges that workflow inspection and GitHub Actions permissions cannot prove arbitrary job code has no external side effects.
+- This tracker update records the approval before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the precise workflow-file validity and safety inspection rules, distinguishing enforceable configuration constraints from guarantees PMCP cannot make about arbitrary job code and external effects. Then reconcile the evidence fingerprint and strategy-gate contracts.
