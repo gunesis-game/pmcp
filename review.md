@@ -176,7 +176,7 @@ flowchart TD
 
 ### Further questions (not yet decided)
 
-- Parsing failures vs. domain/governance validation: parsing converts Git file contents to domain types; governance validation checks semantic rules. Whether malformed/partial state should block specific operations is operation-dependent and still open.
+- Whether malformed/partial state should block a specific operation remains operation-dependent. Parsing failures are distinct from semantic governance validation (A-007).
 - Whether a lightweight application/request service is needed after removing branch/lock/retry/snapshot machinery, or whether the existing coordinator should be substantially reduced/replaced.
 
 ## Session 32 — Architecture simplification decisions and tracking correction
@@ -185,7 +185,7 @@ flowchart TD
 - Updated this file on `main` with the agreed decisions A-001 through A-006, the agreed conceptual layering, unresolved questions, and this session log. This commit is the durable checkpoint; future approved decisions must be recorded in this file before review continues. If the repository update cannot be completed, stop and explicitly report the failure instead of proceeding with more decisions.
 - Review focus moved toward governance/domain responsibilities. Initial source inspection surfaced `internal/state/snapshot.go` as combining parsed domain records with raw files, parse errors, serialization/clone, changed-file detection, and digest mechanics. The user agreed that the domain model should not own raw repository-file management or Git snapshot mechanics.
 - No code changes were authorized. This session only updates the review tracker.
-- **Resume at:** critically inspect governance/domain operations in current source, one issue at a time, and persist each approved decision to `review.md` on `main` before moving forward. The immediately preceding unresolved proposal is to distinguish parsing from semantic validation; it has not been agreed yet.
+- **Resume at:** critically inspect governance/domain operations in current source, one issue at a time, and persist each approved decision to `review.md` on `main` before moving forward. Decision A-007 now settles the separation of parsing, domain interpretation, and operation-specific semantic validation.
 
 
 ## Review update — Product North Star added to baseline documents
@@ -196,3 +196,23 @@ flowchart TD
 - It explains PMCP's role as interpreting and validating repository-resident knowledge and exposing explicit MCP operations/guidance so agents can recover context and continue after session loss or agent replacement.
 - This product framing belongs in the requirements and architecture baseline documents. `review.md` remains the delta assessment record and logs this change rather than redefining the product purpose.
 - Verified both documents on `main` after writing: `architecture.md` content SHA `e42c51d9d23b5b98db92492ab40c1779176f90d8`; `requirements.md` content SHA `b9a017bbe6610246f8501e0625249fc91cb51bd4`.
+
+
+### A-007 | Parsing, domain interpretation, and semantic validation
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Parsing converts repository file contents into typed values and returns explicit parsing errors; malformed or missing input is a parsing concern.
+- Domain interpretation represents PMCP governance concepts and their relationships. It does not own raw Git/repository file management.
+- Semantic validation evaluates governance rules over interpreted domain values. It is distinct from parsing.
+- Each governance operation determines which inputs must parse and which semantic rules must hold for that operation. A global full-state validation pipeline is not to be introduced as a replacement.
+- Remove `ParseErrors` and `IsUsable()` as domain-model responsibilities; do not simply relocate the same global usability gate.
+- Raw repository files, serialization, cloning, digests, and changed-path detection remain outside the PMCP domain model.
+
+Rationale: syntactically malformed data and semantically invalid governance state are different failure classes. Their relevance depends on the operation being performed. Keeping repository representation and mechanics out of the domain model preserves the agreed boundary in A-001/A-002/A-006.
+
+### Session 33 — Parsing and validation separation
+
+- User approved A-007. Recorded the decision above and updated the unresolved parsing question and resume point.
+- No implementation changes authorized or made.
+- **Resume at:** inspect the current governance operations and their actual input dependencies/validation behavior. Use concrete call sites to assess whether the operation-specific boundary is respected; propose one next design decision at a time and record approval here before continuing.
