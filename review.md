@@ -120,6 +120,17 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 
 
 ## Session log
+
+
+### R-008 — Validator accepts partially populated reconciliation records
+**Status:** Confirmed validation gap; P2 candidate
+**Area:** Reconciliation metadata integrity
+
+A reconciliation record is written atomically by `plan.reconcile`: it sets `revision`, `reviewed`, `items`, and `at` together. The snapshot validator does not enforce this relationship. It accepts partial metadata (for example, `at` set while `revision` is null, or a revision/reviewed/items payload with no `at` timestamp), so malformed or out-of-band state can look recorded or contain classifications without a recorded reconciliation event. `IsRecorded()` checks only `At != nil`, making the partial state particularly ambiguous.
+
+
+**Suggested disposition:** Validate reconciliation as either pristine/unrecorded (all metadata null/empty and no items) or recorded (non-null revision and timestamp, reviewed-source list present/non-blank, items structurally valid). Keep zero-item reconciliations valid when recorded. Add tests for each partial combination.
+
 ### Session 6 — Plan mutations, reconciliation, cycle gates, and validator review
 - Read `review.md) from `main`, then checked current `main` HEAD: `c5fe7994cae24250939f7b09db9ae2fa9d798661` (commit message: “fixed review”; only tracker change since prior baseline).
 - Continued review of `PlanRules.update` / `reconcile`, cycle phase transitions and completion gates, preemption, promotion, pending reorder, DR-06 default ordering, and snapshot validator record checks.
@@ -205,3 +216,12 @@ Decision recording verifies approval and writes approval metadata, but `Snapshot
 The normal `plan.reconcile` action trims and rejects empty `item` and `evidence` values, but snapshot validation checks only reconciliation classification. A manually edited, malformed, or otherwise out-of-band reconciliation record can therefore pass validation with blank item/evidence text. This is separate from R-006, which concerns the `reviewed` source list.
 
 **Suggested disposition:** Validate non-blank item and evidence in stored reconciliation records (trim-aware), and consider validating each `reviewed` entry too. Add malformed-state tests that demonstrate the validator rejects incomplete reconciliation records, while allowing a legitimate reconciliation with zero items.
+
+### Session 7 — Validator cross-record integrity and adversarial test mapping
+- Re-read the full tracker and verified latest main HEAD is the tracker commit from Session 6; no code changes were made during this pass.
+- Inspected snapshot validation and relevant state/reconciliation schemas. The repository has **no `internal/validate/*_test.go` validator tests, and no dedicated plan/reconciliation tests** in the current test tree.
+- Confirmed R-007 validator omission for blank reconciliation item/evidence; normal reconcile action trims/rejects them.
+- Added R-008: validator does not enforce reconciliation record atomicity/completeness (revision, reviewed sources, items, timestamp can be partially populated; `IsRecorded` relies only on timestamp). Normal reconcile writes these fields together; malformed/out-of-band snapshots can violate this.
+- Cross-record checks do enforce record-to-cycle existence and prohibit records on micro cycles, require plan/checkpoint on standard cycles, validate evidence SHA/tier, and validate audit watermark against completed-cycle execution order. No additional issue assigned from these checks yet.
+- Next: map R-001–R-008 to adversarial tests, then review repository-store/audit edge cases and re-evaluate evidence findings.
+- Tests have not been executed; this remains source review only.
