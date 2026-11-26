@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-The assessment is not yet demonstrated exhaustive. Previous work covered the areas in the matrix below and accumulated candidate validator/test observations, but has not established a complete file-by-file and symbol-by-symbol accounting of all current code, nor a complete critical assessment of the requirements and architecture themselves.
+The assessment remains ongoing and is not yet exhaustive. The current active track is the detailed operation-contract review, following the approved operation-dependency matrix and the actual registered actions/call paths.
 
-**Next:** continue the assessment in a neutral manner. Establish traceability between current requirements, architecture, and all code; critically assess each of the three; capture missing coverage and questions; then use the evidence to support redesign decisions. Do not presume the old architecture needs to be extended.
+**Next:** review the remaining non-cycle operation contracts in registered order, beginning with `audit.check` after approval of A-014 (`evidence.collect`). Verify each contract against implementation and record each approval here before proceeding. After the operation contracts are complete, reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before proposing coordinator redesign. Do not implement without explicit approval.
 
 ## Current assessment matrix
 
@@ -351,4 +351,36 @@ No implementation changes are authorized by this decision.
 - User approved A-013: evidence must be bound to the implementation revision and the verification-relevant policy snapshot that selected required checks.
 - The initial tracker write accidentally replaced the document with only the appended section. This was immediately identified and recovered from the parent commit; the complete prior review history is restored below, with A-013 appended.
 - The corrective commit restores the full tracker and records A-013. No implementation files changed and no tests were executed.
-- **Resume at:** continue the remaining non-cycle operation contracts after `evidence.collect`, verifying each against registered actions and implementation call paths. Then reconcile `requirements.md` and `architecture.md` with A-007 through A-013 before proposing coordinator redesign.
+- **Resume at:** continue the remaining non-cycle operation contracts after `evidence.collect`, beginning with `audit.check`; verify each against registered actions and implementation call paths. Then reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before proposing coordinator redesign.
+
+### A-014 | Complete contract for `evidence.collect`
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Purpose: collect verification results for an exact implementation revision under an identified verification-policy snapshot.
+- Accepted arguments: `sha`, `tier`, `components`, `required_workflows`, `wait_minutes`, and `cycle`; unknown arguments are rejected.
+- An explicit SHA must resolve to a full commit SHA. When omitted, select the newest qualifying implementation commit using the defined selection rule.
+- Tier is `fast`, `integration`, or `full`, defaulting to `full`. Required workflows are derived from the policy snapshot and tier; an explicit `required_workflows` argument overrides policy selection.
+- Components are valid only with the `fast` tier and include tests for the named components and their transitive dependants.
+- Wait duration is explicit when supplied, otherwise policy-configured, otherwise 15 minutes. The configured maximum is enforced and capped at 60 minutes.
+- Evidence identifies both the implementation SHA and the policy source revision plus a stable fingerprint of the verification-relevant policy used to derive required checks.
+- CI runs are evaluated for the exact implementation SHA, selecting the latest run per workflow by creation time and then attempt. Gate outcomes are `pass`, `fail`, `pending`, or `no-required-checks`.
+- Failed workflows include bounded failure detail: failed jobs, failed steps, and annotations.
+- An explicit cycle must resolve to an open standard cycle. Without one, use the in-progress standard cycle if present. If no standard cycle is available, return evidence without storing it.
+- When a cycle is targeted, evidence and its journal entry are published atomically. Evidence collection does not itself transition cycle lifecycle state.
+- Historical evidence is retained. Different verification contexts for the same implementation SHA must not overwrite one another; evidence identity/storage must distinguish at least SHA, tier, and verification-policy fingerprint.
+- Policy changes during CI polling must not cause evidence to be represented as having been collected under the newer policy. A current gate accepts only evidence whose verification-relevant policy matches the policy required by that gate.
+- Validate state prerequisites and the target cycle before spending time collecting CI evidence.
+- Polling is governed by required workflows; optional in-progress workflows must not delay a required-check gate that has already passed.
+- Coordinator-level replay and validation behavior remains a coordinator redesign concern; it must not be hidden in the evidence operation contract or reintroduce blanket semantic validation.
+
+Rationale: evidence is meaningful only when its implementation revision and verification policy are explicit. The operation must preserve historical results, enforce the correct target and gate semantics, and avoid misleading evidence when policy changes during collection.
+
+No implementation changes are authorized by this decision.
+
+### Session 40 — Evidence collection contract approval
+
+- User approved A-014, completing the detailed `evidence.collect` contract after A-013 established policy-bound evidence.
+- Static inspection confirmed current gaps: the evidence model has no policy revision/fingerprint; evidence is keyed by SHA alone; cycle resolution occurs after CI collection; optional in-progress workflows can prolong polling; and coordinator replay occurs after evidence preparation.
+- No implementation files changed and no tests were executed. This update records the approved contract only.
+- **Resume at:** continue with the next remaining non-cycle operation contract, `audit.check`, and verify it against registered actions and implementation call paths. After each approval, update and verify this file on `main` before proceeding. Reconcile `requirements.md` and `architecture.md` with A-007 through A-014 before coordinator redesign.
