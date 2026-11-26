@@ -1,6 +1,6 @@
 ## SESSION HANDOFF — START HERE
 
-**Last updated:** 2026-11-25  
+**Last updated:** 2026-11-26  
 **Branch:** `main` only. All review work happens on `main`; do not create or use any other branch (see [README.md](README.md)).  
 **Persistent tracker:** this file (`review.md`) — read it before continuing.
 
@@ -25,7 +25,7 @@
 
 **Review status:** In progress  
 **Repository:** `gunesis-game/pmcp`  
-**Baseline:** `main` (review baseline at tree `c72f1398f7f8b959e4fe8fb40f5745448517451d`)  
+**Baseline:** `main` (latest tracker commit before Session 15: `025691f28c3234d643681c50ea24153f49b8e260`)  
 **Purpose:** Maintain review findings, confirmed facts, hypotheses, next steps, and remediation decisions across sessions.  
 **Scope:** Architecture/requirements reconciliation, implementation correctness, governance consistency, evidence integrity, idempotency/concurrency, CI, repository-store behavior, and test coverage.
 
@@ -305,3 +305,14 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - R-001/R-002/R-004 dispositions reconciled in the Findings section and status summary to reflect Sessions 10–11 conclusions.
 - No code changes; no tests executed.
 - Next: consolidate R-005–R-009 into an invariant/test matrix; inspect decision/reconciliation validation requirements and surrounding state lifecycle to decide which candidates can be confirmed against explicit contract language. Continue review of audit/journal integrity and store failure paths.
+
+
+### Session 15 — Audit and journal integrity review
+- Verified the latest tracker and main HEAD before review: `025691f28c3234d643681c50ea24153f49b8e260`; no external repository changes observed.
+- Reviewed `audit_rules.go`, `audit_window.go`, `state/audit.go`, `journal.go`, checkpoint rules, validator audit checks, store interface, and MemoryStore implementation.
+- Audit actions align with REQ-080/081: audit.check lists completed cycles above watermark; audit.advance requires a higher watermark that corresponds to a completed execution order and an in-progress standard cycle, then writes the audit row, watermark, handoff boundary and journal event together. The validator checks watermark non-negative and anchored to a completed cycle. It does not validate the full audit-history sequence, but REQ-101's audit validation requirement only specifies watermark integrity; no defect assigned without a stronger history invariant.
+- Journal helper touches the cycle handoff timestamps/branch/revision and appends events for state-changing cycle-related actions; checkpoint.save appends the specified event and optional notes. No new journal defect confirmed in this source pass.
+- MemoryStore expected-head compare and commit are serialized under mutex; ancestry and commit traversal are guarded for unknown commits. Production adapter cannot be reviewed because it is absent from the repository tree despite architecture text describing a GitHub implementation.
+- Corrected stale R-002 and R-004 descriptions in Findings to match the later Sessions 10–11 dispositions. Tracker still needs a broader consolidation to remove duplicate/out-of-order session history and reconcile top-level finding inventory.
+- No tests executed; no implementation changes.
+- Next: review request result envelopes, validation/refusal semantics, and CI policy/workflow mapping; then consolidate findings and missing test matrix.
