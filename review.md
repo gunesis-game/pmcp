@@ -59,7 +59,9 @@ The assessment should establish and continually update:
 
 **Latest approved direction (A-044):** Option A—direct, namespace-scoped publication into `.pmcp/state.json`. Each verification tool writes only its own section. PMCP reads and derives governance state; it does not overwrite the underlying tool result. The decision is recorded below. Concurrency/write-safety and the precise publication contract are not yet settled.
 
-**Resume next:** Continue reviewing evidence lifecycle within the implementation-cycle model: PMCP mechanically governs and prepares evidence/context, presents it as part of the cycle interaction, and AI makes the final contextual assessment and determines the next step. PMCP validates that decision against governance constraints, records it in canonical state, and enforces permitted progression. Avoid a separate evidence-assessment feedback loop, universal evidence schema, or duplicating canonical metadata. No implementation changes without explicit approval.
+**Latest approved evidence handoff direction (A-054):** PMCP must assemble and make the actual relevant evidence content available to the AI within the governed cycle interaction; references alone are insufficient. It selects evidence/context for the task rather than indiscriminately loading everything. Preserve native evidence formats and Git-native identity/integrity; avoid redundant metadata or a standalone assessment loop.
+
+**Resume next:** Continue reviewing remaining evidence lifecycle mechanics and cycle integration. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -1107,3 +1109,26 @@ No implementation changes are authorized by this decision.
 - User corrected the proposal's basis: repository growth decisions must be supported by clear evidence from governed cycles, not speculative concerns.
 - A-053 approved: defer storage-growth interventions until actual cycle evidence establishes a meaningful operational constraint; assess and decide within the governed implementation cycle.
 - **Resume at:** Continue the evidence lifecycle/storage review, identifying any remaining unresolved mechanics without inventing controls or duplicating Git's capabilities.
+
+
+## A-054 — Evidence content must be accessible in the governed AI handoff
+
+**Status:** Approved architectural clarification  
+**Date:** 2026-11-26
+
+- PMCP's evidence handoff must make the actual relevant evidence content available to the AI in a usable form. Providing only references and leaving the AI to discover and retrieve the evidence independently is insufficient.
+- PMCP is responsible for selecting, gathering, and organizing evidence and context relevant to the unresolved assessment, using its mechanical governance capabilities. It must not indiscriminately load all evidence; relevance and scope are determined by the assessment task and governed subject.
+- Evidence may remain in its native, opaque, heterogeneous format. This does not introduce a universal evidence-content schema, a separate evidence identity, or redundant integrity metadata. Git-native identity and integrity remain authoritative for repository-retained payloads.
+- The handoff is part of the implementation cycle, not a separate feedback loop. The AI assesses the evidence and decides the next step within governance constraints; PMCP validates the returned decision, records it with the existing subject/revision association and provenance, and enforces permitted progression.
+- References may accompany evidence for traceability and navigation, but they do not substitute for access to the evidence content needed for the assessment.
+
+**Boundary:** PMCP owns evidence discovery, relevance selection, and making the necessary evidence content available. AI owns contextual assessment and next-step judgment. PMCP retains mechanical governance and progression enforcement.
+
+No implementation changes are authorized by this decision.
+
+
+## Session 84 — Evidence handoff accessibility approved
+
+- A-054 approved: evidence handoff must expose actual relevant evidence content to the AI; references alone are not enough. PMCP selects and organizes evidence for the assessment rather than loading everything indiscriminately.
+- This clarification does not add a universal evidence format, separate identity/checksum, or standalone assessment loop.
+- **Resume at:** continue reviewing remaining evidence lifecycle mechanics and implementation-cycle integration, checking for unresolved needs without duplicating Git capabilities or adding speculative controls.
