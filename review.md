@@ -119,6 +119,29 @@ The replay scan matches a commit by `Pmcp-Request` only, then decodes and return
 **Suggested disposition:** Require at least one non-empty reviewed source and validate each entry is non-blank (trim whitespace); add tests for omitted, empty, and whitespace-only entries, while retaining the ability to record zero reconciliation items when a thorough review finds none.
 
 
+## Adversarial test coverage map (Session 8)
+
+Test coverage below is source-inspected only; no tests were executed.
+
+| Finding / behavior | Existing coverage observed | Missing adversarial tests |
+|---|---|---|
+| R-001 policy changes during evidence wait | Evidence gates cover pending/fail/no-required-checks; no policy mutation during collection wait found | Change required workflows after collection preparation but before recording; assert evidence is revalidated or rejected/recollected under changed policy |
+| R-002 tier overwrite for same SHA | Standard cycle exercises full-tier collection; no same-SHA cross-tier retention/overwrite test found | Collect full then fast (and reverse) for same cycle/SHA; assert storage semantics and completion gate behavior explicitly |
+| R-003 full-pass completion requirement | End-to-end test explicitly rejects verify transition without full-tier pass, then succeeds with full pass | Add matrix for fast-pass, integration-pass, full-fail, full-pending, and full-pass; some gates already indirectly exercised but not isolated |
+| R-004 replay request mismatch | End-to-end test repeats same request ID/request and confirms no publish | Reuse identical request ID with different tool/action/args; expect mismatch rejection, not replay of old result; confirm unchanged head |
+| R-005 Recorded decision metadata | Decision recording tests approval path and normal successful record | Validator tests for Recorded without approval, without recorded_at, without specification, malformed verified revision; Proposed-state constraints too, once invariants are specified |
+| R-006 reviewed sources | Standard-cycle happy path reconciles with one reviewed source | reviewed omitted, empty list, whitespace-only element; expect reject/validator invalid; legitimate zero-item reconciliation remains allowed |
+| R-007 reconciliation item/evidence | Happy path reconciliation has non-empty item/evidence | Validator rejects blank/whitespace item and evidence, while action-level trimming and reject behavior are asserted |
+| R-008 reconciliation metadata atomicity | No validator test suite identified | Test pristine record, fully recorded record, each partial metadata combination, null revision/time, empty/blank reviewed; permit recorded zero-item case |
+
+### Session 8 — Adversarial test matrix
+- Verified current main HEAD is fb3b94155418479837e799781640da8d901514dc before continuing; this is the previous tracker update, no intervening commit.
+- Source-read the existing evidence rules, coordinator safeguards, standard-cycle end-to-end, harness, and canonical JSON tests to map R-001–R-008 against actual tests.
+- Coverage confirms basic evidence request validation and workflow dependency expansion; evidence gate states; standard-cycle completion requires full pass; normal same-request idempotent replay; expected-head retry under concurrent movement; micro-cycle preemption; decision approval checks; canonical strict decoding/encoding.
+- Added the adversarial coverage matrix above. Key gaps: cross-tier same-SHA evidence overwrite; policy changes during evidence preparation; request-ID reuse with different action; malformed Recorded decision/reconciliation validator states; and missing direct validator/plan-reconciliation tests.
+- Tests have not been run. No implementation changes.
+- Next: review repository-store/audit edge cases and then re-evaluate evidence findings (R-001/R-002) with requirements semantics.
+
 ## Session log
 
 
