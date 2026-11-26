@@ -9,7 +9,7 @@
 2. Inspect the latest commit on `main`.
 3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
 4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
-5. Next task: continue with store-integrity and production-adapter boundaries, then build a prioritized adversarial test plan across validator, evidence, and publication paths.
+5. Next task: consolidate the implementation-completeness observations from Session 22, reconcile the architecture's target-server claims against actual scope, then build a prioritized adversarial test plan.
 6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
 
 ### Review snapshot
@@ -386,3 +386,17 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Test coverage currently proves the fake's compare-and-publish race, but cannot prove production behavior. Highest-value future tests once an adapter exists: branch moved between preflight and ref update; branch ref update rejects non-fast-forward; commit is created but ref update fails; publish succeeds but head/ancestry read fails; retry of same request ID after uncertain publication; multi-file change is one commit; deletion and empty file behavior.
 - No tests run and no implementation changes.
 - **Next:** review request envelope parsing, tool exposure and server/bootstrap boundaries against REQ-001–REQ-017 and architecture claims; map which components are implemented vs. missing rather than assuming production readiness. Continue review only.
+
+
+### Session 22 — Request envelope, tool exposure, and bootstrap boundary
+
+- Verified the latest tracker and `main` HEAD before review: `abdf514f49de9861ff729af87980067bf1a8204d`; no source changes since Session 21.
+- Reviewed `coordinator/request.go`, `coordinator/result.go`, `coordinator/identity.go`, `governance/args.go`, `governance/call.go`, `governance/toolset.go`, `setup/setup_rules.go`, `guide/served_content.go`, coordinator request dispatch, and safeguards tests. Rechecked REQ-001–REQ-017 and architecture's server/config/bootstrap sections.
+- **Request and args validation:** request requires owner/repo and UUID-shaped request ID; tool/action are allowlisted against governance tool rules plus setup's explicit special case; action unknown is rejected with accepted actions. Args are decoded as JSON object, null entries removed, unknown keys are rejected per action, scalar strings and list entries trimmed and validated. No defect confirmed from this source review.
+- **Result envelope:** result includes request ID, tool/action, status/verdict, summary/messages, data, changed files, read/published revisions, branch, completion time, retry/fix, optional read section and next_request. finish() normalizes message/changed-file lists and selects summary as documented. No new defect confirmed.
+- **Governance exposure in current source:** seven rule groups (status, cycle, plan, checkpoint, decision, evidence, audit) are assembled by `governance.Toolset()`; setup is routed separately by coordinator. The rules interface/actions are implemented, but no MCP adapter layer registers these as actual MCP tools in the source tree.
+- **Architecture vs repository completeness:** architecture describes the target `cmd/pmcp`, `internal/config`, `internal/server`, `internal/githubclient`, `internal/tools`, embedded GitHub MCP integration, configuration parity, and stdio transport. The repository tree currently has none of those packages, no `main.go`/CLI, no MCP server assembly/transport, no GitHub MCP dependency in `go.mod`, and no production GitHub RepoStore/GitHubFacts implementation. Thus this checkout contains governance rules and coordinator abstractions/test fakes, but not a runnable PMCP MCP server or the promised GitHub tool passthrough.
+- **Disposition:** this is a material delivery/scope gap against REQ-001/REQ-002 and architecture's server/bootstrap description if those are considered current release obligations. However, architecture status is explicitly “Under review,” requirements/decisions are Draft, and no approved scope/release milestone was located in this pass; therefore record as **completeness risk, not confirmed implementation defect** pending scope confirmation.
+- Existing in-repository tests validate coordinator behavior through test harness and fake GitHub facts/store, not the actual MCP tool inventory, configuration propagation, server startup, transport, or exposed GitHub tool parity. Once adapters/bootstrap exist, highest-value contract tests: tool inventory parity and filtering/config options; tool schemas/annotations; read-only/lockdown behavior on PMCP tools; malformed MCP arguments/envelope mapping; startup/config failures; tool/resource/prompt registration; integration with real GitHub clients and atomic repository-store semantics.
+- No tests executed; no implementation changes.
+- **Next:** reconcile target architecture claims and project scope/milestone status; then consolidate confirmed findings vs completeness risks and produce a prioritized test plan. Continue review only.
