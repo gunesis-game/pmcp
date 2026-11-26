@@ -130,3 +130,41 @@ This log exists specifically to recover continuity when agentic sessions end. Ke
 ## Overall assessment status
 
 **Ongoing current-state and design assessment.** No confirmed defect established to date. No tests executed. No implementation fixes made. Requirements, architecture, and code are all open to reconsideration. The current matrix is a partial assessment map—not an exhaustive inventory or a statement that the current system is correct.
+
+
+## Architectural decisions established during the current review
+
+These decisions were agreed conversationally and must be treated as the current review baseline, subject to further explicit revision:
+
+| ID | Decision | Implication |
+|---|---|---|
+| A-001 | Git is authoritative for repository state | Git commit/tree/blob/history are the source of truth; PMCP must not duplicate Git snapshot/persistence capabilities unnecessarily. |
+| A-002 | Separate three concepts: Git snapshot, PMCP domain interpretation, and PMCP validation | Git snapshot is the input; PMCP interprets governance files into its domain model; validation checks governance integrity/rules. |
+| A-003 | Always operate on `main` | Branches are not an application-level PMCP concept. No branch selection or branch-aware architecture. |
+| A-004 | No PMCP concurrency subsystem | Do not implement PMCP locks, concurrency management, retry orchestration, or branch-movement recovery. Git owns commit identity/history. |
+| A-005 | Validation is operation-specific | Validation requirements depend on the operation's purpose, inputs, dependencies, and effects. Do not impose a blanket full-state validation pipeline. |
+| A-006 | Domain model should not duplicate repository mechanics | PMCP domain state should contain interpreted governance concepts, not raw repository file management, Git snapshot mechanics, changed-path detection, publishing, or commit identity. Generic serialization is not inherently a domain responsibility. |
+
+### Agreed conceptual layering
+
+```mermaid
+flowchart TD
+    G["Git snapshot — main, commit, tree, blobs"]
+    D["PMCP domain model — interpreted governance state"]
+    V["PMCP validation — operation-specific governance rules"]
+    G -->|"read / interpret"| D
+    D -->|"validate as required by operation"| V
+```
+
+### Further questions (not yet decided)
+
+- Parsing failures vs. domain/governance validation: parsing converts Git file contents to domain types; governance validation checks semantic rules. Whether malformed/partial state should block specific operations is operation-dependent and still open.
+- Whether a lightweight application/request service is needed after removing branch/lock/retry/snapshot machinery, or whether the existing coordinator should be substantially reduced/replaced.
+
+## Session 32 — Architecture simplification decisions and tracking correction
+
+- User emphasized that "tracking" means **actually updating `review.md` in the repository**, not merely maintaining a chat recap. This failure was acknowledged.
+- Updated this file on `main` with the agreed decisions A-001 through A-006, the agreed conceptual layering, unresolved questions, and this session log. This commit is the durable checkpoint; future approved decisions must be recorded in this file before review continues. If the repository update cannot be completed, stop and explicitly report the failure instead of proceeding with more decisions.
+- Review focus moved toward governance/domain responsibilities. Initial source inspection surfaced `internal/state/snapshot.go` as combining parsed domain records with raw files, parse errors, serialization/clone, changed-file detection, and digest mechanics. The user agreed that the domain model should not own raw repository-file management or Git snapshot mechanics.
+- No code changes were authorized. This session only updates the review tracker.
+- **Resume at:** critically inspect governance/domain operations in current source, one issue at a time, and persist each approved decision to `review.md` on `main` before moving forward. The immediately preceding unresolved proposal is to distinguish parsing from semantic validation; it has not been agreed yet.
