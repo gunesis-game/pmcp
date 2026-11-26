@@ -9,7 +9,7 @@
 2. Inspect the latest commit on `main`.
 3. Do not assume prior findings or snapshots of `main` are unchanged; verify relevant source before acting.
 4. Continue the review only. **Do not make implementation changes or create remediation commits without the user's explicit approval.**
-5. Next task: review plan mutations, reconciliation classification, cycle ordering/preemption, and cross-record validator consistency. Then map findings to adversarial/negative tests.
+5. Next task: inspect policy validation for workflow/component names and evidence wait bounds, then review CI read/error/cancellation and publication/idempotency boundaries.
 6. Update this file with findings, review status, session log, and next handoff whenever work pauses.
 
 ### Review snapshot
@@ -324,3 +324,12 @@ The normal `plan.reconcile` action trims and rejects empty `item` and `evidence`
 - Tracker hygiene issue: the persistent Findings section had stale R-002 and R-004 descriptions despite the summary/session notes having downgraded them. Corrected those descriptions and refreshed the handoff priority.
 - No tests run; no code changes.
 - Next: inspect policy parsing and workflow/component selection edge cases, then review error paths where external CI reads fail, canceled polling, and idempotency/result publication boundaries. Consolidate findings and missing test coverage.
+
+
+### Session 17 — Policy workflow/component validation and CI preparation edge cases
+- Verified latest tracker SHA `8296e2ef5839af037cbd0dfd9945f99ff7777ab3` and main HEAD `05de33052de3107de9104685716492767306d653` before review.
+- Read `evidence_rules.go`, `policy.go`, `snapshot_validator.go`, `evidence_collector.go`, `gate_evaluator.go`, `coordinator.go`, `ci/run.go`, and REQ-070–REQ-073.
+- **Confirmed alignment:** `required_workflows` override takes precedence per REQ-071; component selection is fast-tier only, adds transitive dependants, rejects unknown requested components, and sorts the final workflow list. Cyclic dependant relationships terminate due to the visited set. Workflow run selection and gate classification/polling match REQ-072. No new defect confirmed in these paths.
+- **Potential policy-validation gap (not elevated to finding):** policy validation checks that component dependants refer to known components and that tier lists exist and decode, but does not appear to reject blank workflow names, blank component test names, duplicate entries, or invalid `evidence_wait_minutes` bounds. Some invalid values fail later during request preparation; duplicates are de-duplicated for policy-selected workflows. Requirements text around policy validity and normalization needs to be checked before classifying these as defects.
+- **No tests run; no implementation changes.**
+- Next: inspect exact policy requirements and tests for invalid workflow names/wait values, then review CI read failures/cancellation and idempotency/publish/read-back failure behavior. Consolidate the tracker findings and negative-test priorities.
