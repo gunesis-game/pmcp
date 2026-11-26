@@ -53,9 +53,9 @@ The assessment should establish and continually update:
 
 ## Handoff / current next step
 
-A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return the genuinely unresolved assessment to the consumer as structured, evidence-backed findings. A-030 establishes a common structured governance assessment contract that distinguishes passed checks, confirmed violations, and unresolved findings, while separating validation execution status from governance authorization.
+A-019 establishes fixed-`main`, exact-HEAD, single-attempt optimistic publication. A-020 retires `project/policy.json` as a required concept. A-021 establishes CI-owned configuration as the source of verification workflow selection. A-022 makes GitHub Actions the initial provider and testing/verification mandatory governance. A-023 establishes progressively inclusive verification tiers. A-024 establishes filename-based tier declarations. A-025 establishes manually initiated, read-only verification execution with exact-revision evidence and repository-integrity checks. A-026 limits the no-automatic-trigger rule to PMCP-governed verification workflows. A-027 establishes effective-configuration validation and the narrowly scoped history-cleanup reusable-workflow exception. A-028 establishes the dedicated caller/reusable-workflow structure for history cleanup. A-029 establishes PMCP's core governance responsibility: automate and enforce everything it can reliably determine, and return genuinely unresolved assessments to the consumer. A-030 establishes a common structured assessment response contract distinguishing passed, violation, and unresolved findings, separate from validation execution status and authorization. A-031 establishes deterministic workflow discovery, parsing, and structural validation as one necessary validation layer, not the complete validation or final governance assessment.
 
-Continue by defining the precise supported GitHub Actions configuration subset and validator rules under A-027/A-029/A-030: YAML/schema validity, trigger allowlist, effective permissions, secret/credential restrictions, reusable workflows/actions, expression handling, and explicit treatment of properties PMCP cannot determine. Apply the common response contract, including machine-readable findings, evidence, actionable explanations, stable identifiers, and a distinct top-level validation execution status for infrastructure/tool failures. Then reconcile the evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
+Continue by defining the remaining semantic and security validation layers for GitHub Actions: trigger semantics, effective permissions, expressions and conditional execution, secrets and credentials (including `GITHUB_TOKEN`), actions and reusable workflow resolution, and behavior PMCP cannot statically establish. The final validation must aggregate all applicable layers under A-030; structural parsing alone must never be presented as complete workflow validation or sufficient authorization. Then reconcile evidence fingerprint and strategy-gate contracts. No implementation changes without explicit approval.
 ## Current assessment matrix
 
 | Area | Assessment coverage | Current understanding / assessment |
@@ -853,3 +853,47 @@ No implementation changes are authorized by this decision.
 - Validation evidence is not governance authorization. Validation execution, assessment outcome, and authorization remain separate questions.
 - The exact schema and operation-specific extensions remain open. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the precise supported GitHub Actions configuration subset and effective-configuration inspection rules, applying A-027, A-029, and A-030. Begin with YAML/schema validity, trigger and permission semantics, expression handling, and the boundary between GitHub's automatically provided `GITHUB_TOKEN` and separately supplied secrets/credentials. No implementation changes without explicit approval.
+
+
+### A-031 | Workflow discovery, parsing, and structural validation boundary
+
+**Status: Approved by the user on 2026-11-26, with explicit scope clarification.**
+
+PMCP must establish a deterministic and deliberately bounded language for GitHub Actions workflow inspection. It must not accept arbitrary workflow syntax and silently inspect only the fields it happens to understand.
+
+**Discovery**
+- Inspect only direct files under `.github/workflows/`.
+- Recognize `.yml` and `.yaml` workflow files.
+- Apply the approved A-024 filename patterns to identify governed verification workflows.
+- Do not silently treat nested files or unrelated workflows as governed verification workflows.
+
+**Parsing and structure**
+- Parse each complete workflow document into a structured representation; do not rely on textual searches or regular expressions to infer YAML structure.
+- Use GitHub Actions-compatible YAML semantics.
+- Reject malformed YAML, duplicate mapping keys, multiple YAML documents, and ambiguous constructs such as unsupported aliases or merge-key behavior.
+- Validate document structure against an explicit supported GitHub Actions schema subset.
+- Maintain an explicit allowlist of supported top-level and job-level properties. A property being valid in GitHub Actions does not by itself mean PMCP supports or can safely interpret it.
+- Do not silently ignore properties that could affect execution, permissions, triggers, or dependencies.
+
+**Unsupported constructs and findings**
+- A malformed or demonstrably invalid workflow is a `violation`.
+- A valid GitHub Actions construct that PMCP cannot reliably interpret is `unresolved`, with its exact location and reason.
+- An unresolved workflow cannot qualify as validated or be used to authorize verification execution.
+- PMCP must not ask the consumer to infer that unsupported syntax is safe.
+
+**Critical scope clarification — this is not final validation**
+A-031 defines only the discovery, YAML parsing, and structural-validation layer. It is one necessary part of the workflow-validation boundary, not the complete boundary and not the final validation result. Structural parsing success must never be represented as complete workflow validation, a finding that the workflow is safe, or sufficient evidence to authorize execution.
+
+The eventual workflow validation must evaluate and aggregate every applicable semantic and security layer, including trigger semantics, effective permissions, expression and conditional behavior, secrets and credentials, action and reusable-workflow resolution, and any other execution-affecting configuration. It must report completion only when all required layers have been evaluated for the exact subject revision. Any remaining uncertainty must remain explicit under A-030. Validation evidence still does not itself confer authorization.
+
+Rationale: a deliberately bounded structural language is a prerequisite for reliable deeper analysis. Explicitly treating it as a component layer prevents a partial parser from creating false confidence or being mistaken for a complete governance decision.
+
+No implementation changes are authorized by this decision.
+
+### Session 58 — Workflow parsing boundary approved and scoped
+
+- User agreed to A-031 and clarified that discovery/parsing/structural validation is only one side/layer of the boundary; it must not be represented as final validation.
+- The decision now explicitly requires later semantic and security validation layers and an aggregate result under A-030. Structural parsing success alone cannot imply complete validation or authorization.
+- The handoff now points to trigger semantics, effective permissions, expressions, credentials, action/reusable-workflow resolution, and remaining static-analysis limits.
+- No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the trigger semantics and allowlist for governed verification workflows, including how GitHub Actions event forms and event filters are interpreted. No implementation changes without explicit approval.
