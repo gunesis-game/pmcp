@@ -725,3 +725,28 @@ No implementation changes are authorized by this decision.
 - The A-025 execution-safety controls remain fully applicable to all workflows discovered as PMCP verification workflows.
 - This tracker update records the scope decision before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
 - **Resume at:** define the exact PMCP validation contract for governed verification workflows, including triggers, YAML/schema, effective permissions, credentials/secrets, reusable workflows/actions, and limits on proving job behaviour.
+
+### A-027 | Governed verification workflow validation contract
+
+**Status: Approved by the user on 2026-11-26, with the explicit history-cleanup exception below.**
+
+- PMCP validates the effective GitHub Actions workflow configuration, not merely whether the YAML parses.
+- Governed verification workflows must use `workflow_dispatch` as their only trigger, consistent with A-025 and A-026.
+- Effective repository permissions must be explicit and least-privilege. Unspecified permissions default to none; governed verification jobs must not receive write permissions.
+- Governed verification jobs must not be given repository, organization, environment, or other secrets/credentials that could enable repository writes or otherwise bypass the read-only execution boundary. The exact static inspection rules and treatment of platform-provided credentials remain to be specified.
+- Reusable workflows and external actions are permitted only when referenced immutably by full commit SHA, rather than mutable tags or branches.
+- **Explicit exception — Git workflow-history cleanup:** the Git workflow-history cleanup capability is to be implemented as a reusable workflow. This is a narrowly scoped operational exception to the general restriction on reusable workflows; it is not a PMCP verification workflow, must not be selected as verification evidence, and must not be callable from governed verification workflows. Its invocation model and narrowly scoped permissions must be designed separately. The exception does not authorize mutable references; reusable-workflow/action references remain pinned to immutable commit SHAs.
+- PMCP rejects dynamic, ambiguous, or unsupported workflow constructs when it cannot determine the effective configuration and enforce the applicable contract. It must fail closed rather than assume a safe interpretation.
+- Static workflow inspection cannot prove arbitrary shell scripts, action internals, or external side effects harmless. PMCP must state this limitation and must not represent configuration validation as a complete sandbox or security proof.
+- This decision establishes the validation direction and the explicit reusable-workflow exception. The precise supported YAML subset, expression handling, secret/credential detection, and cleanup-workflow invocation/permission contract remain to be defined.
+- No implementation changes are authorized by this decision.
+
+Rationale: validating only YAML syntax would accept workflows whose effective triggers, permissions, dependencies, or expressions undermine the governed verification boundary. A deliberately small, inspectable configuration surface makes enforcement more deterministic. The separately scoped history-cleanup reusable workflow serves an operational purpose and must not be conflated with workflows that produce verification evidence.
+
+### Session 54 — Workflow validation direction approved
+
+- User approved effective-configuration validation, including explicit least-privilege permissions, restrictions on secrets/credentials, immutable references for reusable workflows/actions, and rejection of constructs PMCP cannot safely inspect.
+- User added one explicit exception: Git workflow-history cleanup must be implemented as a reusable workflow. The exception is limited to that operational capability; it is not a verification workflow and cannot be used to produce or participate in verification evidence.
+- The cleanup workflow's invocation and permission model remain open and must be designed separately; the exception does not grant it broad permissions by implication.
+- This tracker update records the approved direction before proceeding. No requirements, architecture, or implementation files were changed and no tests were run.
+- **Resume at:** define the precise supported GitHub Actions YAML subset and effective-configuration inspection rules, including expression handling, secret/credential detection, the platform-provided token boundary, and the separately scoped invocation/permission contract for the history-cleanup reusable workflow.
