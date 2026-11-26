@@ -305,3 +305,28 @@ No implementation changes are authorized by this decision.
 - User approved all ten detailed cycle operation contracts.
 - No implementation files changed.
 - **Resume at:** formalize the remaining non-cycle operation contracts (plans, checkpoints, decisions, evidence, audit, and status), then verify all contracts against registered actions and implementation call paths. Reconcile requirements and architecture with A-007 through A-011 before proposing implementation.
+### A-012 | Reconciliation as a mandatory governed workflow gate
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Reconciliation is a mandatory, phase-controlled workflow step, not an optional operation performed at an agent's discretion.
+- A standard cycle enters the designated `reconcile` phase only after the required implementation and verification gates pass.
+- Reconciliation reviews the authoritative project/governance state against what was planned and what actually occurred; it records the assessment and discrepancies.
+- A standard cycle cannot complete without a valid reconciliation for the relevant project state.
+- Reconciliation records the exact Git revision reviewed. The reviewed revision is never silently advanced.
+- Relevant changes after the reviewed revision invalidate the reconciliation for completion purposes and require a fresh reconciliation. Invalidation is based on substantive changes, not elapsed time or commit count.
+- The reconciliation's own state/journal commit does not invalidate itself. Explicitly defined non-substantive PMCP bookkeeping changes (such as unrelated checkpoint/administrative metadata) do not invalidate it. Changes to source/tests, requirements, architecture, decisions, plan tasks/criteria, or evidence affecting verification do invalidate it.
+- Reconciliation records an assessment; it does not itself make a cycle complete or assert that all possible future issues are eliminated. Contradictions must be corrected at their authoritative source and must not be classified away.
+- The precise set of relevant paths/state transitions and the mechanical invalidation algorithm still require formalization against the canonical state/history design before implementation.
+
+Rationale: a governed process must determine when reconciliation happens and enforce it as a lifecycle gate. A revision-bound record makes the review auditable and prevents stale reconciliation from authorizing completion after relevant changes.
+
+### Session 38 — Non-cycle operation contract approvals and tracking correction
+
+- User approved the reconciliation workflow and invalidation rule in A-012.
+- User approved the detailed contracts for `checkpoint.save`, `plan.update`, `decision.propose`, `decision.record`, and `decision.list`. These are accepted operation contracts under A-010; they are not implementation authorization.
+- The contracts require explicit minimal dependencies, conditional cycle/checkpoint requirements, atomic publication of all declared side effects, clean rejection instead of nil-pointer panics, and no unrelated global semantic validation.
+- `decision.record` requires both verified approval and published-specification evidence; decision/policy/checkpoint/journal effects publish atomically.
+- The user correctly identified that the review's North Star had been violated: approved decisions were accumulated in chat without updating `review.md` before proceeding. This update restores the durable tracker. Future progression must stop after each approval until `review.md` is updated and the commit is verified.
+- No implementation files changed. This commit updates the review tracker only.
+- **Resume at:** continue detailed contracts for remaining registered operations, beginning with the next decision operation after `decision.list`; verify each against actual registered actions and call paths. After each user approval, update and verify this file on `main` before moving to the next contract. Reconcile the requirements and architecture baselines with the approved decisions before coordinator redesign.
