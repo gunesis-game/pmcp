@@ -238,3 +238,28 @@ No implementation changes are authorized by this decision.
 - User approved A-008: one canonical `.pmcp/state.json`, with Git commits as the sole state history and operation-dependent historical comparison.
 - Recorded A-008 in this review tracker on `main`; no implementation files changed.
 - **Resume at:** continue inspecting actual governance operation call sites and their input dependencies/validation behavior. Then assess operation-specific validation as a separate decision. The previously discussed validation proposal is not yet approved.
+### A-009 | Operation-specific dependencies and validation
+
+**Status: Approved by the user on 2026-11-26.**
+
+- Each governance operation must have an explicit set of state inputs it reads.
+- Each operation must identify the invariants that must hold for those inputs.
+- Each mutation must identify the state it changes and the invariants that must hold after the mutation.
+- Historical comparisons are required only when the operation's governance rules depend on the transition; they are not an automatic prerequisite for every operation.
+- Semantically invalid unrelated governance data must not block an operation whose required inputs and invariants are valid.
+- Comprehensive repository/governance validation remains available as a diagnostic capability, but is not a prerequisite gate for every operation.
+- Do not introduce a global `IsUsable()` gate or an equivalent all-state usability gate.
+- Use an operation-dependency matrix as the design specification before changing the coordinator.
+
+Clarification: the canonical `.pmcp/state.json` must still parse as a complete document before it can be interpreted. Operation-specific validation narrows semantic preconditions and invariants; it does not imply partial parsing of malformed JSON.
+
+Rationale: operations have different state dependencies and governance obligations. A global validation gate allows unrelated semantic defects to prevent valid work. Explicit dependencies make preconditions, mutation effects, and any required historical comparisons reviewable and testable.
+
+No implementation changes are authorized by this decision.
+
+### Session 35 — Operation-specific validation decision
+
+- User approved A-009: explicit per-operation state dependencies, preconditions, mutation effects, and post-mutation invariants; no global usability gate.
+- Record that full-state validation remains diagnostic rather than a universal operation gate.
+- No implementation files changed.
+- **Resume at:** construct and verify the operation-dependency matrix from all registered operations, including exact state fields, repository inputs, historical reads, and mutation effects. Reconcile the matrix with requirements and architecture docs before proposing implementation changes.
