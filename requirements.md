@@ -1,5 +1,22 @@
 # Requirements
 
+## Product North Star — Reliable work across limited agent sessions
+
+PMCP exists to make AI-assisted project work reliable even when the AI agents doing the work have limited reasoning capability, small context windows, short or interrupted sessions, or lose their conversation history entirely. The project must not depend on an agent remembering prior conversations, decisions, tool calls, or undocumented conventions.
+
+The governed GitHub repository is the durable memory of the project. It contains both the actual project being built and the PMCP-managed project knowledge and governance state needed to understand, govern, and continue that work. This includes the project's requirements and architecture, decisions and rationale, plans, progress, checkpoints, evidence, policy, and other durable records. **There is no separate PMCP-managed project database or independently maintained governance store.** Git commits, trees, blobs, and history provide the authoritative persistence, revision identity, and provenance.
+
+PMCP interprets and validates that repository-resident information and exposes clear, explicit MCP operations and guidance so an agent can recover the relevant context and determine what to do next after a session reset or agent replacement. The system must not assume a sophisticated model, a large context window, durable conversational memory, or the ability to reconstruct missing context correctly.
+
+Design and requirements should therefore favour:
+- durable, discoverable project knowledge stored alongside the project it describes;
+- explicit decisions, state, constraints, progress, and outstanding work;
+- small, focused, actionable context that can be retrieved when needed rather than requiring the agent to retain the entire project history;
+- deterministic operations, clear contracts, and actionable responses that less capable agents can follow;
+- continuity across sessions and across different agents, without dependence on any particular agent's private memory.
+
+This is the product purpose against which requirements and architecture decisions must be evaluated. PMCP is not the agent's memory; it is the project's durable, repository-based system of record and the interface through which agents recover and act on that record.
+
 pmcp (Project Management MCP) is an MCP server that gives AI coding agents everything the GitHub MCP server offers, plus a governed development life cycle whose state the server keeps in the governed repository itself.
 
 This document is complete on its own. Every rule, argument, check and piece of guidance pmcp must implement or serve is written here, and nothing has to be read from another repository. The technical design is in [architecture.md](architecture.md), which also holds the state and policy schemas.
@@ -8,7 +25,7 @@ Status: **Draft.** Requirements approval has not been established. Draft stateme
 
 ## Purpose and scope
 
-**Purpose.** Let an AI agent connected to one MCP server work on a GitHub repository under enforced governance:
+**Purpose.** Let AI agents—including agents with limited reasoning capability, small context windows, and short or interrupted sessions—work on a GitHub repository under enforced governance, while making project knowledge and governance state durable and recoverable across session loss and agent replacement:
 
 - work happens inside tracked cycles;
 - phase gates are checked mechanically;
